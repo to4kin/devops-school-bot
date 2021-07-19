@@ -24,7 +24,7 @@ func TestStudent_Validate(t *testing.T) {
 			name: "zero_telegram_id",
 			s: func() *model.Student {
 				s := model.TestStudent(t)
-				s.TelegramID = 0
+				s.TelegramID = int64(0)
 				return s
 			},
 			isValid: false,

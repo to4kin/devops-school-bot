@@ -4,10 +4,9 @@ import (
 	validation "github.com/go-ozzo/ozzo-validation/v4"
 )
 
-// Student ...
 type Student struct {
-	ID         int
-	TelegramID int
+	ID         int64
+	TelegramID int64
 	FirstName  string
 	LastName   string
 	Username   string
