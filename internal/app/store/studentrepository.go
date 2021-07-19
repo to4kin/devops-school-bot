@@ -8,6 +8,10 @@ type StudentRepository struct {
 
 // Create ...
 func (r *StudentRepository) Create(s *model.Student) (*model.Student, error) {
+	if err := s.Validate(); err != nil {
+		return nil, err
+	}
+
 	if err := r.store.db.QueryRow(
 		"INSERT INTO students (telegram_id, first_name, last_name, username) VALUES ($1, $2, $3, $4) RETURNING id",
 		s.TelegramID,
