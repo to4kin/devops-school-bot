@@ -19,3 +19,9 @@ func TestSchool(t *testing.T) *School {
 		Finished:   false,
 	}
 }
+
+func TestHomework(t *testing.T) *Homework {
+	return &Homework{
+		Title: "golang",
+	}
+}

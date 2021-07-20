@@ -11,3 +11,8 @@ type SchoolRepository interface {
 	Create(*model.School) error
 	FindByTitle(string) (*model.School, error)
 }
+
+type HomeworkRepository interface {
+	Create(*model.Homework) error
+	FindByTitle(string) (*model.Homework, error)
+}

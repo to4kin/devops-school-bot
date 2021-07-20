@@ -6,8 +6,9 @@ import (
 )
 
 type Store struct {
-	userRepository   *UserRepository
-	schoolRepository *SchoolRepository
+	userRepository     *UserRepository
+	schoolRepository   *SchoolRepository
+	homeworkRepository *HomeworkRepository
 }
 
 func New() *Store {
@@ -38,4 +39,17 @@ func (store *Store) School() store.SchoolRepository {
 	}
 
 	return store.schoolRepository
+}
+
+func (store *Store) Homework() store.HomeworkRepository {
+	if store.homeworkRepository != nil {
+		return store.homeworkRepository
+	}
+
+	store.homeworkRepository = &HomeworkRepository{
+		store:     store,
+		homeworks: make(map[string]*model.Homework),
+	}
+
+	return store.homeworkRepository
 }
