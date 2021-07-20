@@ -17,7 +17,7 @@ func (r *SchoolRepository) Create(s *model.School) error {
 	}
 
 	return r.store.db.QueryRow(
-		"INSERT INTO schools (title, in_progress, finished) VALUES ($1, $2, $3) RETURNING id",
+		"INSERT INTO school (title, in_progress, finished) VALUES ($1, $2, $3) RETURNING id",
 		s.Title,
 		s.InProgress,
 		s.Finished,
@@ -29,7 +29,7 @@ func (r *SchoolRepository) Create(s *model.School) error {
 func (r *SchoolRepository) FindByTitle(title string) (*model.School, error) {
 	s := &model.School{}
 	if err := r.store.db.QueryRow(
-		"SELECT id, title, in_progress, finished FROM schools WHERE title = $1",
+		"SELECT id, title, in_progress, finished FROM school WHERE title = $1",
 		title,
 	).Scan(
 		&s.ID,

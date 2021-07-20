@@ -2,9 +2,9 @@ package store
 
 import "gitlab.devops.telekom.de/anton.bastin/devops-school-bot/internal/app/model"
 
-type UserRepository interface {
-	Create(*model.User) error
-	FindByTelegramID(int64) (*model.User, error)
+type AccountRepository interface {
+	Create(*model.Account) error
+	FindByTelegramID(int64) (*model.Account, error)
 }
 
 type SchoolRepository interface {
@@ -12,7 +12,7 @@ type SchoolRepository interface {
 	FindByTitle(string) (*model.School, error)
 }
 
-type HomeworkRepository interface {
-	Create(*model.Homework) error
-	FindByTitle(string) (*model.Homework, error)
+type LessonRepository interface {
+	Create(*model.Leson) error
+	FindByTitle(string) (*model.Leson, error)
 }

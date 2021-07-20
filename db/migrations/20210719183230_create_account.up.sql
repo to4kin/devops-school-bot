@@ -1,4 +1,4 @@
-CREATE TABLE users (
+CREATE TABLE account (
     id bigserial not null primary key,
     telegram_id bigint not null unique,
     first_name varchar not null,

@@ -4,7 +4,7 @@ import (
 	validation "github.com/go-ozzo/ozzo-validation/v4"
 )
 
-type User struct {
+type Account struct {
 	ID         int64
 	TelegramID int64
 	FirstName  string
@@ -13,10 +13,10 @@ type User struct {
 	IsAdmin    bool
 }
 
-func (u *User) Validate() error {
+func (a *Account) Validate() error {
 	return validation.ValidateStruct(
-		u,
-		validation.Field(&u.TelegramID, validation.Required),
-		validation.Field(&u.FirstName, validation.Required),
+		a,
+		validation.Field(&a.TelegramID, validation.Required),
+		validation.Field(&a.FirstName, validation.Required),
 	)
 }

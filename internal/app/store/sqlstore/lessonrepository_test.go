@@ -9,30 +9,30 @@ import (
 	"gitlab.devops.telekom.de/anton.bastin/devops-school-bot/internal/app/store/sqlstore"
 )
 
-func TestHomeworkRepository_Create(t *testing.T) {
+func TestLessonRepository_Create(t *testing.T) {
 	db, teardown := sqlstore.TestDb(t, databaseURL)
-	defer teardown("homeworks")
+	defer teardown("lesson")
 
 	s := sqlstore.New(db)
-	h := model.TestHomework(t)
+	l := model.TestLesson(t)
 
-	assert.NoError(t, s.Homework().Create(h))
-	assert.NotNil(t, h)
+	assert.NoError(t, s.Lesson().Create(l))
+	assert.NotNil(t, l)
 }
 
-func TestHomework_FindByTitle(t *testing.T) {
+func TestLesson_FindByTitle(t *testing.T) {
 	db, teardown := sqlstore.TestDb(t, databaseURL)
-	defer teardown("homeworks")
+	defer teardown("lesson")
 
 	s := sqlstore.New(db)
-	h := model.TestHomework(t)
+	l := model.TestLesson(t)
 
-	_, err := s.Homework().FindByTitle(h.Title)
+	_, err := s.Lesson().FindByTitle(l.Title)
 	assert.EqualError(t, err, store.ErrRecordNotFound.Error())
 
-	s.Homework().Create(h)
+	s.Lesson().Create(l)
 
-	homework, err := s.Homework().FindByTitle(h.Title)
+	lesson, err := s.Lesson().FindByTitle(l.Title)
 	assert.NoError(t, err)
-	assert.NotNil(t, homework)
+	assert.NotNil(t, lesson)
 }

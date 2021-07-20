@@ -11,7 +11,7 @@ import (
 
 func TestSchoolRepository_Create(t *testing.T) {
 	db, teardown := sqlstore.TestDb(t, databaseURL)
-	defer teardown("schools")
+	defer teardown("school")
 
 	s := sqlstore.New(db)
 	school := model.TestSchool(t)
@@ -22,7 +22,7 @@ func TestSchoolRepository_Create(t *testing.T) {
 
 func TestSchoolRepository_FindByTitle(t *testing.T) {
 	db, teardown := sqlstore.TestDb(t, databaseURL)
-	defer teardown("schools")
+	defer teardown("school")
 
 	s := sqlstore.New(db)
 	testSchool := model.TestSchool(t)

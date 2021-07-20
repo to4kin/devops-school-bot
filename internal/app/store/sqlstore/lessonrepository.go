@@ -7,31 +7,31 @@ import (
 	"gitlab.devops.telekom.de/anton.bastin/devops-school-bot/internal/app/store"
 )
 
-type HomeworkRepository struct {
+type LessonRepository struct {
 	store *Store
 }
 
-func (r *HomeworkRepository) Create(h *model.Homework) error {
-	if err := h.Validate(); err != nil {
+func (r *LessonRepository) Create(l *model.Leson) error {
+	if err := l.Validate(); err != nil {
 		return err
 	}
 
 	return r.store.db.QueryRow(
-		"INSERT INTO homeworks (title) VALUES ($1) RETURNING id",
-		h.Title,
+		"INSERT INTO lesson (title) VALUES ($1) RETURNING id",
+		l.Title,
 	).Scan(
-		&h.ID,
+		&l.ID,
 	)
 }
 
-func (r *HomeworkRepository) FindByTitle(title string) (*model.Homework, error) {
-	h := &model.Homework{}
+func (r *LessonRepository) FindByTitle(title string) (*model.Leson, error) {
+	l := &model.Leson{}
 	if err := r.store.db.QueryRow(
-		"SELECT id, title FROM homeworks WHERE title = $1",
+		"SELECT id, title FROM lesson WHERE title = $1",
 		title,
 	).Scan(
-		&h.ID,
-		&h.Title,
+		&l.ID,
+		&l.Title,
 	); err != nil {
 		if err == sql.ErrNoRows {
 			return nil, store.ErrRecordNotFound
@@ -40,5 +40,5 @@ func (r *HomeworkRepository) FindByTitle(title string) (*model.Homework, error) 
 		return nil, err
 	}
 
-	return h, nil
+	return l, nil
 }

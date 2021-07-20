@@ -2,8 +2,8 @@ package model
 
 import "testing"
 
-func TestUser(t *testing.T) *User {
-	return &User{
+func TestAccount(t *testing.T) *Account {
+	return &Account{
 		TelegramID: int64(99999),
 		FirstName:  "FirstName",
 		LastName:   "LastName",
@@ -20,8 +20,8 @@ func TestSchool(t *testing.T) *School {
 	}
 }
 
-func TestHomework(t *testing.T) *Homework {
-	return &Homework{
+func TestLesson(t *testing.T) *Leson {
+	return &Leson{
 		Title: "golang",
 	}
 }

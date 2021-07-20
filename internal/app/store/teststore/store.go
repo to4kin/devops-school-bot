@@ -6,26 +6,26 @@ import (
 )
 
 type Store struct {
-	userRepository     *UserRepository
-	schoolRepository   *SchoolRepository
-	homeworkRepository *HomeworkRepository
+	accountRepository *AccountRepository
+	schoolRepository  *SchoolRepository
+	lessonRepository  *LessonRepository
 }
 
 func New() *Store {
 	return &Store{}
 }
 
-func (store *Store) User() store.UserRepository {
-	if store.userRepository != nil {
-		return store.userRepository
+func (store *Store) Account() store.AccountRepository {
+	if store.accountRepository != nil {
+		return store.accountRepository
 	}
 
-	store.userRepository = &UserRepository{
-		store: store,
-		users: make(map[int64]*model.User),
+	store.accountRepository = &AccountRepository{
+		store:    store,
+		accounts: make(map[int64]*model.Account),
 	}
 
-	return store.userRepository
+	return store.accountRepository
 }
 
 func (store *Store) School() store.SchoolRepository {
@@ -41,15 +41,15 @@ func (store *Store) School() store.SchoolRepository {
 	return store.schoolRepository
 }
 
-func (store *Store) Homework() store.HomeworkRepository {
-	if store.homeworkRepository != nil {
-		return store.homeworkRepository
+func (store *Store) Lesson() store.LessonRepository {
+	if store.lessonRepository != nil {
+		return store.lessonRepository
 	}
 
-	store.homeworkRepository = &HomeworkRepository{
-		store:     store,
-		homeworks: make(map[string]*model.Homework),
+	store.lessonRepository = &LessonRepository{
+		store:   store,
+		lessons: make(map[string]*model.Leson),
 	}
 
-	return store.homeworkRepository
+	return store.lessonRepository
 }

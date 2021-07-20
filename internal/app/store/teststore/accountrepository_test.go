@@ -9,24 +9,24 @@ import (
 	"gitlab.devops.telekom.de/anton.bastin/devops-school-bot/internal/app/store/teststore"
 )
 
-func TestHomework_Create(t *testing.T) {
+func TestAccountRepository_Create(t *testing.T) {
 	s := teststore.New()
-	h := model.TestHomework(t)
+	a := model.TestAccount(t)
 
-	assert.NoError(t, s.Homework().Create(h))
-	assert.NotNil(t, h)
+	assert.NoError(t, s.Account().Create(a))
+	assert.NotNil(t, a)
 }
 
-func TestHomework_FindByTitle(t *testing.T) {
+func TestAccountRepository_FindByTelegramID(t *testing.T) {
 	s := teststore.New()
-	h := model.TestHomework(t)
+	a := model.TestAccount(t)
 
-	_, err := s.Homework().FindByTitle(h.Title)
+	_, err := s.Account().FindByTelegramID(a.TelegramID)
 	assert.EqualError(t, err, store.ErrRecordNotFound.Error())
 
-	s.Homework().Create(h)
+	s.Account().Create(a)
 
-	homework, err := s.Homework().FindByTitle(h.Title)
+	account, err := s.Account().FindByTelegramID(a.TelegramID)
 	assert.NoError(t, err)
-	assert.NotNil(t, homework)
+	assert.NotNil(t, account)
 }

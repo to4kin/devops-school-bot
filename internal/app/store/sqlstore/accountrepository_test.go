@@ -9,30 +9,30 @@ import (
 	"gitlab.devops.telekom.de/anton.bastin/devops-school-bot/internal/app/store/sqlstore"
 )
 
-func TestUserRepository_Create(t *testing.T) {
+func TestAccountRepository_Create(t *testing.T) {
 	db, teardown := sqlstore.TestDb(t, databaseURL)
-	defer teardown("users")
+	defer teardown("account")
 
 	s := sqlstore.New(db)
-	u := model.TestUser(t)
+	a := model.TestAccount(t)
 
-	assert.NoError(t, s.User().Create(u))
-	assert.NotNil(t, u)
+	assert.NoError(t, s.Account().Create(a))
+	assert.NotNil(t, a)
 }
 
-func TestUserRepository_FindByTelegramID(t *testing.T) {
+func TestAccountRepository_FindByTelegramID(t *testing.T) {
 	db, teardown := sqlstore.TestDb(t, databaseURL)
-	defer teardown("users")
+	defer teardown("account")
 
 	s := sqlstore.New(db)
-	u := model.TestUser(t)
+	a := model.TestAccount(t)
 
-	_, err := s.User().FindByTelegramID(u.TelegramID)
+	_, err := s.Account().FindByTelegramID(a.TelegramID)
 	assert.EqualError(t, err, store.ErrRecordNotFound.Error())
 
-	s.User().Create(u)
+	s.Account().Create(a)
 
-	user, err := s.User().FindByTelegramID(u.TelegramID)
+	account, err := s.Account().FindByTelegramID(a.TelegramID)
 	assert.NoError(t, err)
-	assert.NotNil(t, user)
+	assert.NotNil(t, account)
 }

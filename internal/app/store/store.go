@@ -1,7 +1,7 @@
 package store
 
 type Store interface {
-	User() UserRepository
+	Account() AccountRepository
 	School() SchoolRepository
-	Homework() HomeworkRepository
+	Lesson() LessonRepository
 }

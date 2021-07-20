@@ -8,10 +8,10 @@ import (
 )
 
 type Store struct {
-	db                 *sql.DB
-	userRepository     *UserRepository
-	schoolRepository   *SchoolRepository
-	homeworkRepository *HomeworkRepository
+	db                *sql.DB
+	accountRepository *AccountRepository
+	schoolRepository  *SchoolRepository
+	lessonRepository  *LessonRepository
 }
 
 func New(db *sql.DB) *Store {
@@ -20,16 +20,16 @@ func New(db *sql.DB) *Store {
 	}
 }
 
-func (store *Store) User() store.UserRepository {
-	if store.userRepository != nil {
-		return store.userRepository
+func (store *Store) Account() store.AccountRepository {
+	if store.accountRepository != nil {
+		return store.accountRepository
 	}
 
-	store.userRepository = &UserRepository{
+	store.accountRepository = &AccountRepository{
 		store: store,
 	}
 
-	return store.userRepository
+	return store.accountRepository
 }
 
 func (store *Store) School() store.SchoolRepository {
@@ -44,14 +44,14 @@ func (store *Store) School() store.SchoolRepository {
 	return store.schoolRepository
 }
 
-func (store *Store) Homework() store.HomeworkRepository {
-	if store.homeworkRepository != nil {
-		return store.homeworkRepository
+func (store *Store) Lesson() store.LessonRepository {
+	if store.lessonRepository != nil {
+		return store.lessonRepository
 	}
 
-	store.homeworkRepository = &HomeworkRepository{
+	store.lessonRepository = &LessonRepository{
 		store: store,
 	}
 
-	return store.homeworkRepository
+	return store.lessonRepository
 }

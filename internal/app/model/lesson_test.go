@@ -7,25 +7,25 @@ import (
 	"gitlab.devops.telekom.de/anton.bastin/devops-school-bot/internal/app/model"
 )
 
-func TestHomework_Validate(t *testing.T) {
+func TestLesson_Validate(t *testing.T) {
 	testCases := []struct {
 		name    string
-		h       func() *model.Homework
+		l       func() *model.Leson
 		isValid bool
 	}{
 		{
 			name: "valid",
-			h: func() *model.Homework {
-				return model.TestHomework(t)
+			l: func() *model.Leson {
+				return model.TestLesson(t)
 			},
 			isValid: true,
 		},
 		{
 			name: "empty_title",
-			h: func() *model.Homework {
-				h := model.TestHomework(t)
-				h.Title = ""
-				return h
+			l: func() *model.Leson {
+				l := model.TestLesson(t)
+				l.Title = ""
+				return l
 			},
 			isValid: false,
 		},
@@ -34,9 +34,9 @@ func TestHomework_Validate(t *testing.T) {
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
 			if tc.isValid {
-				assert.NoError(t, tc.h().Validate())
+				assert.NoError(t, tc.l().Validate())
 			} else {
-				assert.Error(t, tc.h().Validate())
+				assert.Error(t, tc.l().Validate())
 			}
 		})
 	}

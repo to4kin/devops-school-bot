@@ -1,4 +1,4 @@
-CREATE TABLE schools (
+CREATE TABLE school (
     id bigserial not null primary key,
     title varchar not null unique,
     in_progress boolean not null default false,
