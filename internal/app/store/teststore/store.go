@@ -6,22 +6,22 @@ import (
 )
 
 type Store struct {
-	studentRepository *StudentRepository
+	userRepository *UserRepository
 }
 
 func New() *Store {
 	return &Store{}
 }
 
-func (store *Store) Student() store.StudentRepository {
-	if store.studentRepository != nil {
-		return store.studentRepository
+func (store *Store) User() store.UserRepository {
+	if store.userRepository != nil {
+		return store.userRepository
 	}
 
-	store.studentRepository = &StudentRepository{
-		store:    store,
-		students: make(map[int64]*model.Student),
+	store.userRepository = &UserRepository{
+		store: store,
+		users: make(map[int64]*model.User),
 	}
 
-	return store.studentRepository
+	return store.userRepository
 }

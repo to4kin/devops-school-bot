@@ -2,12 +2,13 @@ package model
 
 import "testing"
 
-func TestStudent(t *testing.T) *Student {
-	return &Student{
+func TestUser(t *testing.T) *User {
+	return &User{
 		TelegramID: int64(99999),
 		FirstName:  "FirstName",
 		LastName:   "LastName",
 		Username:   "Username",
+		IsAdmin:    false,
 	}
 }
 

@@ -1,5 +1,5 @@
 package store
 
 type Store interface {
-	Student() StudentRepository
+	User() UserRepository
 }
