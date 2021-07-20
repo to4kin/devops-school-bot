@@ -17,7 +17,7 @@ func TestUserRepository_Create(t *testing.T) {
 	assert.NotNil(t, u)
 }
 
-func TestUserRepository_FindBytelegramID(t *testing.T) {
+func TestUserRepository_FindByTelegramID(t *testing.T) {
 	s := teststore.New()
 	u := model.TestUser(t)
 

@@ -20,7 +20,7 @@ func TestUserRepository_Create(t *testing.T) {
 	assert.NotNil(t, u)
 }
 
-func TestUserRepository_FindBytelegramID(t *testing.T) {
+func TestUserRepository_FindByTelegramID(t *testing.T) {
 	db, teardown := sqlstore.TestDb(t, databaseURL)
 	defer teardown("users")
 

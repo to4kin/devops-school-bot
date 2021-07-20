@@ -8,8 +8,9 @@ import (
 )
 
 type Store struct {
-	db             *sql.DB
-	userRepository *UserRepository
+	db               *sql.DB
+	userRepository   *UserRepository
+	schoolRepository *SchoolRepository
 }
 
 func New(db *sql.DB) *Store {
@@ -28,4 +29,16 @@ func (store *Store) User() store.UserRepository {
 	}
 
 	return store.userRepository
+}
+
+func (store *Store) School() store.SchoolRepository {
+	if store.schoolRepository != nil {
+		return store.schoolRepository
+	}
+
+	store.schoolRepository = &SchoolRepository{
+		store: store,
+	}
+
+	return store.schoolRepository
 }
