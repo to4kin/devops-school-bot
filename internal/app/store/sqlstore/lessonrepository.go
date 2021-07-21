@@ -11,7 +11,7 @@ type LessonRepository struct {
 	store *Store
 }
 
-func (r *LessonRepository) Create(l *model.Leson) error {
+func (r *LessonRepository) Create(l *model.Lesson) error {
 	if err := l.Validate(); err != nil {
 		return err
 	}
@@ -24,8 +24,8 @@ func (r *LessonRepository) Create(l *model.Leson) error {
 	)
 }
 
-func (r *LessonRepository) FindByTitle(title string) (*model.Leson, error) {
-	l := &model.Leson{}
+func (r *LessonRepository) FindByTitle(title string) (*model.Lesson, error) {
+	l := &model.Lesson{}
 	if err := r.store.db.QueryRow(
 		"SELECT id, title FROM lesson WHERE title = $1",
 		title,

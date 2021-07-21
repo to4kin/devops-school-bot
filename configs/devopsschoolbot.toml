@@ -1,6 +1,6 @@
 bind_addr = ":3000"
 log_level = "debug"
-database_url = "host=localhost port=5432 user=postgres password=example dbname=devops_school_dev sslmode=disable"
+database_url = "postgres://localhost/devops_school_dev?user=postgres&password=example&sslmode=disable"
 
 [telegram_bot]
 token = "1745836330:AAEcNvnG6LCm9myT7pcSV-lguctxIeyq6nc"

@@ -1,4 +1,4 @@
 CREATE TABLE lesson (
-    id bigserial not null primary key,
-    title varchar not null unique
+    id bigserial NOT NULL PRIMARY KEY,
+    title VARCHAR NOT NULL UNIQUE
 );

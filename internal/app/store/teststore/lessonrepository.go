@@ -7,10 +7,10 @@ import (
 
 type LessonRepository struct {
 	store   *Store
-	lessons map[string]*model.Leson
+	lessons map[string]*model.Lesson
 }
 
-func (r *LessonRepository) Create(l *model.Leson) error {
+func (r *LessonRepository) Create(l *model.Lesson) error {
 	if err := l.Validate(); err != nil {
 		return err
 	}
@@ -21,7 +21,7 @@ func (r *LessonRepository) Create(l *model.Leson) error {
 	return nil
 }
 
-func (r *LessonRepository) FindByTitle(title string) (*model.Leson, error) {
+func (r *LessonRepository) FindByTitle(title string) (*model.Lesson, error) {
 	l, ok := r.lessons[title]
 	if !ok {
 		return nil, store.ErrRecordNotFound

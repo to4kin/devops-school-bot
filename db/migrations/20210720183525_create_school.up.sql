@@ -1,6 +1,6 @@
 CREATE TABLE school (
-    id bigserial not null primary key,
-    title varchar not null unique,
-    active boolean not null default false,
-    finished boolean not null default false
+    id BIGSERIAL NOT NULL PRIMARY KEY,
+    title VARCHAR NOT NULL UNIQUE,
+    active BOOLEAN NOT NULL DEFAULT FALSE,
+    finished BOOLEAN NOT NULL DEFAULT FALSE
 );

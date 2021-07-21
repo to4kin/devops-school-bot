@@ -10,19 +10,19 @@ import (
 func TestLesson_Validate(t *testing.T) {
 	testCases := []struct {
 		name    string
-		l       func() *model.Leson
+		l       func() *model.Lesson
 		isValid bool
 	}{
 		{
 			name: "valid",
-			l: func() *model.Leson {
+			l: func() *model.Lesson {
 				return model.TestLesson(t)
 			},
 			isValid: true,
 		},
 		{
 			name: "empty_title",
-			l: func() *model.Leson {
+			l: func() *model.Lesson {
 				l := model.TestLesson(t)
 				l.Title = ""
 				return l

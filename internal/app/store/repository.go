@@ -13,6 +13,16 @@ type SchoolRepository interface {
 }
 
 type LessonRepository interface {
-	Create(*model.Leson) error
-	FindByTitle(string) (*model.Leson, error)
+	Create(*model.Lesson) error
+	FindByTitle(string) (*model.Lesson, error)
+}
+
+type StudentRepository interface {
+	Create(*model.Student) error
+	FindByAccountIDSchoolID(int64, int64) (*model.Student, error)
+}
+
+type HomeworkRepository interface {
+	Create(*model.Homework) error
+	FindByStudentIDLessonID(int64, int64) (*model.Homework, error)
 }

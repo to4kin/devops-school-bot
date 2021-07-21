@@ -20,8 +20,24 @@ func TestSchool(t *testing.T) *School {
 	}
 }
 
-func TestLesson(t *testing.T) *Leson {
-	return &Leson{
+func TestLesson(t *testing.T) *Lesson {
+	return &Lesson{
 		Title: "golang",
+	}
+}
+
+func TestStudent(t *testing.T) *Student {
+	return &Student{
+		Account: TestAccount(t),
+		School:  TestSchool(t),
+		Active:  true,
+	}
+}
+
+func TestHomework(t *testing.T) *Homework {
+	return &Homework{
+		Student: TestStudent(t),
+		Lesson:  TestLesson(t),
+		Accept:  true,
 	}
 }
