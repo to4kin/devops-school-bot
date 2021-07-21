@@ -30,7 +30,7 @@ func TestSchool_Validate(t *testing.T) {
 			isValid: false,
 		},
 		{
-			name: "in_progress_and_finished_at_the_same_time",
+			name: "active_and_finished_at_the_same_time",
 			s: func() *model.School {
 				s := model.TestSchool(t)
 				s.Finished = true

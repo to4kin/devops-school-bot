@@ -14,9 +14,9 @@ func TestAccount(t *testing.T) *Account {
 
 func TestSchool(t *testing.T) *School {
 	return &School{
-		Title:      "2021.2",
-		InProgress: true,
-		Finished:   false,
+		Title:    "2021.2",
+		Active:   true,
+		Finished: false,
 	}
 }
 
