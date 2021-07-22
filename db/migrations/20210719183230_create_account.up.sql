@@ -4,5 +4,5 @@ CREATE TABLE account (
     first_name VARCHAR NOT NULL,
     last_name VARCHAR,
     username VARCHAR,
-    is_admin BOOLEAN NOT NULL DEFAULT FALSE
+    superuser BOOLEAN NOT NULL DEFAULT FALSE
 );

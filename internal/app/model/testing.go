@@ -8,7 +8,7 @@ func TestAccount(t *testing.T) *Account {
 		FirstName:  "FirstName",
 		LastName:   "LastName",
 		Username:   "Username",
-		IsAdmin:    false,
+		Superuser:  false,
 	}
 }
 

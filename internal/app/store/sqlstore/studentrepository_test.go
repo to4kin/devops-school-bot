@@ -23,7 +23,7 @@ func TestStudentRepository_Create(t *testing.T) {
 	assert.NotNil(t, testStudent)
 }
 
-func TestSchoolRepository_FindByAccountIDSchoolID(t *testing.T) {
+func TestStudentRepository_FindByAccountIDSchoolID(t *testing.T) {
 	db, teardown := sqlstore.TestDb(t, databaseURL)
 	defer teardown("student", "school", "account")
 

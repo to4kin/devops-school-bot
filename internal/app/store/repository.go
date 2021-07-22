@@ -10,6 +10,7 @@ type AccountRepository interface {
 type SchoolRepository interface {
 	Create(*model.School) error
 	FindByTitle(string) (*model.School, error)
+	FindActive() (*model.School, error)
 }
 
 type LessonRepository interface {

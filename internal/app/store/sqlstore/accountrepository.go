@@ -17,12 +17,12 @@ func (r *AccountRepository) Create(a *model.Account) error {
 	}
 
 	return r.store.db.QueryRow(
-		"INSERT INTO account (telegram_id, first_name, last_name, username, is_admin) VALUES ($1, $2, $3, $4, $5) RETURNING id",
+		"INSERT INTO account (telegram_id, first_name, last_name, username, superuser) VALUES ($1, $2, $3, $4, $5) RETURNING id",
 		a.TelegramID,
 		a.FirstName,
 		a.LastName,
 		a.Username,
-		a.IsAdmin,
+		a.Superuser,
 	).Scan(
 		&a.ID,
 	)
@@ -31,7 +31,7 @@ func (r *AccountRepository) Create(a *model.Account) error {
 func (r *AccountRepository) FindByTelegramID(telegramID int64) (*model.Account, error) {
 	a := &model.Account{}
 	if err := r.store.db.QueryRow(
-		"SELECT id, telegram_id, first_name, last_name, username, is_admin FROM account WHERE telegram_id = $1",
+		"SELECT id, telegram_id, first_name, last_name, username, superuser FROM account WHERE telegram_id = $1",
 		telegramID,
 	).Scan(
 		&a.ID,
@@ -39,7 +39,7 @@ func (r *AccountRepository) FindByTelegramID(telegramID int64) (*model.Account, 
 		&a.FirstName,
 		&a.LastName,
 		&a.Username,
-		&a.IsAdmin,
+		&a.Superuser,
 	); err != nil {
 		if err == sql.ErrNoRows {
 			return nil, store.ErrRecordNotFound

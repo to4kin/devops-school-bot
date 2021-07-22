@@ -36,3 +36,20 @@ func TestSchoolRepository_FindByTitle(t *testing.T) {
 	assert.NoError(t, err)
 	assert.NotNil(t, school)
 }
+
+func TestSchoolRepository_FindActive(t *testing.T) {
+	db, terdown := sqlstore.TestDb(t, databaseURL)
+	defer terdown("school")
+
+	s := sqlstore.New(db)
+	testSchool := model.TestSchool(t)
+
+	_, err := s.School().FindActive()
+	assert.EqualError(t, err, store.ErrRecordNotFound.Error())
+
+	s.School().Create(testSchool)
+
+	school, err := s.School().FindActive()
+	assert.NoError(t, err)
+	assert.NotNil(t, school)
+}

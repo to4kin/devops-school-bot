@@ -10,7 +10,7 @@ type Account struct {
 	FirstName  string
 	LastName   string
 	Username   string
-	IsAdmin    bool
+	Superuser  bool
 }
 
 func (a *Account) Validate() error {

@@ -29,3 +29,18 @@ func (r *SchoolRepository) FindByTitle(title string) (*model.School, error) {
 
 	return s, nil
 }
+
+func (r *SchoolRepository) FindActive() (*model.School, error) {
+	s := &model.School{}
+	for _, school := range r.schools {
+		if school.Active {
+			s = school
+		}
+	}
+
+	if s.Title == "" {
+		return nil, store.ErrRecordNotFound
+	}
+
+	return s, nil
+}

@@ -5,6 +5,7 @@ import (
 	"net/http"
 
 	"gitlab.devops.telekom.de/anton.bastin/devops-school-bot/internal/app/store/sqlstore"
+	"gopkg.in/tucnak/telebot.v3"
 )
 
 func Start(config *Config) error {
@@ -17,6 +18,17 @@ func Start(config *Config) error {
 
 	store := sqlstore.New(db)
 	srv := newServer(store)
+
+	srv.bot, err = telebot.NewBot(telebot.Settings{
+		Token:   config.TelegramBot.Token,
+		Verbose: config.TelegramBot.Verbose,
+	})
+
+	if err != nil {
+		return err
+	}
+
+	srv.configureBotHandler()
 
 	return http.ListenAndServe(config.BindAddr, srv)
 }
