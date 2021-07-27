@@ -17,24 +17,107 @@ func (r *HomeworkRepository) Create(h *model.Homework) error {
 	}
 
 	return r.store.db.QueryRow(
-		"INSERT INTO homework (student_id, lesson_id, accept) VALUES ($1, $2, $3) RETURNING id",
+		"INSERT INTO homework (student_id, lesson_id, message_id, verify) VALUES ($1, $2, $3, $4) RETURNING id",
 		h.Student.ID,
 		h.Lesson.ID,
-		h.Accept,
+		h.MessageID,
+		h.Verify,
 	).Scan(
 		&h.ID,
 	)
 }
 
-func (r *HomeworkRepository) FindByStudentIDLessonID(studentID int64, lessonID int64) (*model.Homework, error) {
-	h := &model.Homework{}
+func (r *HomeworkRepository) FindByStudent(student *model.Student) ([]*model.Homework, error) {
+	rowsCount := 0
+	hw := []*model.Homework{}
+
+	rows, err := r.store.db.Query(
+		"SELECT id, lesson_id, message_id, verify FROM homework WHERE student_id = $1",
+		student.ID,
+	)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		rowsCount++
+
+		h := &model.Homework{
+			Student: student,
+			Lesson:  &model.Lesson{},
+		}
+
+		if err := rows.Scan(&h.ID, &h.Lesson.ID, &h.MessageID, &h.Verify); err != nil {
+			return nil, err
+		}
+
+		hw = append(hw, h)
+	}
+
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+
+	if rowsCount == 0 {
+		return nil, store.ErrRecordNotFound
+	}
+
+	return hw, nil
+}
+
+func (r *HomeworkRepository) FindBySchool(school *model.School) ([]*model.Homework, error) {
+	rowsCount := 0
+	hw := []*model.Homework{}
+
+	rows, err := r.store.db.Query(
+		"SELECT id, student_id, lesson_id, message_id, verify FROM homework WHERE student_id IN (SELECT id FROM student WHERE school_id = $1)",
+		school.ID,
+	)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		rowsCount++
+
+		h := &model.Homework{
+			Student: &model.Student{},
+			Lesson:  &model.Lesson{},
+		}
+
+		if err := rows.Scan(&h.ID, &h.Student.ID, &h.Lesson.ID, &h.MessageID, &h.Verify); err != nil {
+			return nil, err
+		}
+
+		hw = append(hw, h)
+	}
+
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+
+	if rowsCount == 0 {
+		return nil, store.ErrRecordNotFound
+	}
+
+	return hw, nil
+}
+
+func (r *HomeworkRepository) FindByStudentLesson(student *model.Student, lesson *model.Lesson) (*model.Homework, error) {
+	h := &model.Homework{
+		Student: student,
+		Lesson:  lesson,
+	}
 	if err := r.store.db.QueryRow(
-		"SELECT id, accept FROM homework WHERE student_id = $1 AND lesson_id = $2",
-		studentID,
-		lessonID,
+		"SELECT id, message_id, verify FROM homework WHERE student_id = $1 AND lesson_id = $2",
+		h.Student.ID,
+		h.Lesson.ID,
 	).Scan(
 		&h.ID,
-		&h.Accept,
+		&h.MessageID,
+		&h.Verify,
 	); err != nil {
 		if err == sql.ErrNoRows {
 			return nil, store.ErrRecordNotFound

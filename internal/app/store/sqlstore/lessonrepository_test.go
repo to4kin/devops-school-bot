@@ -20,6 +20,23 @@ func TestLessonRepository_Create(t *testing.T) {
 	assert.NotNil(t, l)
 }
 
+func TestLesson_FindByID(t *testing.T) {
+	db, teardown := sqlstore.TestDb(t, databaseURL)
+	defer teardown("lesson")
+
+	s := sqlstore.New(db)
+	l := model.TestLesson(t)
+
+	_, err := s.Lesson().FindByID(l.ID)
+	assert.EqualError(t, err, store.ErrRecordNotFound.Error())
+
+	assert.NoError(t, s.Lesson().Create(l))
+
+	lesson, err := s.Lesson().FindByID(l.ID)
+	assert.NoError(t, err)
+	assert.NotNil(t, lesson)
+}
+
 func TestLesson_FindByTitle(t *testing.T) {
 	db, teardown := sqlstore.TestDb(t, databaseURL)
 	defer teardown("lesson")
@@ -30,9 +47,30 @@ func TestLesson_FindByTitle(t *testing.T) {
 	_, err := s.Lesson().FindByTitle(l.Title)
 	assert.EqualError(t, err, store.ErrRecordNotFound.Error())
 
-	s.Lesson().Create(l)
+	assert.NoError(t, s.Lesson().Create(l))
 
 	lesson, err := s.Lesson().FindByTitle(l.Title)
+	assert.NoError(t, err)
+	assert.NotNil(t, lesson)
+}
+
+func TestLesson_FindBySchool(t *testing.T) {
+	db, teardown := sqlstore.TestDb(t, databaseURL)
+	defer teardown("homework", "lesson", "student", "school", "account")
+
+	s := sqlstore.New(db)
+	h := model.TestHomework(t)
+
+	_, err := s.Lesson().FindBySchool(h.Student.School)
+	assert.EqualError(t, err, store.ErrRecordNotFound.Error())
+
+	assert.NoError(t, s.Account().Create(h.Student.Account))
+	assert.NoError(t, s.School().Create(h.Student.School))
+	assert.NoError(t, s.Student().Create(h.Student))
+	assert.NoError(t, s.Lesson().Create(h.Lesson))
+	assert.NoError(t, s.Homework().Create(h))
+
+	lesson, err := s.Lesson().FindBySchool(h.Student.School)
 	assert.NoError(t, err)
 	assert.NotNil(t, lesson)
 }

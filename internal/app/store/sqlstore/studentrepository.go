@@ -26,12 +26,15 @@ func (r *StudentRepository) Create(s *model.Student) error {
 	)
 }
 
-func (r *StudentRepository) FindByAccountIDSchoolID(accountID int64, schoolID int64) (*model.Student, error) {
-	s := &model.Student{}
+func (r *StudentRepository) FindByAccountSchool(account *model.Account, school *model.School) (*model.Student, error) {
+	s := &model.Student{
+		Account: account,
+		School:  school,
+	}
 	if err := r.store.db.QueryRow(
 		"SELECT id, active FROM student WHERE account_id = $1 AND school_id = $2",
-		accountID,
-		schoolID,
+		s.Account.ID,
+		s.School.ID,
 	).Scan(
 		&s.ID,
 		&s.Active,

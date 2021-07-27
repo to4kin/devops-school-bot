@@ -36,8 +36,9 @@ func TestStudent(t *testing.T) *Student {
 
 func TestHomework(t *testing.T) *Homework {
 	return &Homework{
-		Student: TestStudent(t),
-		Lesson:  TestLesson(t),
-		Accept:  true,
+		Student:   TestStudent(t),
+		Lesson:    TestLesson(t),
+		MessageID: int64(99999),
+		Verify:    true,
 	}
 }

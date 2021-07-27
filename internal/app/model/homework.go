@@ -1,12 +1,17 @@
 package model
 
-import validation "github.com/go-ozzo/ozzo-validation/v4"
+import (
+	"encoding/json"
+
+	validation "github.com/go-ozzo/ozzo-validation/v4"
+)
 
 type Homework struct {
-	ID      int64
-	Student *Student
-	Lesson  *Lesson
-	Accept  bool
+	ID        int64    `json:"id"`
+	Student   *Student `json:"student"`
+	Lesson    *Lesson  `json:"lesson"`
+	MessageID int64    `json:"message_id"`
+	Verify    bool     `json:"verify"`
 }
 
 func (h *Homework) Validate() error {
@@ -14,5 +19,15 @@ func (h *Homework) Validate() error {
 		h,
 		validation.Field(&h.Student, validation.Required),
 		validation.Field(&h.Lesson, validation.Required),
+		validation.Field(&h.MessageID, validation.Required),
 	)
+}
+
+func (h *Homework) ToString() string {
+	str, err := json.Marshal(h)
+	if err != nil {
+		return ""
+	}
+
+	return string(str)
 }

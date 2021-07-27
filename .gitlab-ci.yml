@@ -1,0 +1,27 @@
+image: artifactory.devops.telekom.de/tvpp-docker/tvpp-runner:golang-1.16
+
+cache:
+  paths:
+    - /apt-cache
+    - /go/src/github.com
+    - /go/src/golang.org
+    - /go/src/google.golang.org
+    - /go/src/gopkg.in
+    - /go/src/gitlab.devops.telekom.de
+
+stages:
+  - test
+  - build
+
+unit_tests:
+  stage: test
+  # TODO: https://github.com/golang/go/issues/44129 will be fixed in Go 1.17
+  variables:
+    GOFLAGS: "-mod=mod"
+  script:
+    - make test
+
+build:
+  stage: build
+  script:
+    - make

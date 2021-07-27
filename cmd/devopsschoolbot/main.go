@@ -25,13 +25,18 @@ func main() {
 	}
 
 	if level, err := logrus.ParseLevel(config.LogLevel); err != nil {
+		logrus.Error(err)
 		logrus.SetLevel(logrus.InfoLevel)
 	} else {
 		logrus.SetLevel(level)
 	}
 
+	logrus.SetFormatter(&logrus.TextFormatter{
+		FullTimestamp: true,
+		ForceColors:   true,
+	})
+
 	if err := apiserver.Start(config); err != nil {
 		logrus.Fatal(err)
 	}
-
 }

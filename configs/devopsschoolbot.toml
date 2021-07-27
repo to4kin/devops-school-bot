@@ -4,4 +4,4 @@ database_url = "postgres://localhost/devops_school_dev?user=postgres&password=ex
 
 [telegram_bot]
 token = "1745836330:AAEcNvnG6LCm9myT7pcSV-lguctxIeyq6nc"
-verbose = true
+verbose = false

@@ -23,13 +23,13 @@ func (r *StudentRepository) Create(s *model.Student) error {
 	return nil
 }
 
-func (r *StudentRepository) FindByAccountIDSchoolID(accountID int64, schoolID int64) (*model.Student, error) {
-	schools, ok := r.students[accountID]
+func (r *StudentRepository) FindByAccountSchool(account *model.Account, school *model.School) (*model.Student, error) {
+	schools, ok := r.students[account.ID]
 	if !ok {
 		return nil, store.ErrRecordNotFound
 	}
 
-	student, ok := schools[schoolID]
+	student, ok := schools[school.ID]
 	if !ok {
 		return nil, store.ErrRecordNotFound
 	}

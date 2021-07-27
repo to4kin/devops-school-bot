@@ -3,10 +3,8 @@ package apiserver
 import (
 	"encoding/json"
 	"net/http"
-	"strings"
 
 	"github.com/gorilla/mux"
-	"github.com/sirupsen/logrus"
 	"gitlab.devops.telekom.de/anton.bastin/devops-school-bot/internal/app/store"
 	"gopkg.in/tucnak/telebot.v3"
 )
@@ -37,7 +35,10 @@ func (srv *server) configureRouter() {
 }
 
 func (srv *server) configureBotHandler() {
-	srv.bot.Handle(telebot.OnText, srv.onTextHanlder)
+	srv.bot.Handle("/join", srv.handleJoin)
+	srv.bot.Handle("/report", srv.handleReport)
+	srv.bot.Handle("/help", srv.handleHelp)
+	srv.bot.Handle(telebot.OnText, srv.handleOnText)
 }
 
 func (srv *server) botWebHookHandler() http.HandlerFunc {
@@ -49,6 +50,7 @@ func (srv *server) botWebHookHandler() http.HandlerFunc {
 		}
 
 		srv.bot.ProcessUpdate(u)
+		srv.respond(rw, r, http.StatusOK, nil)
 	}
 }
 
@@ -61,15 +63,4 @@ func (srv *server) respond(rw http.ResponseWriter, r *http.Request, code int, da
 	if data != nil {
 		json.NewEncoder(rw).Encode(data)
 	}
-}
-
-func (srv *server) onTextHanlder(c telebot.Context) error {
-	text := strings.ToLower(c.Message().Text)
-	logrus.Debug("Text: " + text)
-	for _, entity := range c.Message().Entities {
-		logrus.Debug("Entity: " + entity.Type)
-		logrus.Debug(text[entity.Offset : entity.Offset+entity.Length])
-	}
-
-	return nil
 }

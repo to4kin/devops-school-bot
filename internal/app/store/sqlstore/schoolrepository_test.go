@@ -18,6 +18,9 @@ func TestSchoolRepository_Create(t *testing.T) {
 
 	assert.NoError(t, s.School().Create(school))
 	assert.NotNil(t, school)
+
+	err := s.School().Create(school)
+	assert.EqualError(t, err, store.ErrAnotherSchoolIsActive.Error())
 }
 
 func TestSchoolRepository_FindByTitle(t *testing.T) {
@@ -30,7 +33,7 @@ func TestSchoolRepository_FindByTitle(t *testing.T) {
 	_, err := s.School().FindByTitle(testSchool.Title)
 	assert.EqualError(t, err, store.ErrRecordNotFound.Error())
 
-	s.School().Create(testSchool)
+	assert.NoError(t, s.School().Create(testSchool))
 
 	school, err := s.School().FindByTitle(testSchool.Title)
 	assert.NoError(t, err)
@@ -47,7 +50,7 @@ func TestSchoolRepository_FindActive(t *testing.T) {
 	_, err := s.School().FindActive()
 	assert.EqualError(t, err, store.ErrRecordNotFound.Error())
 
-	s.School().Create(testSchool)
+	assert.NoError(t, s.School().Create(testSchool))
 
 	school, err := s.School().FindActive()
 	assert.NoError(t, err)

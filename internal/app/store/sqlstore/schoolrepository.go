@@ -22,7 +22,7 @@ func (r *SchoolRepository) Create(s *model.School) error {
 	}
 
 	if school != nil {
-		return store.ErrAnotherSchoolActive
+		return store.ErrAnotherSchoolIsActive
 	}
 
 	return r.store.db.QueryRow(

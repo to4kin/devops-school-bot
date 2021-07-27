@@ -30,7 +30,7 @@ func TestAccountRepository_FindByTelegramID(t *testing.T) {
 	_, err := s.Account().FindByTelegramID(a.TelegramID)
 	assert.EqualError(t, err, store.ErrRecordNotFound.Error())
 
-	s.Account().Create(a)
+	assert.NoError(t, s.Account().Create(a))
 
 	account, err := s.Account().FindByTelegramID(a.TelegramID)
 	assert.NoError(t, err)

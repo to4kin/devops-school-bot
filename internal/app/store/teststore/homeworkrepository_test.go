@@ -13,29 +13,65 @@ func TestHomeworkRepository_Create(t *testing.T) {
 	s := teststore.New()
 	h := model.TestHomework(t)
 
-	s.Account().Create(h.Student.Account)
-	s.School().Create(h.Student.School)
-	s.Student().Create(h.Student)
-	s.Lesson().Create(h.Lesson)
+	assert.NoError(t, s.Account().Create(h.Student.Account))
+	assert.NoError(t, s.School().Create(h.Student.School))
+	assert.NoError(t, s.Student().Create(h.Student))
+	assert.NoError(t, s.Lesson().Create(h.Lesson))
 
 	assert.NoError(t, s.Homework().Create(h))
 	assert.NotNil(t, h)
 }
 
-func TestHomeworkRepository_FindByStudentIDLessonID(t *testing.T) {
+func TestHomeworkRepository_FindByStudent(t *testing.T) {
 	s := teststore.New()
 	h := model.TestHomework(t)
 
-	_, err := s.Homework().FindByStudentIDLessonID(h.Student.ID, h.Lesson.ID)
+	_, err := s.Homework().FindByStudent(h.Student)
 	assert.EqualError(t, err, store.ErrRecordNotFound.Error())
 
-	s.Account().Create(h.Student.Account)
-	s.School().Create(h.Student.School)
-	s.Student().Create(h.Student)
-	s.Lesson().Create(h.Lesson)
-	s.Homework().Create(h)
+	assert.NoError(t, s.Account().Create(h.Student.Account))
+	assert.NoError(t, s.School().Create(h.Student.School))
+	assert.NoError(t, s.Student().Create(h.Student))
+	assert.NoError(t, s.Lesson().Create(h.Lesson))
+	assert.NoError(t, s.Homework().Create(h))
 
-	homework, err := s.Homework().FindByStudentIDLessonID(h.Student.ID, h.Lesson.ID)
+	homeworks, err := s.Homework().FindByStudent(h.Student)
+	assert.NoError(t, err)
+	assert.NotNil(t, homeworks)
+}
+
+func TestHomeworkRepository_FindBySchool(t *testing.T) {
+	s := teststore.New()
+	h := model.TestHomework(t)
+
+	_, err := s.Homework().FindBySchool(h.Student.School)
+	assert.EqualError(t, err, store.ErrRecordNotFound.Error())
+
+	assert.NoError(t, s.Account().Create(h.Student.Account))
+	assert.NoError(t, s.School().Create(h.Student.School))
+	assert.NoError(t, s.Student().Create(h.Student))
+	assert.NoError(t, s.Lesson().Create(h.Lesson))
+	assert.NoError(t, s.Homework().Create(h))
+
+	homeworks, err := s.Homework().FindBySchool(h.Student.School)
+	assert.NoError(t, err)
+	assert.NotNil(t, homeworks)
+}
+
+func TestHomeworkRepository_FindByStudentLesson(t *testing.T) {
+	s := teststore.New()
+	h := model.TestHomework(t)
+
+	_, err := s.Homework().FindByStudentLesson(h.Student, h.Lesson)
+	assert.EqualError(t, err, store.ErrRecordNotFound.Error())
+
+	assert.NoError(t, s.Account().Create(h.Student.Account))
+	assert.NoError(t, s.School().Create(h.Student.School))
+	assert.NoError(t, s.Student().Create(h.Student))
+	assert.NoError(t, s.Lesson().Create(h.Lesson))
+	assert.NoError(t, s.Homework().Create(h))
+
+	homework, err := s.Homework().FindByStudentLesson(h.Student, h.Lesson)
 	assert.NoError(t, err)
 	assert.NotNil(t, homework)
 }

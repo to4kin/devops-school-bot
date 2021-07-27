@@ -15,15 +15,19 @@ type SchoolRepository interface {
 
 type LessonRepository interface {
 	Create(*model.Lesson) error
+	FindByID(int64) (*model.Lesson, error)
 	FindByTitle(string) (*model.Lesson, error)
+	FindBySchool(*model.School) ([]*model.Lesson, error)
 }
 
 type StudentRepository interface {
 	Create(*model.Student) error
-	FindByAccountIDSchoolID(int64, int64) (*model.Student, error)
+	FindByAccountSchool(*model.Account, *model.School) (*model.Student, error)
 }
 
 type HomeworkRepository interface {
 	Create(*model.Homework) error
-	FindByStudentIDLessonID(int64, int64) (*model.Homework, error)
+	FindByStudent(*model.Student) ([]*model.Homework, error)
+	FindBySchool(*model.School) ([]*model.Homework, error)
+	FindByStudentLesson(*model.Student, *model.Lesson) (*model.Homework, error)
 }

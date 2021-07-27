@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"net/http"
 	"net/http/httptest"
-	"os"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -13,22 +12,10 @@ import (
 	"gopkg.in/tucnak/telebot.v3"
 )
 
-var (
-	token string
-)
-
-func TestMain(m *testing.M) {
-	if token == "" {
-		token = "1949550059:AAHTvp0Zm5ABVDKL8LVHAYkS-PEEGGZnEJE"
-	}
-
-	os.Exit(m.Run())
-}
-
 func TestServer_BotWebHookHandler(t *testing.T) {
 	srv := newServer(teststore.New())
 
-	bot, err := telebot.NewBot(telebot.Settings{Token: token})
+	bot, err := telebot.NewBot(telebot.Settings{Token: token, Verbose: true})
 	assert.NoError(t, err)
 	assert.NotNil(t, bot)
 
@@ -47,7 +34,7 @@ func TestServer_BotWebHookHandler(t *testing.T) {
 					"date": 1441645532,
 					"chat": map[string]interface{}{
 						"last_name":  "Test Lastname",
-						"type":       "private",
+						"type":       "group",
 						"id":         1111111,
 						"first_name": "Test Firstname",
 						"username":   "Testusername",
@@ -59,17 +46,17 @@ func TestServer_BotWebHookHandler(t *testing.T) {
 						"first_name": "Test Firstname",
 						"username":   "Testusername",
 					},
-					"text": "/start #hashtag",
+					"text": "/join #hashtag",
 					"entities": []map[string]interface{}{
 						{
 							"type":   "hashtag",
-							"offset": 7,
+							"offset": 6,
 							"length": 8,
 						},
 						{
 							"type":   "bot_command",
 							"offset": 0,
-							"length": 6,
+							"length": 5,
 						},
 					},
 				},

@@ -24,7 +24,7 @@ func TestSchoolRepository_FindByTitle(t *testing.T) {
 	_, err := s.School().FindByTitle(testSchool.Title)
 	assert.EqualError(t, err, store.ErrRecordNotFound.Error())
 
-	s.School().Create(testSchool)
+	assert.NoError(t, s.School().Create(testSchool))
 
 	school, err := s.School().FindByTitle(testSchool.Title)
 	assert.NoError(t, err)
@@ -38,7 +38,7 @@ func TestSchoolRepository_FindActive(t *testing.T) {
 	_, err := s.School().FindActive()
 	assert.EqualError(t, err, store.ErrRecordNotFound.Error())
 
-	s.School().Create(testSchool)
+	assert.NoError(t, s.School().Create(testSchool))
 
 	school, err := s.School().FindActive()
 	assert.NoError(t, err)

@@ -31,16 +31,11 @@ func (r *SchoolRepository) FindByTitle(title string) (*model.School, error) {
 }
 
 func (r *SchoolRepository) FindActive() (*model.School, error) {
-	s := &model.School{}
 	for _, school := range r.schools {
 		if school.Active {
-			s = school
+			return school, nil
 		}
 	}
 
-	if s.Title == "" {
-		return nil, store.ErrRecordNotFound
-	}
-
-	return s, nil
+	return nil, store.ErrRecordNotFound
 }
