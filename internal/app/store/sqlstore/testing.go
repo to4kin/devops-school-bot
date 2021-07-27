@@ -5,6 +5,10 @@ import (
 	"fmt"
 	"strings"
 	"testing"
+
+	"github.com/golang-migrate/migrate/v4"
+	"github.com/golang-migrate/migrate/v4/database/postgres"
+	_ "github.com/golang-migrate/migrate/v4/source/file"
 )
 
 func TestDb(t *testing.T, databaseURL string) (*sql.DB, func(...string)) {
@@ -18,6 +22,22 @@ func TestDb(t *testing.T, databaseURL string) (*sql.DB, func(...string)) {
 	if err := db.Ping(); err != nil {
 		t.Fatal(err)
 	}
+
+	driver, err := postgres.WithInstance(db, &postgres.Config{})
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	m, err := migrate.NewWithDatabaseInstance(
+		"file://../../../../db/migrations/",
+		"postgres",
+		driver,
+	)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	m.Steps(2)
 
 	return db, func(tables ...string) {
 		if len(tables) > 0 {

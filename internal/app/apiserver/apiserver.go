@@ -4,6 +4,9 @@ import (
 	"database/sql"
 	"net/http"
 
+	"github.com/golang-migrate/migrate/v4"
+	"github.com/golang-migrate/migrate/v4/database/postgres"
+	_ "github.com/golang-migrate/migrate/v4/source/file"
 	"gitlab.devops.telekom.de/anton.bastin/devops-school-bot/internal/app/store/sqlstore"
 	"gopkg.in/tucnak/telebot.v3"
 )
@@ -42,6 +45,22 @@ func newDb(databaseURL string) (*sql.DB, error) {
 	if err := db.Ping(); err != nil {
 		return nil, err
 	}
+
+	driver, err := postgres.WithInstance(db, &postgres.Config{})
+	if err != nil {
+		return nil, err
+	}
+
+	m, err := migrate.NewWithDatabaseInstance(
+		"file://./db/migrations/",
+		"postgres",
+		driver,
+	)
+	if err != nil {
+		return nil, err
+	}
+
+	m.Steps(2)
 
 	return db, nil
 }
