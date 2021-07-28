@@ -1,5 +1,15 @@
 image: artifactory.devops.telekom.de/tvpp-docker/tvpp-runner:golang-1.16
 
+services:
+  - postgres:12.2-alpine
+
+variables:
+  POSTGRES_DB: devops_school_test
+  POSTGRES_USER: testuser
+  POSTGRES_PASSWORD: testpassword
+  POSTGRES_HOST_AUTH_METHOD: trust
+  TEST_DATABASE_URL: postgres://localhost/${POSTGRES_DB}?user=${POSTGRES_USER}&password=${POSTGRES_PASSWORD}&sslmode=disable
+
 cache:
   paths:
     - /apt-cache
