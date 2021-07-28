@@ -33,9 +33,6 @@ unit_tests:
     GOFLAGS: "-mod=mod"
   script:
     - make test
-    - ls -la /go/src
-    - ls -la /go/pkg/mod/
-    - go env
 
 build:
   stage: build
