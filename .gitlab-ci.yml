@@ -8,7 +8,7 @@ variables:
   POSTGRES_USER: testuser
   POSTGRES_PASSWORD: testpassword
   POSTGRES_HOST_AUTH_METHOD: trust
-  TEST_DATABASE_URL: postgres://localhost/${POSTGRES_DB}?user=${POSTGRES_USER}&password=${POSTGRES_PASSWORD}&sslmode=disable
+  TEST_DATABASE_URL: postgres://postgres/${POSTGRES_DB}?user=${POSTGRES_USER}&password=${POSTGRES_PASSWORD}&sslmode=disable
 
 cache:
   paths:
