@@ -40,14 +40,14 @@ func (r *LessonRepository) FindByTitle(title string) (*model.Lesson, error) {
 	return l, nil
 }
 
-func (r *LessonRepository) FindBySchool(school *model.School) ([]*model.Lesson, error) {
+func (r *LessonRepository) FindBySchoolID(school_id int64) ([]*model.Lesson, error) {
 	l := []*model.Lesson{}
 
 	if r.store.studentRepository == nil {
 		return nil, store.ErrRecordNotFound
 	}
 
-	students, ok := r.store.studentRepository.students[school.ID]
+	students, ok := r.store.studentRepository.students[school_id]
 	if !ok {
 		return nil, store.ErrRecordNotFound
 	}

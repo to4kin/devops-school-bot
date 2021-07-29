@@ -40,7 +40,7 @@ func (srv *server) handleReport(c telebot.Context) error {
 	logrus.Debug(account.ToString())
 
 	logrus.Debug("get student from database by account_id: ", account.ID, " and school_id: ", school.ID)
-	student, err := srv.store.Student().FindByAccountSchool(account, school)
+	student, err := srv.store.Student().FindByAccountIDSchoolID(account.ID, school.ID)
 	if err != nil {
 		logrus.Error(err)
 
@@ -53,14 +53,14 @@ func (srv *server) handleReport(c telebot.Context) error {
 	logrus.Debug(student.ToString())
 
 	logrus.Debug("get student homeworks from database by student_id: ", student.ID)
-	studentHomeworks, err := srv.store.Homework().FindByStudent(student)
+	studentHomeworks, err := srv.store.Homework().FindByStudentID(student.ID)
 	if err != nil {
 		logrus.Error(err)
 		return nil
 	}
 
 	logrus.Debug("get all homeworks from database by school_id: ", school.ID)
-	allLessons, err := srv.store.Lesson().FindBySchool(school)
+	allLessons, err := srv.store.Lesson().FindBySchoolID(school.ID)
 	if err != nil {
 		logrus.Error(err)
 		return nil

@@ -61,7 +61,7 @@ func TestLesson_FindBySchool(t *testing.T) {
 	s := sqlstore.New(db)
 	h := model.TestHomework(t)
 
-	_, err := s.Lesson().FindBySchool(h.Student.School)
+	_, err := s.Lesson().FindBySchoolID(h.Student.School.ID)
 	assert.EqualError(t, err, store.ErrRecordNotFound.Error())
 
 	assert.NoError(t, s.Account().Create(h.Student.Account))
@@ -70,7 +70,7 @@ func TestLesson_FindBySchool(t *testing.T) {
 	assert.NoError(t, s.Lesson().Create(h.Lesson))
 	assert.NoError(t, s.Homework().Create(h))
 
-	lesson, err := s.Lesson().FindBySchool(h.Student.School)
+	lesson, err := s.Lesson().FindBySchoolID(h.Student.School.ID)
 	assert.NoError(t, err)
 	assert.NotNil(t, lesson)
 }

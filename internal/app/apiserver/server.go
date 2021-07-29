@@ -35,6 +35,7 @@ func (srv *server) configureRouter() {
 }
 
 func (srv *server) configureBotHandler() {
+	srv.bot.Handle("/start", srv.handleStart)
 	srv.bot.Handle("/join", srv.handleJoin)
 	srv.bot.Handle("/report", srv.handleReport)
 	srv.bot.Handle("/help", srv.handleHelp)

@@ -23,9 +23,9 @@ func (r *HomeworkRepository) Create(h *model.Homework) error {
 	return nil
 }
 
-func (r *HomeworkRepository) FindByStudent(student *model.Student) ([]*model.Homework, error) {
+func (r *HomeworkRepository) FindByStudentID(student_id int64) ([]*model.Homework, error) {
 	hw := []*model.Homework{}
-	lessons, ok := r.homeworks[student.ID]
+	lessons, ok := r.homeworks[student_id]
 	if !ok {
 		return nil, store.ErrRecordNotFound
 	}
@@ -37,14 +37,14 @@ func (r *HomeworkRepository) FindByStudent(student *model.Student) ([]*model.Hom
 	return hw, nil
 }
 
-func (r *HomeworkRepository) FindBySchool(school *model.School) ([]*model.Homework, error) {
+func (r *HomeworkRepository) FindBySchoolID(school_id int64) ([]*model.Homework, error) {
 	result := []*model.Homework{}
 
 	if r.store.studentRepository == nil {
 		return nil, store.ErrRecordNotFound
 	}
 
-	students, ok := r.store.studentRepository.students[school.ID]
+	students, ok := r.store.studentRepository.students[school_id]
 	if !ok {
 		return nil, store.ErrRecordNotFound
 	}
@@ -67,13 +67,13 @@ func (r *HomeworkRepository) FindBySchool(school *model.School) ([]*model.Homewo
 	return result, nil
 }
 
-func (r *HomeworkRepository) FindByStudentLesson(student *model.Student, lesson *model.Lesson) (*model.Homework, error) {
-	lessons, ok := r.homeworks[student.ID]
+func (r *HomeworkRepository) FindByStudentIDLessonID(student_id int64, lesson_id int64) (*model.Homework, error) {
+	lessons, ok := r.homeworks[student_id]
 	if !ok {
 		return nil, store.ErrRecordNotFound
 	}
 
-	homework, ok := lessons[lesson.ID]
+	homework, ok := lessons[lesson_id]
 	if !ok {
 		return nil, store.ErrRecordNotFound
 	}

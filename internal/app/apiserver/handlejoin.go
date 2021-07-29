@@ -49,7 +49,7 @@ func (srv *server) handleJoin(c telebot.Context) error {
 	logrus.Debug(account.ToString())
 
 	logrus.Debug("get student from database by account_id: ", account.ID, " and school_id: ", school.ID)
-	student, err := srv.store.Student().FindByAccountSchool(account, school)
+	student, err := srv.store.Student().FindByAccountIDSchoolID(account.ID, school.ID)
 	if err != nil {
 		if err == store.ErrRecordNotFound {
 			logrus.Debug("student not found, will create a new one")

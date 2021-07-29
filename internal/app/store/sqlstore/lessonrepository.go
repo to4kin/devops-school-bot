@@ -62,7 +62,7 @@ func (r *LessonRepository) FindByTitle(title string) (*model.Lesson, error) {
 	return l, nil
 }
 
-func (r *LessonRepository) FindBySchool(school *model.School) ([]*model.Lesson, error) {
+func (r *LessonRepository) FindBySchoolID(school_id int64) ([]*model.Lesson, error) {
 	rowsCount := 0
 	l := []*model.Lesson{}
 
@@ -73,7 +73,7 @@ func (r *LessonRepository) FindBySchool(school *model.School) ([]*model.Lesson, 
 		WHERE student.school_id = $1
 		GROUP BY lesson.id, lesson.title
 		`,
-		school.ID,
+		school_id,
 	)
 	if err != nil {
 		return nil, err

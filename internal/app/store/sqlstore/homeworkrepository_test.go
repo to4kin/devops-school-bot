@@ -25,14 +25,14 @@ func TestHomeworkRepository_Create(t *testing.T) {
 	assert.NotNil(t, h)
 }
 
-func TestHomeworkRepository_FindByStudent(t *testing.T) {
+func TestHomeworkRepository_FindByStudentID(t *testing.T) {
 	db, teardown := sqlstore.TestDb(t, databaseURL)
 	defer teardown("homework", "lesson", "student", "school", "account")
 
 	s := sqlstore.New(db)
 	h := model.TestHomework(t)
 
-	_, err := s.Homework().FindByStudent(h.Student)
+	_, err := s.Homework().FindByStudentID(h.Student.ID)
 	assert.EqualError(t, err, store.ErrRecordNotFound.Error())
 
 	assert.NoError(t, s.Account().Create(h.Student.Account))
@@ -41,19 +41,19 @@ func TestHomeworkRepository_FindByStudent(t *testing.T) {
 	assert.NoError(t, s.Lesson().Create(h.Lesson))
 	assert.NoError(t, s.Homework().Create(h))
 
-	homeworks, err := s.Homework().FindByStudent(h.Student)
+	homeworks, err := s.Homework().FindByStudentID(h.Student.ID)
 	assert.NoError(t, err)
 	assert.NotNil(t, homeworks)
 }
 
-func TestHomeworkRepository_FindBySchool(t *testing.T) {
+func TestHomeworkRepository_FindBySchoolID(t *testing.T) {
 	db, teardown := sqlstore.TestDb(t, databaseURL)
 	defer teardown("homework", "lesson", "student", "school", "account")
 
 	s := sqlstore.New(db)
 	h := model.TestHomework(t)
 
-	_, err := s.Homework().FindBySchool(h.Student.School)
+	_, err := s.Homework().FindBySchoolID(h.Student.School.ID)
 	assert.EqualError(t, err, store.ErrRecordNotFound.Error())
 
 	assert.NoError(t, s.Account().Create(h.Student.Account))
@@ -62,19 +62,19 @@ func TestHomeworkRepository_FindBySchool(t *testing.T) {
 	assert.NoError(t, s.Lesson().Create(h.Lesson))
 	assert.NoError(t, s.Homework().Create(h))
 
-	homeworks, err := s.Homework().FindBySchool(h.Student.School)
+	homeworks, err := s.Homework().FindBySchoolID(h.Student.School.ID)
 	assert.NoError(t, err)
 	assert.NotNil(t, homeworks)
 }
 
-func TestHomeworkRepository_FindByStudentLesson(t *testing.T) {
+func TestHomeworkRepository_FindByStudentIDLessonID(t *testing.T) {
 	db, teardown := sqlstore.TestDb(t, databaseURL)
 	defer teardown("homework", "lesson", "student", "school", "account")
 
 	s := sqlstore.New(db)
 	h := model.TestHomework(t)
 
-	_, err := s.Homework().FindByStudentLesson(h.Student, h.Lesson)
+	_, err := s.Homework().FindByStudentIDLessonID(h.Student.ID, h.Lesson.ID)
 	assert.EqualError(t, err, store.ErrRecordNotFound.Error())
 
 	assert.NoError(t, s.Account().Create(h.Student.Account))
@@ -83,7 +83,7 @@ func TestHomeworkRepository_FindByStudentLesson(t *testing.T) {
 	assert.NoError(t, s.Lesson().Create(h.Lesson))
 	assert.NoError(t, s.Homework().Create(h))
 
-	homework, err := s.Homework().FindByStudentLesson(h.Student, h.Lesson)
+	homework, err := s.Homework().FindByStudentIDLessonID(h.Student.ID, h.Lesson.ID)
 	assert.NoError(t, err)
 	assert.NotNil(t, homework)
 }
