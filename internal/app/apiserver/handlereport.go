@@ -19,7 +19,7 @@ func (srv *server) handleReport(c telebot.Context) error {
 		logrus.Error(err)
 
 		if err == store.ErrRecordNotFound {
-			return c.Reply(MsgNoActiveSchool, &telebot.SendOptions{ParseMode: "HTML"})
+			return c.Reply(msgNoActiveSchool, &telebot.SendOptions{ParseMode: "HTML"})
 		}
 
 		return nil
@@ -32,7 +32,7 @@ func (srv *server) handleReport(c telebot.Context) error {
 		logrus.Error(err)
 
 		if err == store.ErrRecordNotFound {
-			return c.Reply(MsgUserNotJoined, &telebot.SendOptions{ParseMode: "HTML"})
+			return c.Reply(msgUserNotJoined, &telebot.SendOptions{ParseMode: "HTML"})
 		}
 
 		return nil
@@ -45,7 +45,7 @@ func (srv *server) handleReport(c telebot.Context) error {
 		logrus.Error(err)
 
 		if err == store.ErrRecordNotFound {
-			return c.Reply(MsgUserNotJoined, &telebot.SendOptions{ParseMode: "HTML"})
+			return c.Reply(msgUserNotJoined, &telebot.SendOptions{ParseMode: "HTML"})
 		}
 
 		return nil
@@ -58,6 +58,7 @@ func (srv *server) handleReport(c telebot.Context) error {
 		logrus.Error(err)
 		return nil
 	}
+	logrus.Debug("found homeworks: ", len(studentHomeworks))
 
 	logrus.Debug("get all lessons from database by school_id: ", school.ID)
 	allLessons, err := srv.store.Lesson().FindBySchoolID(school.ID)
@@ -65,8 +66,9 @@ func (srv *server) handleReport(c telebot.Context) error {
 		logrus.Error(err)
 		return nil
 	}
+	logrus.Debug("found lessons: ", len(allLessons))
 
-	reportMessage := fmt.Sprintf("Hello, @%v!\n\nYour progress in <b>DevOps School %v</b>:\n", account.Username, school.Title)
+	reportMessage := fmt.Sprintf(msgHomeworkReport, account.Username, school.Title)
 	for _, lesson := range allLessons {
 		if err != nil {
 			logrus.Error(err)
@@ -78,18 +80,16 @@ func (srv *server) handleReport(c telebot.Context) error {
 			if homework.Lesson.ID == lesson.ID {
 				counted = true
 				if homework.Verify {
-					reportMessage += fmt.Sprintf("✔️ - %v\n", lesson.Title)
+					reportMessage += fmt.Sprintf("%v - %v\n", msgHomeworkVerified, lesson.Title)
 				} else {
-					reportMessage += fmt.Sprintf("⭕ - %v\n", lesson.Title)
+					reportMessage += fmt.Sprintf("%v - %v\n", msgHomeworkNotVerified, lesson.Title)
 				}
 			}
 		}
 
 		if !counted {
-			reportMessage += fmt.Sprintf("❌ - %v\n", lesson.Title)
+			reportMessage += fmt.Sprintf("%v - %v\n", msgHomeworkNotProvided, lesson.Title)
 		}
-
-		logrus.Debug(lesson.ToString())
 	}
 
 	return c.Reply(reportMessage, &telebot.SendOptions{ParseMode: "HTML"})

@@ -9,6 +9,10 @@ import (
 	"gopkg.in/tucnak/telebot.v3"
 )
 
+var (
+	homeworkHashtag string = "#homework"
+)
+
 func (srv *server) handleOnText(c telebot.Context) error {
 	if c.Message().Private() {
 		return nil
@@ -16,13 +20,13 @@ func (srv *server) handleOnText(c telebot.Context) error {
 
 	text := strings.ToLower(c.Message().Text)
 
-	if strings.Contains(text, "#homework") {
+	if strings.Contains(text, homeworkHashtag) {
 		logrus.Debug("get active school")
 		school, err := srv.store.School().FindActive()
 		if err != nil {
 			if err == store.ErrRecordNotFound {
 				logrus.Error(err)
-				return c.Reply(MsgNoActiveSchool, &telebot.SendOptions{ParseMode: "HTML"})
+				return c.Reply(msgNoActiveSchool, &telebot.SendOptions{ParseMode: "HTML"})
 			}
 
 			logrus.Error(err)
@@ -35,7 +39,7 @@ func (srv *server) handleOnText(c telebot.Context) error {
 		if err != nil {
 			if err == store.ErrRecordNotFound {
 				logrus.Error(err)
-				return c.Reply(MsgUserNotJoined, &telebot.SendOptions{ParseMode: "HTML"})
+				return c.Reply(msgUserNotJoined, &telebot.SendOptions{ParseMode: "HTML"})
 			}
 
 			logrus.Error(err)
@@ -48,7 +52,7 @@ func (srv *server) handleOnText(c telebot.Context) error {
 		if err != nil {
 			if err == store.ErrRecordNotFound {
 				logrus.Error(err)
-				return c.Reply(MsgUserNotJoined, &telebot.SendOptions{ParseMode: "HTML"})
+				return c.Reply(msgUserNotJoined, &telebot.SendOptions{ParseMode: "HTML"})
 			}
 
 			logrus.Error(err)
@@ -60,12 +64,12 @@ func (srv *server) handleOnText(c telebot.Context) error {
 			switch entity.Type {
 			case "hashtag":
 				hashtag := text[entity.Offset : entity.Offset+entity.Length]
-				if hashtag == "#homework" {
-					logrus.Debug("special hashtag skipped")
-					break
+				if hashtag == homeworkHashtag {
+					logrus.Debug("homework hashtag skipped: ", homeworkHashtag)
+					continue
 				}
 
-				logrus.Debug("get lesson from database by title: ")
+				logrus.Debug("get lesson from database by title: ", hashtag)
 				lesson, err := srv.store.Lesson().FindByTitle(hashtag)
 				if err != nil {
 					if err == store.ErrRecordNotFound {
@@ -95,6 +99,7 @@ func (srv *server) handleOnText(c telebot.Context) error {
 							Lesson:    lesson,
 							ChatID:    int64(c.Message().Chat.ID),
 							MessageID: int64(c.Message().ID),
+							Verify:    false,
 						}
 
 						if err := srv.store.Homework().Create(homework); err != nil {

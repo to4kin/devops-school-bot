@@ -26,7 +26,7 @@ func (h *Homework) Validate() error {
 }
 
 func (h *Homework) ToString() string {
-	str, err := json.Marshal(h)
+	str, err := json.MarshalIndent(h, "", "  ")
 	if err != nil {
 		return ""
 	}

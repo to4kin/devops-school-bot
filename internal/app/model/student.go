@@ -22,7 +22,7 @@ func (s *Student) Validate() error {
 }
 
 func (s *Student) ToString() string {
-	str, err := json.Marshal(s)
+	str, err := json.MarshalIndent(s, "", "  ")
 	if err != nil {
 		return ""
 	}

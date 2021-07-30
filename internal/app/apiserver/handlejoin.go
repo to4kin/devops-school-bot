@@ -17,7 +17,7 @@ func (srv *server) handleJoin(c telebot.Context) error {
 	if err != nil {
 		if err == store.ErrRecordNotFound {
 			logrus.Error(err)
-			return c.Reply(MsgNoActiveSchool, &telebot.SendOptions{ParseMode: "HTML"})
+			return c.Reply(msgNoActiveSchool, &telebot.SendOptions{ParseMode: "HTML"})
 		}
 
 		logrus.Error(err)
@@ -66,7 +66,7 @@ func (srv *server) handleJoin(c telebot.Context) error {
 			}
 
 			logrus.Debug(student.ToString())
-			return c.Reply(MsgWelcomeToSchool, &telebot.SendOptions{ParseMode: "HTML"})
+			return c.Reply(msgWelcomeToSchool, &telebot.SendOptions{ParseMode: "HTML"})
 		} else {
 			logrus.Error(err)
 			return nil
@@ -74,5 +74,5 @@ func (srv *server) handleJoin(c telebot.Context) error {
 	}
 	logrus.Debug(student.ToString())
 
-	return c.Reply(MsgUserAlreadyJoined, &telebot.SendOptions{ParseMode: "HTML"})
+	return c.Reply(msgUserAlreadyJoined, &telebot.SendOptions{ParseMode: "HTML"})
 }

@@ -24,7 +24,7 @@ func (a *Account) Validate() error {
 }
 
 func (a *Account) ToString() string {
-	str, err := json.Marshal(a)
+	str, err := json.MarshalIndent(a, "", "  ")
 	if err != nil {
 		return ""
 	}

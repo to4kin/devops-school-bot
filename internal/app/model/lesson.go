@@ -19,7 +19,7 @@ func (l *Lesson) Validate() error {
 }
 
 func (l *Lesson) ToString() string {
-	str, err := json.Marshal(l)
+	str, err := json.MarshalIndent(l, "", "  ")
 	if err != nil {
 		return ""
 	}

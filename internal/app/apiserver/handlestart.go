@@ -8,7 +8,6 @@ import (
 )
 
 func (srv *server) handleStart(c telebot.Context) error {
-	logrus.Debug(c.Message().Chat.ID)
 	logrus.Debug("get account from database by telegram_id: ", c.Sender().ID)
 	account, err := srv.store.Account().FindByTelegramID(int64(c.Sender().ID))
 	if err != nil {
@@ -19,6 +18,7 @@ func (srv *server) handleStart(c telebot.Context) error {
 				FirstName:  c.Sender().FirstName,
 				LastName:   c.Sender().LastName,
 				Username:   c.Sender().Username,
+				Superuser:  false,
 			}
 
 			if err := srv.store.Account().Create(account); err != nil {
