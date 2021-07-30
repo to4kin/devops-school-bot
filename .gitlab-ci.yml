@@ -42,4 +42,4 @@ code_coverage:
 build:
   stage: build
   script:
-    - make build
+    - make all
