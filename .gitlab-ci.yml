@@ -41,10 +41,10 @@ test-race:
   script:
     - make test-race
 
-code_coverage:
+test-coverage:
   stage: test
   script:
-    - make coverage
+    - make test-coverage
 
 build:
   stage: build
