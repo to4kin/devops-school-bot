@@ -10,6 +10,7 @@ require (
 	github.com/lib/pq v1.10.2
 	github.com/pkg/errors v0.9.1
 	github.com/sirupsen/logrus v1.8.1
+	github.com/spf13/cobra v1.2.1
 	github.com/stretchr/testify v1.7.0
-	gopkg.in/tucnak/telebot.v3 v3.0.0-20210727191609-6b6558547b11
+	gopkg.in/tucnak/telebot.v3 v3.0.0-20210730153630-0c6b451fbf66
 )
