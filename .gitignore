@@ -6,8 +6,8 @@
 *.ipr
 out/
 
-## Coverage
-coverage/
+## Tests
+test/
 
 ## Binary
 bin/

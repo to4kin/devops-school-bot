@@ -26,13 +26,20 @@ stages:
 before_script:
   - mkdir -p .go
 
-unit_tests:
+test-bench:
   stage: test
-  # TODO: https://github.com/golang/go/issues/44129 will be fixed in Go 1.17
-  variables:
-    GOFLAGS: "-mod=mod"
   script:
-    - make test
+    - make test-bench
+
+test-verbose:
+  stage: test
+  script:
+    - make test-verbose
+
+test-race:
+  stage: test
+  script:
+    - make test-race
 
 code_coverage:
   stage: test
