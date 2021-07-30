@@ -35,6 +35,7 @@ func (srv *server) handleJoin(c telebot.Context) error {
 				FirstName:  c.Sender().FirstName,
 				LastName:   c.Sender().LastName,
 				Username:   c.Sender().Username,
+				Superuser:  false,
 			}
 
 			if err := srv.store.Account().Create(account); err != nil {

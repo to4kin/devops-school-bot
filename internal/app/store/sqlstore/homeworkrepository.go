@@ -17,9 +17,10 @@ func (r *HomeworkRepository) Create(h *model.Homework) error {
 	}
 
 	return r.store.db.QueryRow(
-		"INSERT INTO homework (student_id, lesson_id, message_id, verify) VALUES ($1, $2, $3, $4) RETURNING id",
+		"INSERT INTO homework (student_id, lesson_id, chat_id, message_id, verify) VALUES ($1, $2, $3, $4, $5) RETURNING id",
 		h.Student.ID,
 		h.Lesson.ID,
+		h.ChatID,
 		h.MessageID,
 		h.Verify,
 	).Scan(
@@ -32,7 +33,7 @@ func (r *HomeworkRepository) FindByStudentID(student_id int64) ([]*model.Homewor
 	hw := []*model.Homework{}
 
 	rows, err := r.store.db.Query(`
-		SELECT hw.id, hw.message_id, hw.verify,
+		SELECT hw.id, hw.chat_id, hw.message_id, hw.verify,
 			st.id, st.active,
 			acc.id, acc.telegram_id, acc.first_name, acc.last_name, acc.username, acc.superuser,
 			sch.id, sch.title, sch.active, sch.finished,
@@ -64,6 +65,7 @@ func (r *HomeworkRepository) FindByStudentID(student_id int64) ([]*model.Homewor
 
 		if err := rows.Scan(
 			&h.ID,
+			&h.ChatID,
 			&h.MessageID,
 			&h.Verify,
 			&h.Student.ID,
@@ -103,7 +105,7 @@ func (r *HomeworkRepository) FindBySchoolID(school_id int64) ([]*model.Homework,
 	hw := []*model.Homework{}
 
 	rows, err := r.store.db.Query(`
-		SELECT hw.id, hw.message_id, hw.verify,
+		SELECT hw.id, hw.chat_id, hw.message_id, hw.verify,
 			st.id, st.active,
 			acc.id, acc.telegram_id, acc.first_name, acc.last_name, acc.username, acc.superuser,
 			sch.id, sch.title, sch.active, sch.finished,
@@ -135,6 +137,7 @@ func (r *HomeworkRepository) FindBySchoolID(school_id int64) ([]*model.Homework,
 
 		if err := rows.Scan(
 			&h.ID,
+			&h.ChatID,
 			&h.MessageID,
 			&h.Verify,
 			&h.Student.ID,
@@ -179,7 +182,7 @@ func (r *HomeworkRepository) FindByStudentIDLessonID(student_id int64, lesson_id
 	}
 
 	if err := r.store.db.QueryRow(`
-		SELECT hw.id, hw.message_id, hw.verify,
+		SELECT hw.id, hw.chat_id, hw.message_id, hw.verify,
 			st.id, st.active,
 			acc.id, acc.telegram_id, acc.first_name, acc.last_name, acc.username, acc.superuser,
 			sch.id, sch.title, sch.active, sch.finished,
@@ -195,6 +198,7 @@ func (r *HomeworkRepository) FindByStudentIDLessonID(student_id int64, lesson_id
 		lesson_id,
 	).Scan(
 		&h.ID,
+		&h.ChatID,
 		&h.MessageID,
 		&h.Verify,
 		&h.Student.ID,

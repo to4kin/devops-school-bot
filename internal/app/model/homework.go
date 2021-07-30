@@ -10,6 +10,7 @@ type Homework struct {
 	ID        int64    `json:"id"`
 	Student   *Student `json:"student"`
 	Lesson    *Lesson  `json:"lesson"`
+	ChatID    int64    `json:"chat_id"`
 	MessageID int64    `json:"message_id"`
 	Verify    bool     `json:"verify"`
 }
@@ -19,6 +20,7 @@ func (h *Homework) Validate() error {
 		h,
 		validation.Field(&h.Student, validation.Required),
 		validation.Field(&h.Lesson, validation.Required),
+		validation.Field(&h.ChatID, validation.Required),
 		validation.Field(&h.MessageID, validation.Required),
 	)
 }

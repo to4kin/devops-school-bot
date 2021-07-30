@@ -93,6 +93,7 @@ func (srv *server) handleOnText(c telebot.Context) error {
 						homework = &model.Homework{
 							Student:   student,
 							Lesson:    lesson,
+							ChatID:    int64(c.Message().Chat.ID),
 							MessageID: int64(c.Message().ID),
 						}
 

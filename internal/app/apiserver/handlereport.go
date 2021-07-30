@@ -59,7 +59,7 @@ func (srv *server) handleReport(c telebot.Context) error {
 		return nil
 	}
 
-	logrus.Debug("get all homeworks from database by school_id: ", school.ID)
+	logrus.Debug("get all lessons from database by school_id: ", school.ID)
 	allLessons, err := srv.store.Lesson().FindBySchoolID(school.ID)
 	if err != nil {
 		logrus.Error(err)

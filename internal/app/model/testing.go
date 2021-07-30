@@ -38,6 +38,7 @@ func TestHomework(t *testing.T) *Homework {
 	return &Homework{
 		Student:   TestStudent(t),
 		Lesson:    TestLesson(t),
+		ChatID:    int64(99999),
 		MessageID: int64(99999),
 		Verify:    true,
 	}

@@ -8,6 +8,7 @@ import (
 )
 
 func (srv *server) handleStart(c telebot.Context) error {
+	logrus.Debug(c.Message().Chat.ID)
 	logrus.Debug("get account from database by telegram_id: ", c.Sender().ID)
 	account, err := srv.store.Account().FindByTelegramID(int64(c.Sender().ID))
 	if err != nil {
