@@ -3,24 +3,25 @@ package sqlstore
 import (
 	"database/sql"
 
-	"gitlab.devops.telekom.de/anton.bastin/devops-school-bot/internal/app/model"
-	"gitlab.devops.telekom.de/anton.bastin/devops-school-bot/internal/app/store"
+	"gitlab.devops.telekom.de/tvpp/prototypes/devops-school-bot/internal/app/model"
+	"gitlab.devops.telekom.de/tvpp/prototypes/devops-school-bot/internal/app/store"
 )
 
+// HomeworkRepository ...
 type HomeworkRepository struct {
 	store *Store
 }
 
+// Create ...
 func (r *HomeworkRepository) Create(h *model.Homework) error {
 	if err := h.Validate(); err != nil {
 		return err
 	}
 
 	return r.store.db.QueryRow(
-		"INSERT INTO homework (student_id, lesson_id, chat_id, message_id, verify) VALUES ($1, $2, $3, $4, $5) RETURNING id",
+		"INSERT INTO homework (student_id, lesson_id, message_id, verify) VALUES ($1, $2, $3, $4) RETURNING id",
 		h.Student.ID,
 		h.Lesson.ID,
-		h.ChatID,
 		h.MessageID,
 		h.Verify,
 	).Scan(
@@ -28,12 +29,13 @@ func (r *HomeworkRepository) Create(h *model.Homework) error {
 	)
 }
 
-func (r *HomeworkRepository) FindByStudentID(student_id int64) ([]*model.Homework, error) {
+// FindByStudentID ...
+func (r *HomeworkRepository) FindByStudentID(studentID int64) ([]*model.Homework, error) {
 	rowsCount := 0
 	hw := []*model.Homework{}
 
 	rows, err := r.store.db.Query(`
-		SELECT hw.id, hw.chat_id, hw.message_id, hw.verify,
+		SELECT hw.id, hw.message_id, hw.verify,
 			st.id, st.active,
 			acc.id, acc.telegram_id, acc.first_name, acc.last_name, acc.username, acc.superuser,
 			sch.id, sch.title, sch.active, sch.finished,
@@ -45,7 +47,7 @@ func (r *HomeworkRepository) FindByStudentID(student_id int64) ([]*model.Homewor
 		JOIN lesson les ON les.id = hw.lesson_id
 		WHERE hw.student_id = $1
 		`,
-		student_id,
+		studentID,
 	)
 	if err != nil {
 		return nil, err
@@ -65,7 +67,6 @@ func (r *HomeworkRepository) FindByStudentID(student_id int64) ([]*model.Homewor
 
 		if err := rows.Scan(
 			&h.ID,
-			&h.ChatID,
 			&h.MessageID,
 			&h.Verify,
 			&h.Student.ID,
@@ -100,12 +101,13 @@ func (r *HomeworkRepository) FindByStudentID(student_id int64) ([]*model.Homewor
 	return hw, nil
 }
 
-func (r *HomeworkRepository) FindBySchoolID(school_id int64) ([]*model.Homework, error) {
+// FindBySchoolID ...
+func (r *HomeworkRepository) FindBySchoolID(schoolID int64) ([]*model.Homework, error) {
 	rowsCount := 0
 	hw := []*model.Homework{}
 
 	rows, err := r.store.db.Query(`
-		SELECT hw.id, hw.chat_id, hw.message_id, hw.verify,
+		SELECT hw.id, hw.message_id, hw.verify,
 			st.id, st.active,
 			acc.id, acc.telegram_id, acc.first_name, acc.last_name, acc.username, acc.superuser,
 			sch.id, sch.title, sch.active, sch.finished,
@@ -117,7 +119,7 @@ func (r *HomeworkRepository) FindBySchoolID(school_id int64) ([]*model.Homework,
 		JOIN lesson les ON les.id = hw.lesson_id
 		WHERE sch.id = $1
 		`,
-		school_id,
+		schoolID,
 	)
 	if err != nil {
 		return nil, err
@@ -137,7 +139,6 @@ func (r *HomeworkRepository) FindBySchoolID(school_id int64) ([]*model.Homework,
 
 		if err := rows.Scan(
 			&h.ID,
-			&h.ChatID,
 			&h.MessageID,
 			&h.Verify,
 			&h.Student.ID,
@@ -172,7 +173,8 @@ func (r *HomeworkRepository) FindBySchoolID(school_id int64) ([]*model.Homework,
 	return hw, nil
 }
 
-func (r *HomeworkRepository) FindByStudentIDLessonID(student_id int64, lesson_id int64) (*model.Homework, error) {
+// FindByStudentIDLessonID ...
+func (r *HomeworkRepository) FindByStudentIDLessonID(studentID int64, lessonID int64) (*model.Homework, error) {
 	h := &model.Homework{
 		Student: &model.Student{
 			Account: &model.Account{},
@@ -182,7 +184,7 @@ func (r *HomeworkRepository) FindByStudentIDLessonID(student_id int64, lesson_id
 	}
 
 	if err := r.store.db.QueryRow(`
-		SELECT hw.id, hw.chat_id, hw.message_id, hw.verify,
+		SELECT hw.id, hw.message_id, hw.verify,
 			st.id, st.active,
 			acc.id, acc.telegram_id, acc.first_name, acc.last_name, acc.username, acc.superuser,
 			sch.id, sch.title, sch.active, sch.finished,
@@ -194,11 +196,10 @@ func (r *HomeworkRepository) FindByStudentIDLessonID(student_id int64, lesson_id
 		JOIN lesson les ON les.id = hw.lesson_id
 		WHERE hw.student_id = $1 AND hw.lesson_id = $2
 		`,
-		student_id,
-		lesson_id,
+		studentID,
+		lessonID,
 	).Scan(
 		&h.ID,
-		&h.ChatID,
 		&h.MessageID,
 		&h.Verify,
 		&h.Student.ID,

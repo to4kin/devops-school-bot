@@ -6,25 +6,26 @@ import (
 	validation "github.com/go-ozzo/ozzo-validation/v4"
 )
 
+// Homework ...
 type Homework struct {
 	ID        int64    `json:"id"`
 	Student   *Student `json:"student"`
 	Lesson    *Lesson  `json:"lesson"`
-	ChatID    int64    `json:"chat_id"`
 	MessageID int64    `json:"message_id"`
 	Verify    bool     `json:"verify"`
 }
 
+// Validate ...
 func (h *Homework) Validate() error {
 	return validation.ValidateStruct(
 		h,
 		validation.Field(&h.Student, validation.Required),
 		validation.Field(&h.Lesson, validation.Required),
-		validation.Field(&h.ChatID, validation.Required),
 		validation.Field(&h.MessageID, validation.Required),
 	)
 }
 
+// ToString ...
 func (h *Homework) ToString() string {
 	str, err := json.MarshalIndent(h, "", "  ")
 	if err != nil {

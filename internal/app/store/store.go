@@ -1,5 +1,6 @@
 package store
 
+// Store ...
 type Store interface {
 	Account() AccountRepository
 	School() SchoolRepository

@@ -1,10 +1,11 @@
 package teststore
 
 import (
-	"gitlab.devops.telekom.de/anton.bastin/devops-school-bot/internal/app/model"
-	"gitlab.devops.telekom.de/anton.bastin/devops-school-bot/internal/app/store"
+	"gitlab.devops.telekom.de/tvpp/prototypes/devops-school-bot/internal/app/model"
+	"gitlab.devops.telekom.de/tvpp/prototypes/devops-school-bot/internal/app/store"
 )
 
+// Store ...
 type Store struct {
 	accountRepository  *AccountRepository
 	schoolRepository   *SchoolRepository
@@ -13,10 +14,12 @@ type Store struct {
 	homeworkRepository *HomeworkRepository
 }
 
+// New ...
 func New() *Store {
 	return &Store{}
 }
 
+// Account ...
 func (store *Store) Account() store.AccountRepository {
 	if store.accountRepository != nil {
 		return store.accountRepository
@@ -30,6 +33,7 @@ func (store *Store) Account() store.AccountRepository {
 	return store.accountRepository
 }
 
+// School ...
 func (store *Store) School() store.SchoolRepository {
 	if store.schoolRepository != nil {
 		return store.schoolRepository
@@ -43,6 +47,7 @@ func (store *Store) School() store.SchoolRepository {
 	return store.schoolRepository
 }
 
+// Lesson ...
 func (store *Store) Lesson() store.LessonRepository {
 	if store.lessonRepository != nil {
 		return store.lessonRepository
@@ -56,6 +61,7 @@ func (store *Store) Lesson() store.LessonRepository {
 	return store.lessonRepository
 }
 
+// Student ...
 func (store *Store) Student() store.StudentRepository {
 	if store.studentRepository != nil {
 		return store.studentRepository
@@ -69,6 +75,7 @@ func (store *Store) Student() store.StudentRepository {
 	return store.studentRepository
 }
 
+// Homework ...
 func (store *Store) Homework() store.HomeworkRepository {
 	if store.homeworkRepository != nil {
 		return store.homeworkRepository

@@ -1,4 +1,4 @@
-module gitlab.devops.telekom.de/anton.bastin/devops-school-bot
+module gitlab.devops.telekom.de/tvpp/prototypes/devops-school-bot
 
 go 1.16
 

@@ -6,6 +6,7 @@ import (
 	validation "github.com/go-ozzo/ozzo-validation/v4"
 )
 
+// Student ...
 type Student struct {
 	ID      int64    `json:"id"`
 	Account *Account `json:"account"`
@@ -13,6 +14,7 @@ type Student struct {
 	Active  bool     `json:"active"`
 }
 
+// Validate ...
 func (s *Student) Validate() error {
 	return validation.ValidateStruct(
 		s,
@@ -21,6 +23,7 @@ func (s *Student) Validate() error {
 	)
 }
 
+// ToString ...
 func (s *Student) ToString() string {
 	str, err := json.MarshalIndent(s, "", "  ")
 	if err != nil {

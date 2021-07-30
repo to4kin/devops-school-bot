@@ -4,9 +4,9 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
-	"gitlab.devops.telekom.de/anton.bastin/devops-school-bot/internal/app/model"
-	"gitlab.devops.telekom.de/anton.bastin/devops-school-bot/internal/app/store"
-	"gitlab.devops.telekom.de/anton.bastin/devops-school-bot/internal/app/store/sqlstore"
+	"gitlab.devops.telekom.de/tvpp/prototypes/devops-school-bot/internal/app/model"
+	"gitlab.devops.telekom.de/tvpp/prototypes/devops-school-bot/internal/app/store"
+	"gitlab.devops.telekom.de/tvpp/prototypes/devops-school-bot/internal/app/store/sqlstore"
 )
 
 func TestHomeworkRepository_Create(t *testing.T) {

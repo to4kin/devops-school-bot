@@ -3,14 +3,16 @@ package sqlstore
 import (
 	"database/sql"
 
-	"gitlab.devops.telekom.de/anton.bastin/devops-school-bot/internal/app/model"
-	"gitlab.devops.telekom.de/anton.bastin/devops-school-bot/internal/app/store"
+	"gitlab.devops.telekom.de/tvpp/prototypes/devops-school-bot/internal/app/model"
+	"gitlab.devops.telekom.de/tvpp/prototypes/devops-school-bot/internal/app/store"
 )
 
+// StudentRepository ...
 type StudentRepository struct {
 	store *Store
 }
 
+// Create ...
 func (r *StudentRepository) Create(s *model.Student) error {
 	if err := s.Validate(); err != nil {
 		return err
@@ -26,7 +28,8 @@ func (r *StudentRepository) Create(s *model.Student) error {
 	)
 }
 
-func (r *StudentRepository) FindByAccountIDSchoolID(account_id int64, school_id int64) (*model.Student, error) {
+// FindByAccountIDSchoolID ...
+func (r *StudentRepository) FindByAccountIDSchoolID(accountID int64, schoolID int64) (*model.Student, error) {
 	s := &model.Student{
 		Account: &model.Account{},
 		School:  &model.School{},
@@ -40,8 +43,8 @@ func (r *StudentRepository) FindByAccountIDSchoolID(account_id int64, school_id 
 		JOIN school sch ON sch.id = st.school_id
 		WHERE st.account_id = $1 AND st.school_id = $2
 		`,
-		account_id,
-		school_id,
+		accountID,
+		schoolID,
 	).Scan(
 		&s.ID,
 		&s.Active,

@@ -4,7 +4,7 @@ import (
 	"fmt"
 
 	"github.com/sirupsen/logrus"
-	"gitlab.devops.telekom.de/anton.bastin/devops-school-bot/internal/app/store"
+	"gitlab.devops.telekom.de/tvpp/prototypes/devops-school-bot/internal/app/store"
 	"gopkg.in/tucnak/telebot.v3"
 )
 
@@ -13,8 +13,8 @@ func (srv *server) handleReport(c telebot.Context) error {
 		return nil
 	}
 
-	logrus.Debug("get active school")
-	school, err := srv.store.School().FindActive()
+	logrus.Debug("get school by chat_id: ", c.Message().Chat.ID)
+	school, err := srv.store.School().FindByChatID(c.Message().Chat.ID)
 	if err != nil {
 		logrus.Error(err)
 

@@ -6,11 +6,12 @@ import (
 
 	"github.com/golang-migrate/migrate/v4"
 	"github.com/golang-migrate/migrate/v4/database/postgres"
-	_ "github.com/golang-migrate/migrate/v4/source/file"
-	"gitlab.devops.telekom.de/anton.bastin/devops-school-bot/internal/app/store/sqlstore"
+	_ "github.com/golang-migrate/migrate/v4/source/file" // for migrations by file
+	"gitlab.devops.telekom.de/tvpp/prototypes/devops-school-bot/internal/app/store/sqlstore"
 	"gopkg.in/tucnak/telebot.v3"
 )
 
+// Start ...
 func Start(config *Config) error {
 	db, err := newDb(config.DatabaseURL)
 	if err != nil {

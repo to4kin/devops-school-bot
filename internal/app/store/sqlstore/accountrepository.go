@@ -3,14 +3,16 @@ package sqlstore
 import (
 	"database/sql"
 
-	"gitlab.devops.telekom.de/anton.bastin/devops-school-bot/internal/app/model"
-	"gitlab.devops.telekom.de/anton.bastin/devops-school-bot/internal/app/store"
+	"gitlab.devops.telekom.de/tvpp/prototypes/devops-school-bot/internal/app/model"
+	"gitlab.devops.telekom.de/tvpp/prototypes/devops-school-bot/internal/app/store"
 )
 
+// AccountRepository ...
 type AccountRepository struct {
 	store *Store
 }
 
+// Create ...
 func (r *AccountRepository) Create(a *model.Account) error {
 	if err := a.Validate(); err != nil {
 		return err
@@ -28,6 +30,7 @@ func (r *AccountRepository) Create(a *model.Account) error {
 	)
 }
 
+// FindByTelegramID ...
 func (r *AccountRepository) FindByTelegramID(telegramID int64) (*model.Account, error) {
 	a := &model.Account{}
 	if err := r.store.db.QueryRow(

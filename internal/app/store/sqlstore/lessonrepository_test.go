@@ -4,9 +4,9 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
-	"gitlab.devops.telekom.de/anton.bastin/devops-school-bot/internal/app/model"
-	"gitlab.devops.telekom.de/anton.bastin/devops-school-bot/internal/app/store"
-	"gitlab.devops.telekom.de/anton.bastin/devops-school-bot/internal/app/store/sqlstore"
+	"gitlab.devops.telekom.de/tvpp/prototypes/devops-school-bot/internal/app/model"
+	"gitlab.devops.telekom.de/tvpp/prototypes/devops-school-bot/internal/app/store"
+	"gitlab.devops.telekom.de/tvpp/prototypes/devops-school-bot/internal/app/store/sqlstore"
 )
 
 func TestLessonRepository_Create(t *testing.T) {
@@ -54,7 +54,7 @@ func TestLesson_FindByTitle(t *testing.T) {
 	assert.NotNil(t, lesson)
 }
 
-func TestLesson_FindBySchool(t *testing.T) {
+func TestLesson_FindBySchoolID(t *testing.T) {
 	db, teardown := sqlstore.TestDb(t, databaseURL)
 	defer teardown("homework", "lesson", "student", "school", "account")
 

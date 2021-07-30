@@ -8,7 +8,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
-	"gitlab.devops.telekom.de/anton.bastin/devops-school-bot/internal/app/store/teststore"
+	"gitlab.devops.telekom.de/tvpp/prototypes/devops-school-bot/internal/app/store/teststore"
 	"gopkg.in/tucnak/telebot.v3"
 )
 

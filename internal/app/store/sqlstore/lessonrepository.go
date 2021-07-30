@@ -3,14 +3,16 @@ package sqlstore
 import (
 	"database/sql"
 
-	"gitlab.devops.telekom.de/anton.bastin/devops-school-bot/internal/app/model"
-	"gitlab.devops.telekom.de/anton.bastin/devops-school-bot/internal/app/store"
+	"gitlab.devops.telekom.de/tvpp/prototypes/devops-school-bot/internal/app/model"
+	"gitlab.devops.telekom.de/tvpp/prototypes/devops-school-bot/internal/app/store"
 )
 
+// LessonRepository ...
 type LessonRepository struct {
 	store *Store
 }
 
+// Create ...
 func (r *LessonRepository) Create(l *model.Lesson) error {
 	if err := l.Validate(); err != nil {
 		return err
@@ -24,11 +26,12 @@ func (r *LessonRepository) Create(l *model.Lesson) error {
 	)
 }
 
-func (r *LessonRepository) FindByID(lesson_id int64) (*model.Lesson, error) {
+// FindByID ...
+func (r *LessonRepository) FindByID(lessonID int64) (*model.Lesson, error) {
 	l := &model.Lesson{}
 	if err := r.store.db.QueryRow(
 		"SELECT id, title FROM lesson WHERE id = $1",
-		lesson_id,
+		lessonID,
 	).Scan(
 		&l.ID,
 		&l.Title,
@@ -43,6 +46,7 @@ func (r *LessonRepository) FindByID(lesson_id int64) (*model.Lesson, error) {
 	return l, nil
 }
 
+// FindByTitle ...
 func (r *LessonRepository) FindByTitle(title string) (*model.Lesson, error) {
 	l := &model.Lesson{}
 	if err := r.store.db.QueryRow(
@@ -62,7 +66,8 @@ func (r *LessonRepository) FindByTitle(title string) (*model.Lesson, error) {
 	return l, nil
 }
 
-func (r *LessonRepository) FindBySchoolID(school_id int64) ([]*model.Lesson, error) {
+// FindBySchoolID ...
+func (r *LessonRepository) FindBySchoolID(schoolID int64) ([]*model.Lesson, error) {
 	rowsCount := 0
 	l := []*model.Lesson{}
 
@@ -73,7 +78,7 @@ func (r *LessonRepository) FindBySchoolID(school_id int64) ([]*model.Lesson, err
 		WHERE student.school_id = $1
 		GROUP BY lesson.id, lesson.title
 		`,
-		school_id,
+		schoolID,
 	)
 	if err != nil {
 		return nil, err

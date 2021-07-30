@@ -34,7 +34,12 @@ unit_tests:
   script:
     - make test
 
+code_coverage:
+  stage: test
+  script:
+    - make coverage
+
 build:
   stage: build
   script:
-    - make
+    - make build

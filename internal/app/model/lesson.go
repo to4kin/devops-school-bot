@@ -6,11 +6,13 @@ import (
 	validation "github.com/go-ozzo/ozzo-validation/v4"
 )
 
+// Lesson ...
 type Lesson struct {
 	ID    int64  `json:"id"`
 	Title string `json:"title"`
 }
 
+// Validate ...
 func (l *Lesson) Validate() error {
 	return validation.ValidateStruct(
 		l,
@@ -18,6 +20,7 @@ func (l *Lesson) Validate() error {
 	)
 }
 
+// ToString ...
 func (l *Lesson) ToString() string {
 	str, err := json.MarshalIndent(l, "", "  ")
 	if err != nil {

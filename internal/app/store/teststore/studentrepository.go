@@ -1,15 +1,17 @@
 package teststore
 
 import (
-	"gitlab.devops.telekom.de/anton.bastin/devops-school-bot/internal/app/model"
-	"gitlab.devops.telekom.de/anton.bastin/devops-school-bot/internal/app/store"
+	"gitlab.devops.telekom.de/tvpp/prototypes/devops-school-bot/internal/app/model"
+	"gitlab.devops.telekom.de/tvpp/prototypes/devops-school-bot/internal/app/store"
 )
 
+// StudentRepository ...
 type StudentRepository struct {
 	store    *Store
 	students map[int64]map[int64]*model.Student
 }
 
+// Create ...
 func (r *StudentRepository) Create(s *model.Student) error {
 	if err := s.Validate(); err != nil {
 		return err
@@ -23,13 +25,14 @@ func (r *StudentRepository) Create(s *model.Student) error {
 	return nil
 }
 
-func (r *StudentRepository) FindByAccountIDSchoolID(account_id int64, school_id int64) (*model.Student, error) {
-	schools, ok := r.students[account_id]
+// FindByAccountIDSchoolID ...
+func (r *StudentRepository) FindByAccountIDSchoolID(accountID int64, schoolID int64) (*model.Student, error) {
+	schools, ok := r.students[accountID]
 	if !ok {
 		return nil, store.ErrRecordNotFound
 	}
 
-	student, ok := schools[school_id]
+	student, ok := schools[schoolID]
 	if !ok {
 		return nil, store.ErrRecordNotFound
 	}

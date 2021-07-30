@@ -5,7 +5,7 @@ import (
 
 	"github.com/BurntSushi/toml"
 	"github.com/sirupsen/logrus"
-	"gitlab.devops.telekom.de/anton.bastin/devops-school-bot/internal/app/apiserver"
+	"gitlab.devops.telekom.de/tvpp/prototypes/devops-school-bot/internal/app/apiserver"
 )
 
 var (

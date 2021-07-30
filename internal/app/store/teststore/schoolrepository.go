@@ -1,15 +1,17 @@
 package teststore
 
 import (
-	"gitlab.devops.telekom.de/anton.bastin/devops-school-bot/internal/app/model"
-	"gitlab.devops.telekom.de/anton.bastin/devops-school-bot/internal/app/store"
+	"gitlab.devops.telekom.de/tvpp/prototypes/devops-school-bot/internal/app/model"
+	"gitlab.devops.telekom.de/tvpp/prototypes/devops-school-bot/internal/app/store"
 )
 
+// SchoolRepository ...
 type SchoolRepository struct {
 	store   *Store
 	schools map[string]*model.School
 }
 
+// Create ...
 func (r *SchoolRepository) Create(s *model.School) error {
 	if err := s.Validate(); err != nil {
 		return err
@@ -21,6 +23,7 @@ func (r *SchoolRepository) Create(s *model.School) error {
 	return nil
 }
 
+// FindByTitle ...
 func (r *SchoolRepository) FindByTitle(title string) (*model.School, error) {
 	s, ok := r.schools[title]
 	if !ok {
@@ -30,6 +33,18 @@ func (r *SchoolRepository) FindByTitle(title string) (*model.School, error) {
 	return s, nil
 }
 
+// FindByChatID ...
+func (r *SchoolRepository) FindByChatID(chatID int64) (*model.School, error) {
+	for _, school := range r.schools {
+		if school.ChatID == chatID {
+			return school, nil
+		}
+	}
+
+	return nil, store.ErrRecordNotFound
+}
+
+// FindActive ...
 func (r *SchoolRepository) FindActive() (*model.School, error) {
 	for _, school := range r.schools {
 		if school.Active {

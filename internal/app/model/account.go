@@ -6,6 +6,7 @@ import (
 	validation "github.com/go-ozzo/ozzo-validation/v4"
 )
 
+// Account ...
 type Account struct {
 	ID         int64  `json:"id"`
 	TelegramID int64  `json:"telegram_id"`
@@ -15,6 +16,7 @@ type Account struct {
 	Superuser  bool   `json:"superuser"`
 }
 
+// Validate ...
 func (a *Account) Validate() error {
 	return validation.ValidateStruct(
 		a,
@@ -23,6 +25,7 @@ func (a *Account) Validate() error {
 	)
 }
 
+// ToString ...
 func (a *Account) ToString() string {
 	str, err := json.MarshalIndent(a, "", "  ")
 	if err != nil {

@@ -4,9 +4,9 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
-	"gitlab.devops.telekom.de/anton.bastin/devops-school-bot/internal/app/model"
-	"gitlab.devops.telekom.de/anton.bastin/devops-school-bot/internal/app/store"
-	"gitlab.devops.telekom.de/anton.bastin/devops-school-bot/internal/app/store/sqlstore"
+	"gitlab.devops.telekom.de/tvpp/prototypes/devops-school-bot/internal/app/model"
+	"gitlab.devops.telekom.de/tvpp/prototypes/devops-school-bot/internal/app/store"
+	"gitlab.devops.telekom.de/tvpp/prototypes/devops-school-bot/internal/app/store/sqlstore"
 )
 
 func TestSchoolRepository_Create(t *testing.T) {
@@ -36,6 +36,23 @@ func TestSchoolRepository_FindByTitle(t *testing.T) {
 	assert.NoError(t, s.School().Create(testSchool))
 
 	school, err := s.School().FindByTitle(testSchool.Title)
+	assert.NoError(t, err)
+	assert.NotNil(t, school)
+}
+
+func TestSchoolRepository_FindByChatID(t *testing.T) {
+	db, teardown := sqlstore.TestDb(t, databaseURL)
+	defer teardown("school")
+
+	s := sqlstore.New(db)
+	testSchool := model.TestSchool(t)
+
+	_, err := s.School().FindByChatID(testSchool.ChatID)
+	assert.EqualError(t, err, store.ErrRecordNotFound.Error())
+
+	assert.NoError(t, s.School().Create(testSchool))
+
+	school, err := s.School().FindByChatID(testSchool.ChatID)
 	assert.NoError(t, err)
 	assert.NotNil(t, school)
 }

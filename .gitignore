@@ -6,5 +6,9 @@
 *.ipr
 out/
 
+## Coverage
+coverage/
+
 ## Binary
+bin/
 devopsschoolbot

@@ -1,15 +1,17 @@
 package teststore
 
 import (
-	"gitlab.devops.telekom.de/anton.bastin/devops-school-bot/internal/app/model"
-	"gitlab.devops.telekom.de/anton.bastin/devops-school-bot/internal/app/store"
+	"gitlab.devops.telekom.de/tvpp/prototypes/devops-school-bot/internal/app/model"
+	"gitlab.devops.telekom.de/tvpp/prototypes/devops-school-bot/internal/app/store"
 )
 
+// LessonRepository ...
 type LessonRepository struct {
 	store   *Store
 	lessons map[string]*model.Lesson
 }
 
+// Create ...
 func (r *LessonRepository) Create(l *model.Lesson) error {
 	if err := l.Validate(); err != nil {
 		return err
@@ -21,9 +23,10 @@ func (r *LessonRepository) Create(l *model.Lesson) error {
 	return nil
 }
 
-func (r *LessonRepository) FindByID(lesson_id int64) (*model.Lesson, error) {
+// FindByID ...
+func (r *LessonRepository) FindByID(lessonID int64) (*model.Lesson, error) {
 	for _, l := range r.lessons {
-		if l.ID == lesson_id {
+		if l.ID == lessonID {
 			return l, nil
 		}
 	}
@@ -31,6 +34,7 @@ func (r *LessonRepository) FindByID(lesson_id int64) (*model.Lesson, error) {
 	return nil, store.ErrRecordNotFound
 }
 
+// FindByTitle ...
 func (r *LessonRepository) FindByTitle(title string) (*model.Lesson, error) {
 	l, ok := r.lessons[title]
 	if !ok {
@@ -40,14 +44,15 @@ func (r *LessonRepository) FindByTitle(title string) (*model.Lesson, error) {
 	return l, nil
 }
 
-func (r *LessonRepository) FindBySchoolID(school_id int64) ([]*model.Lesson, error) {
+// FindBySchoolID ...
+func (r *LessonRepository) FindBySchoolID(schoolID int64) ([]*model.Lesson, error) {
 	l := []*model.Lesson{}
 
 	if r.store.studentRepository == nil {
 		return nil, store.ErrRecordNotFound
 	}
 
-	students, ok := r.store.studentRepository.students[school_id]
+	students, ok := r.store.studentRepository.students[schoolID]
 	if !ok {
 		return nil, store.ErrRecordNotFound
 	}

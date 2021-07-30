@@ -3,6 +3,8 @@ package store
 import "errors"
 
 var (
-	ErrRecordNotFound        = errors.New("record not found")
+	// ErrRecordNotFound ...
+	ErrRecordNotFound = errors.New("record not found")
+	// ErrAnotherSchoolIsActive ...
 	ErrAnotherSchoolIsActive = errors.New("another school is active")
 )
