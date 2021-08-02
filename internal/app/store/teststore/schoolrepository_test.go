@@ -15,6 +15,21 @@ func TestSchoolRepository_Create(t *testing.T) {
 
 	assert.NoError(t, s.School().Create(school))
 	assert.NotNil(t, school)
+
+	err := s.School().Create(school)
+	assert.EqualError(t, err, store.ErrSchoolIsExist.Error())
+}
+
+func TestSchoolRepository_Finish(t *testing.T) {
+	s := teststore.New()
+	school := model.TestSchool(t)
+
+	assert.EqualError(t, s.School().Finish(school), store.ErrRecordNotFound.Error())
+	assert.NoError(t, s.School().Create(school))
+
+	assert.NoError(t, s.School().Finish(school))
+	assert.Equal(t, false, school.Active)
+	assert.Equal(t, true, school.Finished)
 }
 
 func TestSchoolRepository_FindByTitle(t *testing.T) {

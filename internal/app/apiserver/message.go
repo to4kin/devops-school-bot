@@ -17,7 +17,8 @@ I'll manage all your progress and provide the report if needed.
 To add homework, use the work hashtag along with the #homework, for example: <code>#homework #cicd</code>
 `
 
-	msgNoActiveSchool    string = `no active school found`
+	msgSchoolNotFound    string = `school not found`
+	msgSchoolIsFinished  string = `school is finished`
 	msgUserNotJoined     string = `please join the school first`
 	msgUserAlreadyJoined string = `you have already joined the school`
 

@@ -12,7 +12,7 @@ func init() {
 var rootCmd = &cobra.Command{
 	Use:   "devops-school-bot",
 	Short: "DevOps School Bot",
-	Long:  "DevOps School Bot manage all students progress and provide the report",
+	Long:  "DevOps School Bot manage students progress and provide the report",
 }
 
 // Execute executes the root command

@@ -18,13 +18,13 @@ func (r *SchoolRepository) Create(s *model.School) error {
 		return err
 	}
 
-	school, err := r.store.schoolRepository.FindActive()
+	school, err := r.store.schoolRepository.FindByChatID(s.ChatID)
 	if err != nil && err != store.ErrRecordNotFound {
 		return err
 	}
 
 	if school != nil {
-		return store.ErrAnotherSchoolIsActive
+		return store.ErrSchoolIsExist
 	}
 
 	return r.store.db.QueryRow(
@@ -36,6 +36,25 @@ func (r *SchoolRepository) Create(s *model.School) error {
 	).Scan(
 		&s.ID,
 	)
+}
+
+// Finish ...
+func (r *SchoolRepository) Finish(s *model.School) error {
+	if err := r.store.db.QueryRow(
+		"UPDATE school SET active = false, finished = true WHERE id = $1 RETURNING active, finished",
+		s.ID,
+	).Scan(
+		&s.Active,
+		&s.Finished,
+	); err != nil {
+		if err == sql.ErrNoRows {
+			return store.ErrRecordNotFound
+		}
+
+		return err
+	}
+
+	return nil
 }
 
 // FindByTitle ...

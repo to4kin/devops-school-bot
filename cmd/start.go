@@ -1,6 +1,8 @@
 package cmd
 
 import (
+	"os"
+
 	"github.com/BurntSushi/toml"
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
@@ -14,6 +16,9 @@ var (
 func init() {
 	startCmd.PersistentFlags().StringVarP(&configPath, "config-path", "c", "configs/devopsschoolbot.toml", "path to config file")
 	rootCmd.AddCommand(startCmd)
+
+	logrus.SetOutput(os.Stdout)
+	logrus.SetLevel(logrus.InfoLevel)
 }
 
 var startCmd = &cobra.Command{
@@ -30,7 +35,6 @@ or skip this flag to use default path`,
 
 		if level, err := logrus.ParseLevel(config.LogLevel); err != nil {
 			logrus.Error(err)
-			logrus.SetLevel(logrus.InfoLevel)
 		} else {
 			logrus.SetLevel(level)
 		}

@@ -11,6 +11,7 @@ type AccountRepository interface {
 // SchoolRepository ...
 type SchoolRepository interface {
 	Create(*model.School) error
+	Finish(*model.School) error
 	FindByTitle(string) (*model.School, error)
 	FindByChatID(int64) (*model.School, error)
 	FindActive() (*model.School, error)

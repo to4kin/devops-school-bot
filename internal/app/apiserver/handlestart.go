@@ -8,28 +8,35 @@ import (
 )
 
 func (srv *server) handleStart(c telebot.Context) error {
-	logrus.Debug("get account from database by telegram_id: ", c.Sender().ID)
-	account, err := srv.store.Account().FindByTelegramID(int64(c.Sender().ID))
+	logger := logrus.WithFields(logrus.Fields{
+		"handler": "start",
+	})
+
+	if c.Message().Private() {
+		return nil
+	}
+
+	logger.Debug("get school by chat_id: ", c.Message().Chat.ID)
+	school, err := srv.store.School().FindByChatID(c.Message().Chat.ID)
 	if err != nil {
 		if err == store.ErrRecordNotFound {
-			logrus.Debug("account not found, will create a new one")
-			account = &model.Account{
-				TelegramID: int64(c.Sender().ID),
-				FirstName:  c.Sender().FirstName,
-				LastName:   c.Sender().LastName,
-				Username:   c.Sender().Username,
-				Superuser:  false,
+			logger.Debug("school not found, will create a new one")
+			school = &model.School{
+				Title:    c.Message().Chat.Title,
+				ChatID:   c.Message().Chat.ID,
+				Active:   true,
+				Finished: false,
 			}
 
-			if err := srv.store.Account().Create(account); err != nil {
-				logrus.Error(err)
+			if err := srv.store.School().Create(school); err != nil {
+				logger.Error(err)
 				return nil
 			}
 		} else {
-			logrus.Error(err)
+			logger.Error(err)
 			return nil
 		}
 	}
-	logrus.Debug(account.ToString())
+	logger.Debug(school.ToString())
 	return nil
 }

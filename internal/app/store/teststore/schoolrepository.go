@@ -17,10 +17,33 @@ func (r *SchoolRepository) Create(s *model.School) error {
 		return err
 	}
 
+	school, err := r.store.schoolRepository.FindByChatID(s.ChatID)
+	if err != nil && err != store.ErrRecordNotFound {
+		return err
+	}
+
+	if school != nil {
+		return store.ErrSchoolIsExist
+	}
+
 	r.schools[s.Title] = s
 	s.ID = int64(len(r.schools))
 
 	return nil
+}
+
+// Finish ...
+func (r *SchoolRepository) Finish(s *model.School) error {
+	for _, school := range r.schools {
+		if school.ID == s.ID {
+			s.Active = false
+			s.Finished = true
+			school = s
+			return nil
+		}
+	}
+
+	return store.ErrRecordNotFound
 }
 
 // FindByTitle ...

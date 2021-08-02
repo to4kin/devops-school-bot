@@ -8,28 +8,36 @@ import (
 )
 
 func (srv *server) handleJoin(c telebot.Context) error {
+	logger := logrus.WithFields(logrus.Fields{
+		"handler": "join",
+	})
+
 	if c.Message().Private() {
 		return nil
 	}
 
-	logrus.Debug("get school by chat_id: ", c.Message().Chat.ID)
+	logger.Debug("get school by chat_id: ", c.Message().Chat.ID)
 	school, err := srv.store.School().FindByChatID(c.Message().Chat.ID)
 	if err != nil {
 		if err == store.ErrRecordNotFound {
-			logrus.Error(err)
-			return c.Reply(msgNoActiveSchool, &telebot.SendOptions{ParseMode: "HTML"})
+			logger.Error(err)
+			return c.Reply(msgSchoolNotFound, &telebot.SendOptions{ParseMode: "HTML"})
 		}
 
-		logrus.Error(err)
+		logger.Error(err)
 		return nil
 	}
-	logrus.Debug(school.ToString())
+	logger.Debug(school.ToString())
 
-	logrus.Debug("get account from database by telegram_id: ", c.Sender().ID)
+	if school.Finished {
+		return c.Reply(msgSchoolIsFinished, &telebot.SendOptions{ParseMode: "HTML"})
+	}
+
+	logger.Debug("get account from database by telegram_id: ", c.Sender().ID)
 	account, err := srv.store.Account().FindByTelegramID(int64(c.Sender().ID))
 	if err != nil {
 		if err == store.ErrRecordNotFound {
-			logrus.Debug("account not found, will create a new one")
+			logger.Debug("account not found, will create a new one")
 			account = &model.Account{
 				TelegramID: int64(c.Sender().ID),
 				FirstName:  c.Sender().FirstName,
@@ -39,21 +47,21 @@ func (srv *server) handleJoin(c telebot.Context) error {
 			}
 
 			if err := srv.store.Account().Create(account); err != nil {
-				logrus.Error(err)
+				logger.Error(err)
 				return nil
 			}
 		} else {
-			logrus.Error(err)
+			logger.Error(err)
 			return nil
 		}
 	}
-	logrus.Debug(account.ToString())
+	logger.Debug(account.ToString())
 
-	logrus.Debug("get student from database by account_id: ", account.ID, " and school_id: ", school.ID)
+	logger.Debug("get student from database by account_id: ", account.ID, " and school_id: ", school.ID)
 	student, err := srv.store.Student().FindByAccountIDSchoolID(account.ID, school.ID)
 	if err != nil {
 		if err == store.ErrRecordNotFound {
-			logrus.Debug("student not found, will create a new one")
+			logger.Debug("student not found, will create a new one")
 			student := &model.Student{
 				Account: account,
 				School:  school,
@@ -61,18 +69,18 @@ func (srv *server) handleJoin(c telebot.Context) error {
 			}
 
 			if err := srv.store.Student().Create(student); err != nil {
-				logrus.Error(err)
+				logger.Error(err)
 				return nil
 			}
 
-			logrus.Debug(student.ToString())
+			logger.Debug(student.ToString())
 			return c.Reply(msgWelcomeToSchool, &telebot.SendOptions{ParseMode: "HTML"})
 		}
 
-		logrus.Error(err)
+		logger.Error(err)
 		return nil
 	}
-	logrus.Debug(student.ToString())
+	logger.Debug(student.ToString())
 
 	return c.Reply(msgUserAlreadyJoined, &telebot.SendOptions{ParseMode: "HTML"})
 }

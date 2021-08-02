@@ -9,27 +9,31 @@ import (
 )
 
 func (srv *server) handleReport(c telebot.Context) error {
+	logger := logrus.WithFields(logrus.Fields{
+		"handler": "report",
+	})
+
 	if c.Message().Private() {
 		return nil
 	}
 
-	logrus.Debug("get school by chat_id: ", c.Message().Chat.ID)
+	logger.Debug("get school by chat_id: ", c.Message().Chat.ID)
 	school, err := srv.store.School().FindByChatID(c.Message().Chat.ID)
 	if err != nil {
-		logrus.Error(err)
+		logger.Error(err)
 
 		if err == store.ErrRecordNotFound {
-			return c.Reply(msgNoActiveSchool, &telebot.SendOptions{ParseMode: "HTML"})
+			return c.Reply(msgSchoolNotFound, &telebot.SendOptions{ParseMode: "HTML"})
 		}
 
 		return nil
 	}
-	logrus.Debug(school.ToString())
+	logger.Debug(school.ToString())
 
-	logrus.Debug("get account from database by telegram_id: ", c.Sender().ID)
+	logger.Debug("get account from database by telegram_id: ", c.Sender().ID)
 	account, err := srv.store.Account().FindByTelegramID(int64(c.Sender().ID))
 	if err != nil {
-		logrus.Error(err)
+		logger.Error(err)
 
 		if err == store.ErrRecordNotFound {
 			return c.Reply(msgUserNotJoined, &telebot.SendOptions{ParseMode: "HTML"})
@@ -37,12 +41,12 @@ func (srv *server) handleReport(c telebot.Context) error {
 
 		return nil
 	}
-	logrus.Debug(account.ToString())
+	logger.Debug(account.ToString())
 
-	logrus.Debug("get student from database by account_id: ", account.ID, " and school_id: ", school.ID)
+	logger.Debug("get student from database by account_id: ", account.ID, " and school_id: ", school.ID)
 	student, err := srv.store.Student().FindByAccountIDSchoolID(account.ID, school.ID)
 	if err != nil {
-		logrus.Error(err)
+		logger.Error(err)
 
 		if err == store.ErrRecordNotFound {
 			return c.Reply(msgUserNotJoined, &telebot.SendOptions{ParseMode: "HTML"})
@@ -50,28 +54,28 @@ func (srv *server) handleReport(c telebot.Context) error {
 
 		return nil
 	}
-	logrus.Debug(student.ToString())
+	logger.Debug(student.ToString())
 
-	logrus.Debug("get student homeworks from database by student_id: ", student.ID)
+	logger.Debug("get student homeworks from database by student_id: ", student.ID)
 	studentHomeworks, err := srv.store.Homework().FindByStudentID(student.ID)
 	if err != nil {
-		logrus.Error(err)
+		logger.Error(err)
 		return nil
 	}
-	logrus.Debug("found homeworks: ", len(studentHomeworks))
+	logger.Debug("found homeworks: ", len(studentHomeworks))
 
-	logrus.Debug("get all lessons from database by school_id: ", school.ID)
+	logger.Debug("get all lessons from database by school_id: ", school.ID)
 	allLessons, err := srv.store.Lesson().FindBySchoolID(school.ID)
 	if err != nil {
-		logrus.Error(err)
+		logger.Error(err)
 		return nil
 	}
-	logrus.Debug("found lessons: ", len(allLessons))
+	logger.Debug("found lessons: ", len(allLessons))
 
 	reportMessage := fmt.Sprintf(msgHomeworkReport, account.Username, school.Title)
 	for _, lesson := range allLessons {
 		if err != nil {
-			logrus.Error(err)
+			logger.Error(err)
 			return nil
 		}
 
