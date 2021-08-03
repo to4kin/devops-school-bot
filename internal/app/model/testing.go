@@ -23,7 +23,6 @@ func TestSchool(t *testing.T) *School {
 		Created:  time.Now(),
 		Title:    "DevOps School 2021.2",
 		ChatID:   int64(99999),
-		Active:   true,
 		Finished: false,
 	}
 }

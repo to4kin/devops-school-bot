@@ -38,7 +38,7 @@ func (r *StudentRepository) FindByAccountIDSchoolID(accountID int64, schoolID in
 	if err := r.store.db.QueryRow(`
 		SELECT st.id, st.created, st.active, 
 			acc.id, acc.created, acc.telegram_id, acc.first_name, acc.last_name, acc.username, acc.superuser,
-			sch.id, sch.created, sch.title, sch.chat_id, sch.active, sch.finished
+			sch.id, sch.created, sch.title, sch.chat_id, sch.finished
 		FROM student st 
 		JOIN account acc ON acc.id = st.account_id
 		JOIN school sch ON sch.id = st.school_id
@@ -61,7 +61,6 @@ func (r *StudentRepository) FindByAccountIDSchoolID(accountID int64, schoolID in
 		&s.School.Created,
 		&s.School.Title,
 		&s.School.ChatID,
-		&s.School.Active,
 		&s.School.Finished,
 	); err != nil {
 		if err == sql.ErrNoRows {

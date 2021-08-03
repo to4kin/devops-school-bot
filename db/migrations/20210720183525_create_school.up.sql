@@ -3,6 +3,5 @@ CREATE TABLE school (
     created TIMESTAMP NOT NULL,
     title VARCHAR NOT NULL,
     chat_id BIGINT NOT NULL,
-    active BOOLEAN NOT NULL DEFAULT FALSE,
     finished BOOLEAN NOT NULL DEFAULT FALSE
 );

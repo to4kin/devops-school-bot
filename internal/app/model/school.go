@@ -14,7 +14,6 @@ type School struct {
 	Created  time.Time `json:"created"`
 	Title    string    `json:"title"`
 	ChatID   int64     `json:"chat_id"`
-	Active   bool      `json:"active"`
 	Finished bool      `json:"finished"`
 }
 
@@ -25,7 +24,6 @@ func (s *School) Validate() error {
 		validation.Field(&s.Created, validation.Required),
 		validation.Field(&s.Title, validation.Required),
 		validation.Field(&s.ChatID, validation.Required),
-		validation.Field(&s.Active, validation.By(notEqual(s.Finished))),
 	)
 }
 
@@ -45,7 +43,6 @@ func (s *School) LogrusFields() logrus.Fields {
 		"id":       s.ID,
 		"title":    s.Title,
 		"chat_id":  s.ChatID,
-		"active":   s.Active,
 		"finished": s.Finished,
 	}
 }

@@ -34,7 +34,6 @@ func TestSchoolRepository_Finish(t *testing.T) {
 	assert.NoError(t, s.School().Create(school))
 
 	assert.NoError(t, s.School().Finish(school))
-	assert.Equal(t, false, school.Active)
 	assert.Equal(t, true, school.Finished)
 }
 
@@ -68,23 +67,6 @@ func TestSchoolRepository_FindByChatID(t *testing.T) {
 	assert.NoError(t, s.School().Create(testSchool))
 
 	school, err := s.School().FindByChatID(testSchool.ChatID)
-	assert.NoError(t, err)
-	assert.NotNil(t, school)
-}
-
-func TestSchoolRepository_FindActive(t *testing.T) {
-	db, terdown := sqlstore.TestDb(t, databaseURL)
-	defer terdown("school")
-
-	s := sqlstore.New(db)
-	testSchool := model.TestSchool(t)
-
-	_, err := s.School().FindActive()
-	assert.EqualError(t, err, store.ErrRecordNotFound.Error())
-
-	assert.NoError(t, s.School().Create(testSchool))
-
-	school, err := s.School().FindActive()
 	assert.NoError(t, err)
 	assert.NotNil(t, school)
 }

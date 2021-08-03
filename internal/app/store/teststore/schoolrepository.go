@@ -36,7 +36,6 @@ func (r *SchoolRepository) Create(s *model.School) error {
 func (r *SchoolRepository) Finish(s *model.School) error {
 	for _, school := range r.schools {
 		if school.ID == s.ID {
-			s.Active = false
 			s.Finished = true
 			school = s
 			return nil
@@ -60,17 +59,6 @@ func (r *SchoolRepository) FindByTitle(title string) (*model.School, error) {
 func (r *SchoolRepository) FindByChatID(chatID int64) (*model.School, error) {
 	for _, school := range r.schools {
 		if school.ChatID == chatID {
-			return school, nil
-		}
-	}
-
-	return nil, store.ErrRecordNotFound
-}
-
-// FindActive ...
-func (r *SchoolRepository) FindActive() (*model.School, error) {
-	for _, school := range r.schools {
-		if school.Active {
 			return school, nil
 		}
 	}

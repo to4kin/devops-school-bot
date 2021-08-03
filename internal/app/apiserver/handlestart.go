@@ -41,7 +41,6 @@ func (srv *server) handleStart(c telebot.Context) error {
 				Created:  time.Now(),
 				Title:    c.Message().Chat.Title,
 				ChatID:   c.Message().Chat.ID,
-				Active:   true,
 				Finished: false,
 			}
 

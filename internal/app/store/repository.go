@@ -14,7 +14,6 @@ type SchoolRepository interface {
 	Finish(*model.School) error
 	FindByTitle(string) (*model.School, error)
 	FindByChatID(int64) (*model.School, error)
-	FindActive() (*model.School, error)
 }
 
 // LessonRepository ...
