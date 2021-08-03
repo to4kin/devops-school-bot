@@ -1,16 +1,15 @@
 package apiserver
 
 var (
-	msgHelpPrivate string = `I'll manage students homeworks`
-	msgHelpGroup   string = `I'll manage students homeworks
-
-<b>Commands</b>
-/start - will create and start school
-/finish - will finish current school
+	msgHelpCommand  string = "I'll manage students homeworks\n\n<b>Commands</b>"
+	msgUserGroupCmd string = `
 /join - will add you to school
 /report - will return your progress in school
-/help - will return this help message
-`
+/help - will return this help message`
+	msgSuperuserGroupCmd string = `
+<b>Superuser only</b>
+/start - will create and start school
+/finish - will finish current school`
 
 	msgWelcomeToSchool string = "<b>Welcome to %v!</b>\n\nI'll manage all your progress and provide the report if needed.\n" +
 		sysHomeworkAdd + "\n\n" + sysHomeworkGuide
@@ -32,7 +31,7 @@ var (
 	iconHomeworkNotVerified string = `🟡`
 	iconHomeworkNotProvided string = `🔴`
 
-	sysHomeworkAdd   string = `To add homework, use the work hashtag along with the #homework, for example: <code>#homework #cicd</code>`
+	sysHomeworkAdd   string = `To add homework, use the lesson hashtag along with the #homework, for example: <code>#homework #cicd</code>`
 	sysHomeworkGuide string = `Homework guide:
 ` + iconHomeworkVerified + ` - homework is <b>verified</b>
 ` + iconHomeworkNotVerified + ` - homework is <b>NOT verified</b>

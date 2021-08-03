@@ -62,6 +62,6 @@ func (srv *server) handleStart(c telebot.Context) error {
 		return c.Reply(fmt.Sprintf(msgSchoolAlreadyFinished, school.Title), &telebot.SendOptions{ParseMode: "HTML"})
 	}
 
-	srv.logger.WithFields(school.LogrusFields()).Debug("school exist and started")
+	srv.logger.WithFields(school.LogrusFields()).Debug("school already started")
 	return c.Reply(fmt.Sprintf(msgSchoolExist, school.Title), &telebot.SendOptions{ParseMode: "HTML"})
 }
