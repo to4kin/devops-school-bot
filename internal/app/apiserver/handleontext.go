@@ -2,6 +2,7 @@ package apiserver
 
 import (
 	"strings"
+	"time"
 
 	"github.com/sirupsen/logrus"
 	"gitlab.devops.telekom.de/tvpp/prototypes/devops-school-bot/internal/app/model"
@@ -99,6 +100,7 @@ func (srv *server) handleOnText(c telebot.Context) error {
 					if err == store.ErrRecordNotFound {
 						srv.logger.Debug("homework not found, will create a new one")
 						homework = &model.Homework{
+							Created:   time.Now(),
 							Student:   student,
 							Lesson:    lesson,
 							MessageID: int64(c.Message().ID),

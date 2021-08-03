@@ -19,7 +19,8 @@ func (r *StudentRepository) Create(s *model.Student) error {
 	}
 
 	return r.store.db.QueryRow(
-		"INSERT INTO student (account_id, school_id, active) VALUES ($1, $2, $3) RETURNING id",
+		"INSERT INTO student (created, account_id, school_id, active) VALUES ($1, $2, $3, $4) RETURNING id",
+		s.Created,
 		s.Account.ID,
 		s.School.ID,
 		s.Active,
@@ -35,9 +36,9 @@ func (r *StudentRepository) FindByAccountIDSchoolID(accountID int64, schoolID in
 		School:  &model.School{},
 	}
 	if err := r.store.db.QueryRow(`
-		SELECT st.id, st.active, 
-			acc.id, acc.telegram_id, acc.first_name, acc.last_name, acc.username, acc.superuser,
-			sch.id, sch.title, sch.chat_id, sch.active, sch.finished
+		SELECT st.id, st.created, st.active, 
+			acc.id, acc.created, acc.telegram_id, acc.first_name, acc.last_name, acc.username, acc.superuser,
+			sch.id, sch.created, sch.title, sch.chat_id, sch.active, sch.finished
 		FROM student st 
 		JOIN account acc ON acc.id = st.account_id
 		JOIN school sch ON sch.id = st.school_id
@@ -47,14 +48,17 @@ func (r *StudentRepository) FindByAccountIDSchoolID(accountID int64, schoolID in
 		schoolID,
 	).Scan(
 		&s.ID,
+		&s.Created,
 		&s.Active,
 		&s.Account.ID,
+		&s.Account.Created,
 		&s.Account.TelegramID,
 		&s.Account.FirstName,
 		&s.Account.LastName,
 		&s.Account.Username,
 		&s.Account.Superuser,
 		&s.School.ID,
+		&s.School.Created,
 		&s.School.Title,
 		&s.School.ChatID,
 		&s.School.Active,

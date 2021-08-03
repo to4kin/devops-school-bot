@@ -28,7 +28,8 @@ func (r *SchoolRepository) Create(s *model.School) error {
 	}
 
 	return r.store.db.QueryRow(
-		"INSERT INTO school (title, chat_id, active, finished) VALUES ($1, $2, $3, $4) RETURNING id",
+		"INSERT INTO school (created, title, chat_id, active, finished) VALUES ($1, $2, $3, $4, $5) RETURNING id",
+		s.Created,
 		s.Title,
 		s.ChatID,
 		s.Active,
@@ -61,10 +62,11 @@ func (r *SchoolRepository) Finish(s *model.School) error {
 func (r *SchoolRepository) FindByTitle(title string) (*model.School, error) {
 	s := &model.School{}
 	if err := r.store.db.QueryRow(
-		"SELECT id, title, chat_id, active, finished FROM school WHERE title = $1",
+		"SELECT id, created, title, chat_id, active, finished FROM school WHERE title = $1",
 		title,
 	).Scan(
 		&s.ID,
+		&s.Created,
 		&s.Title,
 		&s.ChatID,
 		&s.Active,
@@ -85,10 +87,11 @@ func (r *SchoolRepository) FindByTitle(title string) (*model.School, error) {
 func (r *SchoolRepository) FindByChatID(chatID int64) (*model.School, error) {
 	s := &model.School{}
 	if err := r.store.db.QueryRow(
-		"SELECT id, title, chat_id, active, finished FROM school WHERE chat_id = $1",
+		"SELECT id, created, title, chat_id, active, finished FROM school WHERE chat_id = $1",
 		chatID,
 	).Scan(
 		&s.ID,
+		&s.Created,
 		&s.Title,
 		&s.ChatID,
 		&s.Active,
@@ -109,9 +112,10 @@ func (r *SchoolRepository) FindByChatID(chatID int64) (*model.School, error) {
 func (r *SchoolRepository) FindActive() (*model.School, error) {
 	s := &model.School{}
 	if err := r.store.db.QueryRow(
-		"SELECT id, title, chat_id, active, finished FROM school WHERE active = true",
+		"SELECT id, created, title, chat_id, active, finished FROM school WHERE active = true",
 	).Scan(
 		&s.ID,
+		&s.Created,
 		&s.Title,
 		&s.ChatID,
 		&s.Active,

@@ -2,6 +2,7 @@ package model
 
 import (
 	"encoding/json"
+	"time"
 
 	validation "github.com/go-ozzo/ozzo-validation/v4"
 	"github.com/sirupsen/logrus"
@@ -9,18 +10,20 @@ import (
 
 // Account ...
 type Account struct {
-	ID         int64  `json:"id"`
-	TelegramID int64  `json:"telegram_id"`
-	FirstName  string `json:"first_name"`
-	LastName   string `json:"last_name"`
-	Username   string `json:"username"`
-	Superuser  bool   `json:"superuser"`
+	ID         int64     `json:"id"`
+	Created    time.Time `json:"created"`
+	TelegramID int64     `json:"telegram_id"`
+	FirstName  string    `json:"first_name"`
+	LastName   string    `json:"last_name"`
+	Username   string    `json:"username"`
+	Superuser  bool      `json:"superuser"`
 }
 
 // Validate ...
 func (a *Account) Validate() error {
 	return validation.ValidateStruct(
 		a,
+		validation.Field(&a.Created, validation.Required),
 		validation.Field(&a.TelegramID, validation.Required),
 		validation.Field(&a.FirstName, validation.Required),
 	)

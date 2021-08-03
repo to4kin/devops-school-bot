@@ -2,6 +2,7 @@ package apiserver
 
 import (
 	"fmt"
+	"time"
 
 	"github.com/sirupsen/logrus"
 	"gitlab.devops.telekom.de/tvpp/prototypes/devops-school-bot/internal/app/model"
@@ -37,6 +38,7 @@ func (srv *server) handleStart(c telebot.Context) error {
 		if err == store.ErrRecordNotFound {
 			srv.logger.Debug("school not found, will create a new one")
 			school = &model.School{
+				Created:  time.Now(),
 				Title:    c.Message().Chat.Title,
 				ChatID:   c.Message().Chat.ID,
 				Active:   true,

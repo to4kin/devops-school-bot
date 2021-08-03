@@ -1,10 +1,14 @@
 package model
 
-import "testing"
+import (
+	"testing"
+	"time"
+)
 
 // TestAccount ...
 func TestAccount(t *testing.T) *Account {
 	return &Account{
+		Created:    time.Now(),
 		TelegramID: int64(99999),
 		FirstName:  "FirstName",
 		LastName:   "LastName",
@@ -16,6 +20,7 @@ func TestAccount(t *testing.T) *Account {
 // TestSchool ...
 func TestSchool(t *testing.T) *School {
 	return &School{
+		Created:  time.Now(),
 		Title:    "DevOps School 2021.2",
 		ChatID:   int64(99999),
 		Active:   true,
@@ -33,6 +38,7 @@ func TestLesson(t *testing.T) *Lesson {
 // TestStudent ...
 func TestStudent(t *testing.T) *Student {
 	return &Student{
+		Created: time.Now(),
 		Account: TestAccount(t),
 		School:  TestSchool(t),
 		Active:  true,
@@ -42,6 +48,7 @@ func TestStudent(t *testing.T) *Student {
 // TestHomework ...
 func TestHomework(t *testing.T) *Homework {
 	return &Homework{
+		Created:   time.Now(),
 		Student:   TestStudent(t),
 		Lesson:    TestLesson(t),
 		MessageID: int64(99999),

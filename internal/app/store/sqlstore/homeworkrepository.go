@@ -19,7 +19,8 @@ func (r *HomeworkRepository) Create(h *model.Homework) error {
 	}
 
 	return r.store.db.QueryRow(
-		"INSERT INTO homework (student_id, lesson_id, message_id, verify) VALUES ($1, $2, $3, $4) RETURNING id",
+		"INSERT INTO homework (created, student_id, lesson_id, message_id, verify) VALUES ($1, $2, $3, $4, $5) RETURNING id",
+		h.Created,
 		h.Student.ID,
 		h.Lesson.ID,
 		h.MessageID,
@@ -35,10 +36,10 @@ func (r *HomeworkRepository) FindByStudentID(studentID int64) ([]*model.Homework
 	hw := []*model.Homework{}
 
 	rows, err := r.store.db.Query(`
-		SELECT hw.id, hw.message_id, hw.verify,
-			st.id, st.active,
-			acc.id, acc.telegram_id, acc.first_name, acc.last_name, acc.username, acc.superuser,
-			sch.id, sch.title, sch.active, sch.finished,
+		SELECT hw.id, hw.created, hw.message_id, hw.verify,
+			st.id, st.created, st.active,
+			acc.id, acc.created, acc.telegram_id, acc.first_name, acc.last_name, acc.username, acc.superuser,
+			sch.id, sch.created,sch.title, sch.active, sch.finished,
 			les.id, les.title
 		FROM homework hw
 		JOIN student st ON st.id = hw.student_id
@@ -67,17 +68,21 @@ func (r *HomeworkRepository) FindByStudentID(studentID int64) ([]*model.Homework
 
 		if err := rows.Scan(
 			&h.ID,
+			&h.Created,
 			&h.MessageID,
 			&h.Verify,
 			&h.Student.ID,
+			&h.Student.Created,
 			&h.Student.Active,
 			&h.Student.Account.ID,
+			&h.Student.Account.Created,
 			&h.Student.Account.TelegramID,
 			&h.Student.Account.FirstName,
 			&h.Student.Account.LastName,
 			&h.Student.Account.Username,
 			&h.Student.Account.Superuser,
 			&h.Student.School.ID,
+			&h.Student.School.Created,
 			&h.Student.School.Title,
 			&h.Student.School.Active,
 			&h.Student.School.Finished,
@@ -107,10 +112,10 @@ func (r *HomeworkRepository) FindBySchoolID(schoolID int64) ([]*model.Homework, 
 	hw := []*model.Homework{}
 
 	rows, err := r.store.db.Query(`
-		SELECT hw.id, hw.message_id, hw.verify,
-			st.id, st.active,
-			acc.id, acc.telegram_id, acc.first_name, acc.last_name, acc.username, acc.superuser,
-			sch.id, sch.title, sch.active, sch.finished,
+		SELECT hw.id, hw.created, hw.message_id, hw.verify,
+			st.id, st.created, st.active,
+			acc.id, acc.created, acc.telegram_id, acc.first_name, acc.last_name, acc.username, acc.superuser,
+			sch.id, sch.created, sch.title, sch.active, sch.finished,
 			les.id, les.title
 		FROM homework hw
 		JOIN student st ON st.id = hw.student_id
@@ -139,17 +144,21 @@ func (r *HomeworkRepository) FindBySchoolID(schoolID int64) ([]*model.Homework, 
 
 		if err := rows.Scan(
 			&h.ID,
+			&h.Created,
 			&h.MessageID,
 			&h.Verify,
 			&h.Student.ID,
+			&h.Student.Created,
 			&h.Student.Active,
 			&h.Student.Account.ID,
+			&h.Student.Account.Created,
 			&h.Student.Account.TelegramID,
 			&h.Student.Account.FirstName,
 			&h.Student.Account.LastName,
 			&h.Student.Account.Username,
 			&h.Student.Account.Superuser,
 			&h.Student.School.ID,
+			&h.Student.Account.Created,
 			&h.Student.School.Title,
 			&h.Student.School.Active,
 			&h.Student.School.Finished,
@@ -184,10 +193,10 @@ func (r *HomeworkRepository) FindByStudentIDLessonID(studentID int64, lessonID i
 	}
 
 	if err := r.store.db.QueryRow(`
-		SELECT hw.id, hw.message_id, hw.verify,
-			st.id, st.active,
-			acc.id, acc.telegram_id, acc.first_name, acc.last_name, acc.username, acc.superuser,
-			sch.id, sch.title, sch.active, sch.finished,
+		SELECT hw.id, hw.created, hw.message_id, hw.verify,
+			st.id, st.created, st.active,
+			acc.id, acc.created, acc.telegram_id, acc.first_name, acc.last_name, acc.username, acc.superuser,
+			sch.id, sch.created, sch.title, sch.active, sch.finished,
 			les.id, les.title
 		FROM homework hw
 		JOIN student st ON st.id = hw.student_id
@@ -200,17 +209,21 @@ func (r *HomeworkRepository) FindByStudentIDLessonID(studentID int64, lessonID i
 		lessonID,
 	).Scan(
 		&h.ID,
+		&h.Created,
 		&h.MessageID,
 		&h.Verify,
 		&h.Student.ID,
+		&h.Student.Created,
 		&h.Student.Active,
 		&h.Student.Account.ID,
+		&h.Student.Account.Created,
 		&h.Student.Account.TelegramID,
 		&h.Student.Account.FirstName,
 		&h.Student.Account.LastName,
 		&h.Student.Account.Username,
 		&h.Student.Account.Superuser,
 		&h.Student.School.ID,
+		&h.Student.Account.Created,
 		&h.Student.School.Title,
 		&h.Student.School.Active,
 		&h.Student.School.Finished,

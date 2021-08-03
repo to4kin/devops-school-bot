@@ -2,6 +2,7 @@ package apiserver
 
 import (
 	"fmt"
+	"time"
 
 	"github.com/sirupsen/logrus"
 	"gitlab.devops.telekom.de/tvpp/prototypes/devops-school-bot/internal/app/model"
@@ -22,6 +23,7 @@ func (srv *server) handleJoin(c telebot.Context) error {
 		if err == store.ErrRecordNotFound {
 			srv.logger.Debug("account not found, will create a new one")
 			account = &model.Account{
+				Created:    time.Now(),
 				TelegramID: int64(c.Sender().ID),
 				FirstName:  c.Sender().FirstName,
 				LastName:   c.Sender().LastName,
@@ -71,6 +73,7 @@ func (srv *server) handleJoin(c telebot.Context) error {
 		if err == store.ErrRecordNotFound {
 			srv.logger.Debug("student not found, will create a new one")
 			student := &model.Student{
+				Created: time.Now(),
 				Account: account,
 				School:  school,
 				Active:  true,

@@ -1,5 +1,6 @@
 CREATE TABLE account (
-    id bigserial NOT NULL PRIMARY KEY,
+    id BIGSERIAL NOT NULL PRIMARY KEY,
+    created TIMESTAMP NOT NULL,
     telegram_id BIGINT NOT NULL UNIQUE,
     first_name VARCHAR NOT NULL,
     last_name VARCHAR,

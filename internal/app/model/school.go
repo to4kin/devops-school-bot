@@ -2,6 +2,7 @@ package model
 
 import (
 	"encoding/json"
+	"time"
 
 	validation "github.com/go-ozzo/ozzo-validation/v4"
 	"github.com/sirupsen/logrus"
@@ -9,17 +10,19 @@ import (
 
 // School ...
 type School struct {
-	ID       int64  `json:"id"`
-	Title    string `json:"title"`
-	ChatID   int64  `json:"chat_id"`
-	Active   bool   `json:"active"`
-	Finished bool   `json:"finished"`
+	ID       int64     `json:"id"`
+	Created  time.Time `json:"created"`
+	Title    string    `json:"title"`
+	ChatID   int64     `json:"chat_id"`
+	Active   bool      `json:"active"`
+	Finished bool      `json:"finished"`
 }
 
 // Validate ...
 func (s *School) Validate() error {
 	return validation.ValidateStruct(
 		s,
+		validation.Field(&s.Created, validation.Required),
 		validation.Field(&s.Title, validation.Required),
 		validation.Field(&s.ChatID, validation.Required),
 		validation.Field(&s.Active, validation.By(notEqual(s.Finished))),

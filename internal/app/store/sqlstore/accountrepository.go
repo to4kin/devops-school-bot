@@ -19,7 +19,8 @@ func (r *AccountRepository) Create(a *model.Account) error {
 	}
 
 	return r.store.db.QueryRow(
-		"INSERT INTO account (telegram_id, first_name, last_name, username, superuser) VALUES ($1, $2, $3, $4, $5) RETURNING id",
+		"INSERT INTO account (created, telegram_id, first_name, last_name, username, superuser) VALUES ($1, $2, $3, $4, $5, $6) RETURNING id",
+		a.Created,
 		a.TelegramID,
 		a.FirstName,
 		a.LastName,
@@ -34,10 +35,11 @@ func (r *AccountRepository) Create(a *model.Account) error {
 func (r *AccountRepository) FindByTelegramID(telegramID int64) (*model.Account, error) {
 	a := &model.Account{}
 	if err := r.store.db.QueryRow(
-		"SELECT id, telegram_id, first_name, last_name, username, superuser FROM account WHERE telegram_id = $1",
+		"SELECT id, created, telegram_id, first_name, last_name, username, superuser FROM account WHERE telegram_id = $1",
 		telegramID,
 	).Scan(
 		&a.ID,
+		&a.Created,
 		&a.TelegramID,
 		&a.FirstName,
 		&a.LastName,
