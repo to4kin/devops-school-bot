@@ -14,10 +14,6 @@ var (
 )
 
 func (srv *server) handleOnText(c telebot.Context) error {
-	logger := logrus.WithFields(logrus.Fields{
-		"handler": "onText",
-	})
-
 	if c.Message().Private() {
 		return nil
 	}
@@ -25,83 +21,83 @@ func (srv *server) handleOnText(c telebot.Context) error {
 	text := strings.ToLower(c.Message().Text)
 
 	if strings.Contains(text, homeworkHashtag) {
-		logger.Debug("get school by chat_id: ", c.Message().Chat.ID)
+		srv.logger.WithFields(logrus.Fields{
+			"chat_id": c.Message().Chat.ID,
+		}).Debug("get school by chat_id")
 		school, err := srv.store.School().FindByChatID(c.Message().Chat.ID)
 		if err != nil {
-			if err == store.ErrRecordNotFound {
-				logger.Error(err)
-				return nil
-			}
-
-			logger.Error(err)
+			srv.logger.Error(err)
 			return nil
 		}
-		logger.Debug(school.ToString())
+		srv.logger.WithFields(school.LogrusFields()).Debug("school found")
 
 		if school.Finished {
+			srv.logger.WithFields(school.LogrusFields()).Debug("school already finished")
 			return nil
 		}
 
-		logger.Debug("get account from database by telegram_id: ", c.Sender().ID)
+		srv.logger.WithFields(logrus.Fields{
+			"telegram_id": c.Sender().ID,
+		}).Debug("get account from database by telegram_id")
 		account, err := srv.store.Account().FindByTelegramID(int64(c.Sender().ID))
 		if err != nil {
-			if err == store.ErrRecordNotFound {
-				logger.Error(err)
-				return nil
-			}
-
-			logger.Error(err)
+			srv.logger.Error(err)
 			return nil
 		}
-		logger.Debug(account.ToString())
+		srv.logger.WithFields(account.LogrusFields()).Debug("account found")
 
-		logger.Debug("get student from database by account_id: ", account.ID, " and school_id: ", school.ID)
+		srv.logger.WithFields(logrus.Fields{
+			"account_id": account.ID,
+			"school_id":  school.ID,
+		}).Debug("get student from database by account_id and school_id")
 		student, err := srv.store.Student().FindByAccountIDSchoolID(account.ID, school.ID)
 		if err != nil {
-			if err == store.ErrRecordNotFound {
-				logger.Error(err)
-				return nil
-			}
-
-			logger.Error(err)
+			srv.logger.Error(err)
 			return nil
 		}
-		logger.Debug(student.ToString())
+		srv.logger.WithFields(student.LogrusFields()).Debug("student found")
 
 		for _, entity := range c.Message().Entities {
 			switch entity.Type {
 			case "hashtag":
 				hashtag := text[entity.Offset : entity.Offset+entity.Length]
 				if hashtag == homeworkHashtag {
-					logger.Debug("homework hashtag skipped: ", homeworkHashtag)
+					srv.logger.WithFields(logrus.Fields{
+						"hashtag": homeworkHashtag,
+					}).Debug("homework hashtag skipped")
 					continue
 				}
 
-				logger.Debug("get lesson from database by title: ", hashtag)
+				srv.logger.WithFields(logrus.Fields{
+					"title": hashtag,
+				}).Debug("get lesson from database by title")
 				lesson, err := srv.store.Lesson().FindByTitle(hashtag)
 				if err != nil {
 					if err == store.ErrRecordNotFound {
-						logger.Debug("lesson not found, will create a new one")
+						srv.logger.Debug("lesson not found, will create a new one")
 						lesson = &model.Lesson{
 							Title: hashtag,
 						}
 
 						if err := srv.store.Lesson().Create(lesson); err != nil {
-							logger.Error(err)
+							srv.logger.Error(err)
 							return nil
 						}
 					} else {
-						logger.Error(err)
+						srv.logger.Error(err)
 						return nil
 					}
 				}
-				logger.Debug(lesson.ToString())
+				srv.logger.WithFields(lesson.LogrusFields()).Debug("lesson found")
 
-				logger.Debug("get homework from database by student_id: ", student.ID, " and lesson_id: ", lesson.ID)
+				srv.logger.WithFields(logrus.Fields{
+					"student_id": student.ID,
+					"lesson_id":  lesson.ID,
+				}).Debug("get homework from database by student_id and lesson_id")
 				homework, err := srv.store.Homework().FindByStudentIDLessonID(student.ID, lesson.ID)
 				if err != nil {
 					if err == store.ErrRecordNotFound {
-						logger.Debug("homework not found, will create a new one")
+						srv.logger.Debug("homework not found, will create a new one")
 						homework = &model.Homework{
 							Student:   student,
 							Lesson:    lesson,
@@ -110,15 +106,15 @@ func (srv *server) handleOnText(c telebot.Context) error {
 						}
 
 						if err := srv.store.Homework().Create(homework); err != nil {
-							logger.Error(err)
+							srv.logger.Error(err)
 							return nil
 						}
 					} else {
-						logger.Error(err)
+						srv.logger.Error(err)
 						return nil
 					}
 				}
-				logger.Debug(homework.ToString())
+				srv.logger.WithFields(homework.LogrusFields()).Debug("homework found")
 			}
 		}
 	}

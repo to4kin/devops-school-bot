@@ -38,7 +38,9 @@ func TestDb(t *testing.T, databaseURL string) (*sql.DB, func(...string)) {
 		t.Fatal(err)
 	}
 
-	m.Steps(2)
+	if err := m.Up(); err != nil && err != migrate.ErrNoChange {
+		t.Fatal(err)
+	}
 
 	return db, func(tables ...string) {
 		if len(tables) > 0 {

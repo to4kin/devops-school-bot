@@ -5,12 +5,14 @@ import (
 	"net/http"
 
 	"github.com/gorilla/mux"
+	"github.com/sirupsen/logrus"
 	"gitlab.devops.telekom.de/tvpp/prototypes/devops-school-bot/internal/app/store"
 	"gopkg.in/tucnak/telebot.v3"
 )
 
 type server struct {
 	router *mux.Router
+	logger *logrus.Logger
 	store  store.Store
 	bot    *telebot.Bot
 }
@@ -18,6 +20,7 @@ type server struct {
 func newServer(store store.Store) *server {
 	srv := &server{
 		router: mux.NewRouter(),
+		logger: logrus.New(),
 		store:  store,
 	}
 
@@ -32,6 +35,15 @@ func (srv *server) ServeHTTP(rw http.ResponseWriter, r *http.Request) {
 
 func (srv *server) configureRouter() {
 	srv.router.HandleFunc("/", srv.botWebHookHandler()).Methods("POST")
+}
+
+func (srv *server) configureLogger(logLevel string) {
+	if level, err := logrus.ParseLevel(logLevel); err != nil {
+		srv.logger.Error(err)
+		srv.logger.SetLevel(logrus.InfoLevel)
+	} else {
+		srv.logger.SetLevel(level)
+	}
 }
 
 func (srv *server) configureBotHandler() {

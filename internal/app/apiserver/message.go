@@ -5,33 +5,36 @@ var (
 	msgHelpGroup   string = `I'll manage students homeworks
 
 <b>Commands</b>
-/start - will create a user
-/join - will add you to the active school
-/report - will return your progress in active school
+/start - will create and start school
+/finish - will finish current school
+/join - will add you to school
+/report - will return your progress in school
 /help - will return this help message
 `
 
-	msgWelcomeToSchool string = `<b>Welcome to DevOps School!</b>
+	msgWelcomeToSchool string = "<b>Welcome to %v!</b>\n\nI'll manage all your progress and provide the report if needed.\n" +
+		sysHomeworkAdd + "\n\n" + sysHomeworkGuide
 
-I'll manage all your progress and provide the report if needed.
-To add homework, use the work hashtag along with the #homework, for example: <code>#homework #cicd</code>
-`
+	msgUserInsufficientPermissions string = `you have insufficient permissions, please contact teachers or mentors`
+	msgUserNotJoined               string = `please join the school first`
+	msgUserAlreadyJoined           string = "you have already joined school <b>%v</b>\n\n" + sysHomeworkAdd
 
-	msgSchoolNotFound    string = `school not found`
-	msgSchoolIsFinished  string = `school is finished`
-	msgUserNotJoined     string = `please join the school first`
-	msgUserAlreadyJoined string = `you have already joined the school`
+	msgSchoolNotFound        string = `school not started, please contact teachers or mentors`
+	msgSchoolStarted         string = `school <b>%v</b> started`
+	msgSchoolExist           string = `school <b>%v</b> exist and started`
+	msgSchoolAlreadyFinished string = `school <b>%v</b> already finished`
+	msgSchoolFinished        string = `school <b>%v</b> finished`
 
-	msgHomeworkVerified    string = `🟢`
-	msgHomeworkNotVerified string = `🟡`
-	msgHomeworkNotProvided string = `🔴`
-	msgHomeworkReport      string = `Hello, @%v!
+	msgHomeworkNotProvided string = "you haven't submitted your homework yet\n\n" + sysHomeworkAdd
+	msgHomeworkReport      string = "Hello, @%v!\n\n" + sysHomeworkGuide + "\n\nYour progress in <b>%v</b>:\n"
 
-Guide:
-` + msgHomeworkVerified + ` - homework is <b>verified</b>
-` + msgHomeworkNotVerified + ` - homework is <b>NOT verified</b>
-` + msgHomeworkNotProvided + ` - homework is <b>NOT provided</b>
+	iconHomeworkVerified    string = `🟢`
+	iconHomeworkNotVerified string = `🟡`
+	iconHomeworkNotProvided string = `🔴`
 
-Your progress in <b>DevOps School %v</b>:
-`
+	sysHomeworkAdd   string = `To add homework, use the work hashtag along with the #homework, for example: <code>#homework #cicd</code>`
+	sysHomeworkGuide string = `Homework guide:
+` + iconHomeworkVerified + ` - homework is <b>verified</b>
+` + iconHomeworkNotVerified + ` - homework is <b>NOT verified</b>
+` + iconHomeworkNotProvided + ` - homework is <b>NOT provided</b>`
 )

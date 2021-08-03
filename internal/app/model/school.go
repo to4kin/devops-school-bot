@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 
 	validation "github.com/go-ozzo/ozzo-validation/v4"
+	"github.com/sirupsen/logrus"
 )
 
 // School ...
@@ -33,4 +34,15 @@ func (s *School) ToString() string {
 	}
 
 	return string(str)
+}
+
+// LogrusFields ...
+func (s *School) LogrusFields() logrus.Fields {
+	return logrus.Fields{
+		"id":       s.ID,
+		"title":    s.Title,
+		"chat_id":  s.ChatID,
+		"active":   s.Active,
+		"finished": s.Finished,
+	}
 }

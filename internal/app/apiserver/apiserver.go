@@ -32,6 +32,7 @@ func Start(config *Config) error {
 		return err
 	}
 
+	srv.configureLogger(config.LogLevel)
 	srv.configureBotHandler()
 
 	return http.ListenAndServe(config.BindAddr, srv)
@@ -61,7 +62,9 @@ func newDb(databaseURL string) (*sql.DB, error) {
 		return nil, err
 	}
 
-	m.Steps(2)
+	if err := m.Up(); err != nil && err != migrate.ErrNoChange {
+		return nil, err
+	}
 
 	return db, nil
 }
