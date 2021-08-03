@@ -20,7 +20,7 @@ var (
 
 	msgSchoolNotFound        string = `school not started, please contact teachers or mentors`
 	msgSchoolStarted         string = `school <b>%v</b> started`
-	msgSchoolExist           string = `school <b>%v</b> exist and started`
+	msgSchoolAlreadyStarted  string = `school <b>%v</b> already started`
 	msgSchoolAlreadyFinished string = `school <b>%v</b> already finished`
 	msgSchoolFinished        string = `school <b>%v</b> finished`
 

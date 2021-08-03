@@ -58,6 +58,11 @@ func (srv *server) handleOnText(c telebot.Context) error {
 		}
 		srv.logger.WithFields(student.LogrusFields()).Debug("student found")
 
+		if !student.Active {
+			srv.logger.WithFields(student.LogrusFields()).Debug("student is not active")
+			return nil
+		}
+
 		for _, entity := range c.Message().Entities {
 			switch entity.Type {
 			case "hashtag":
