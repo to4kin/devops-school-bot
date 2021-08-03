@@ -87,14 +87,17 @@ func (srv *server) handleOnText(c telebot.Context) error {
 
 						if err := srv.store.Lesson().Create(lesson); err != nil {
 							srv.logger.Error(err)
-							return nil
+							continue
 						}
+
+						srv.logger.WithFields(lesson.LogrusFields()).Debug("lesson created")
 					} else {
 						srv.logger.Error(err)
-						return nil
+						continue
 					}
+				} else {
+					srv.logger.WithFields(lesson.LogrusFields()).Debug("lesson found")
 				}
-				srv.logger.WithFields(lesson.LogrusFields()).Debug("lesson found")
 
 				srv.logger.WithFields(logrus.Fields{
 					"student_id": student.ID,
@@ -114,11 +117,14 @@ func (srv *server) handleOnText(c telebot.Context) error {
 
 						if err := srv.store.Homework().Create(homework); err != nil {
 							srv.logger.Error(err)
-							return nil
+							continue
 						}
+
+						srv.logger.WithFields(homework.LogrusFields()).Debug("homework created")
+						continue
 					} else {
 						srv.logger.Error(err)
-						return nil
+						continue
 					}
 				}
 				srv.logger.WithFields(homework.LogrusFields()).Debug("homework found")
