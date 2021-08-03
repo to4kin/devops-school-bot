@@ -10,7 +10,7 @@ import (
 )
 
 func TestSchoolRepository_Create(t *testing.T) {
-	db, teardown := sqlstore.TestDb(t, databaseURL)
+	db, teardown := sqlstore.TestDb(t, databaseURL, migrations)
 	defer teardown("school")
 
 	s := sqlstore.New(db)
@@ -24,7 +24,7 @@ func TestSchoolRepository_Create(t *testing.T) {
 }
 
 func TestSchoolRepository_Finish(t *testing.T) {
-	db, teardown := sqlstore.TestDb(t, databaseURL)
+	db, teardown := sqlstore.TestDb(t, databaseURL, migrations)
 	defer teardown("school")
 
 	s := sqlstore.New(db)
@@ -38,7 +38,7 @@ func TestSchoolRepository_Finish(t *testing.T) {
 }
 
 func TestSchoolRepository_FindByTitle(t *testing.T) {
-	db, teardown := sqlstore.TestDb(t, databaseURL)
+	db, teardown := sqlstore.TestDb(t, databaseURL, migrations)
 	defer teardown("school")
 
 	s := sqlstore.New(db)
@@ -55,7 +55,7 @@ func TestSchoolRepository_FindByTitle(t *testing.T) {
 }
 
 func TestSchoolRepository_FindByChatID(t *testing.T) {
-	db, teardown := sqlstore.TestDb(t, databaseURL)
+	db, teardown := sqlstore.TestDb(t, databaseURL, migrations)
 	defer teardown("school")
 
 	s := sqlstore.New(db)

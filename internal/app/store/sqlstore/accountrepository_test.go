@@ -10,7 +10,7 @@ import (
 )
 
 func TestAccountRepository_Create(t *testing.T) {
-	db, teardown := sqlstore.TestDb(t, databaseURL)
+	db, teardown := sqlstore.TestDb(t, databaseURL, migrations)
 	defer teardown("account")
 
 	s := sqlstore.New(db)
@@ -21,7 +21,7 @@ func TestAccountRepository_Create(t *testing.T) {
 }
 
 func TestAccountRepository_FindByTelegramID(t *testing.T) {
-	db, teardown := sqlstore.TestDb(t, databaseURL)
+	db, teardown := sqlstore.TestDb(t, databaseURL, migrations)
 	defer teardown("account")
 
 	s := sqlstore.New(db)

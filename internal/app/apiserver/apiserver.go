@@ -13,7 +13,7 @@ import (
 
 // Start ...
 func Start(config *Config) error {
-	db, err := newDb(config.DatabaseURL)
+	db, err := newDb(config.Database.URL, config.Database.Migrations)
 	if err != nil {
 		return err
 	}
@@ -38,7 +38,7 @@ func Start(config *Config) error {
 	return http.ListenAndServe(config.BindAddr, srv)
 }
 
-func newDb(databaseURL string) (*sql.DB, error) {
+func newDb(databaseURL string, migrations string) (*sql.DB, error) {
 	db, err := sql.Open("postgres", databaseURL)
 	if err != nil {
 		return nil, err
@@ -54,7 +54,7 @@ func newDb(databaseURL string) (*sql.DB, error) {
 	}
 
 	m, err := migrate.NewWithDatabaseInstance(
-		"file://./db/migrations/",
+		"file://"+migrations,
 		"postgres",
 		driver,
 	)

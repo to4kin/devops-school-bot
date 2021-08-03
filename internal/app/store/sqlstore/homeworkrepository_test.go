@@ -10,7 +10,7 @@ import (
 )
 
 func TestHomeworkRepository_Create(t *testing.T) {
-	db, teardown := sqlstore.TestDb(t, databaseURL)
+	db, teardown := sqlstore.TestDb(t, databaseURL, migrations)
 	defer teardown("homework", "lesson", "student", "school", "account")
 
 	s := sqlstore.New(db)
@@ -26,7 +26,7 @@ func TestHomeworkRepository_Create(t *testing.T) {
 }
 
 func TestHomeworkRepository_FindByStudentID(t *testing.T) {
-	db, teardown := sqlstore.TestDb(t, databaseURL)
+	db, teardown := sqlstore.TestDb(t, databaseURL, migrations)
 	defer teardown("homework", "lesson", "student", "school", "account")
 
 	s := sqlstore.New(db)
@@ -47,7 +47,7 @@ func TestHomeworkRepository_FindByStudentID(t *testing.T) {
 }
 
 func TestHomeworkRepository_FindBySchoolID(t *testing.T) {
-	db, teardown := sqlstore.TestDb(t, databaseURL)
+	db, teardown := sqlstore.TestDb(t, databaseURL, migrations)
 	defer teardown("homework", "lesson", "student", "school", "account")
 
 	s := sqlstore.New(db)
@@ -68,7 +68,7 @@ func TestHomeworkRepository_FindBySchoolID(t *testing.T) {
 }
 
 func TestHomeworkRepository_FindByStudentIDLessonID(t *testing.T) {
-	db, teardown := sqlstore.TestDb(t, databaseURL)
+	db, teardown := sqlstore.TestDb(t, databaseURL, migrations)
 	defer teardown("homework", "lesson", "student", "school", "account")
 
 	s := sqlstore.New(db)

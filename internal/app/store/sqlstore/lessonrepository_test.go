@@ -10,7 +10,7 @@ import (
 )
 
 func TestLessonRepository_Create(t *testing.T) {
-	db, teardown := sqlstore.TestDb(t, databaseURL)
+	db, teardown := sqlstore.TestDb(t, databaseURL, migrations)
 	defer teardown("lesson")
 
 	s := sqlstore.New(db)
@@ -21,7 +21,7 @@ func TestLessonRepository_Create(t *testing.T) {
 }
 
 func TestLesson_FindByID(t *testing.T) {
-	db, teardown := sqlstore.TestDb(t, databaseURL)
+	db, teardown := sqlstore.TestDb(t, databaseURL, migrations)
 	defer teardown("lesson")
 
 	s := sqlstore.New(db)
@@ -38,7 +38,7 @@ func TestLesson_FindByID(t *testing.T) {
 }
 
 func TestLesson_FindByTitle(t *testing.T) {
-	db, teardown := sqlstore.TestDb(t, databaseURL)
+	db, teardown := sqlstore.TestDb(t, databaseURL, migrations)
 	defer teardown("lesson")
 
 	s := sqlstore.New(db)
@@ -55,7 +55,7 @@ func TestLesson_FindByTitle(t *testing.T) {
 }
 
 func TestLesson_FindBySchoolID(t *testing.T) {
-	db, teardown := sqlstore.TestDb(t, databaseURL)
+	db, teardown := sqlstore.TestDb(t, databaseURL, migrations)
 	defer teardown("homework", "lesson", "student", "school", "account")
 
 	s := sqlstore.New(db)

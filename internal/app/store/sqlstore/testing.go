@@ -12,7 +12,7 @@ import (
 )
 
 // TestDb ...
-func TestDb(t *testing.T, databaseURL string) (*sql.DB, func(...string)) {
+func TestDb(t *testing.T, databaseURL string, migrations string) (*sql.DB, func(...string)) {
 	t.Helper()
 
 	db, err := sql.Open("postgres", databaseURL)
@@ -30,7 +30,7 @@ func TestDb(t *testing.T, databaseURL string) (*sql.DB, func(...string)) {
 	}
 
 	m, err := migrate.NewWithDatabaseInstance(
-		"file://../../../../db/migrations/",
+		"file://"+migrations,
 		"postgres",
 		driver,
 	)
