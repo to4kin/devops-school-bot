@@ -30,6 +30,30 @@ func (r *AccountRepository) Create(a *model.Account) error {
 	return nil
 }
 
+// Update ...
+func (r *AccountRepository) Update(a *model.Account) error {
+	for _, account := range r.accounts {
+		if account.TelegramID == a.TelegramID {
+			account.FirstName = a.FirstName
+			account.LastName = a.LastName
+			account.Username = a.Username
+			account.Superuser = a.Superuser
+			return nil
+		}
+	}
+
+	return store.ErrRecordNotFound
+}
+
+// FindAll ...
+func (r *AccountRepository) FindAll() ([]*model.Account, error) {
+	if len(r.accounts) == 0 {
+		return nil, store.ErrRecordNotFound
+	}
+
+	return r.accounts, nil
+}
+
 // FindByTelegramID ...
 func (r *AccountRepository) FindByTelegramID(telegramID int64) (*model.Account, error) {
 	for _, account := range r.accounts {

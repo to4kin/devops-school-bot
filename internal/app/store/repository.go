@@ -5,6 +5,8 @@ import "gitlab.devops.telekom.de/tvpp/prototypes/devops-school-bot/internal/app/
 // AccountRepository ...
 type AccountRepository interface {
 	Create(*model.Account) error
+	Update(*model.Account) error
+	FindAll() ([]*model.Account, error)
 	FindByTelegramID(int64) (*model.Account, error)
 }
 

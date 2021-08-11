@@ -18,6 +18,38 @@ func TestAccountRepository_Create(t *testing.T) {
 	assert.EqualError(t, s.Account().Create(a), store.ErrRecordIsExist.Error())
 }
 
+func TestAccountRepository_Update(t *testing.T) {
+	s := teststore.New()
+	a := model.TestAccount(t)
+
+	assert.EqualError(t, s.Account().Update(a), store.ErrRecordNotFound.Error())
+
+	assert.NoError(t, s.Account().Create(a))
+	assert.NotNil(t, a)
+
+	a.FirstName = "NewFirstName"
+	a.LastName = "NewLastName"
+	a.Username = "NewUsername"
+	a.Superuser = true
+
+	assert.NoError(t, s.Account().Update(a))
+	assert.NotNil(t, a)
+}
+
+func TestAccountRepository_FindAll(t *testing.T) {
+	s := teststore.New()
+	a := model.TestAccount(t)
+
+	_, err := s.Account().FindAll()
+	assert.EqualError(t, err, store.ErrRecordNotFound.Error())
+
+	assert.NoError(t, s.Account().Create(a))
+
+	accounts, err := s.Account().FindAll()
+	assert.NoError(t, err)
+	assert.NotNil(t, accounts)
+}
+
 func TestAccountRepository_FindByTelegramID(t *testing.T) {
 	s := teststore.New()
 	a := model.TestAccount(t)

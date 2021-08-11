@@ -53,6 +53,7 @@ func (srv *server) configureBotHandler() {
 	srv.bot.Handle("/myreport", srv.handleMyReport)
 	srv.bot.Handle("/help", srv.handleHelp)
 	srv.bot.Handle("/schools", srv.handleSchools)
+	srv.bot.Handle("/users", srv.handleUsers)
 	srv.bot.Handle(telebot.OnText, srv.handleOnText)
 	srv.bot.Handle(telebot.OnCallback, srv.handleCallback)
 }

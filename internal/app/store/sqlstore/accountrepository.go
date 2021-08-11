@@ -31,6 +31,77 @@ func (r *AccountRepository) Create(a *model.Account) error {
 	)
 }
 
+// Update ...
+func (r *AccountRepository) Update(a *model.Account) error {
+	if err := a.Validate(); err != nil {
+		return err
+	}
+
+	if err := r.store.db.QueryRow(
+		"UPDATE account SET first_name = $2, last_name = $3, username = $4, superuser = $5 WHERE telegram_id = $1 RETURNING id",
+		a.TelegramID,
+		a.FirstName,
+		a.LastName,
+		a.Username,
+		a.Superuser,
+	).Scan(
+		&a.ID,
+	); err != nil {
+		if err == sql.ErrNoRows {
+			return store.ErrRecordNotFound
+		}
+
+		return err
+	}
+
+	return nil
+}
+
+// FindAll ...
+func (r *AccountRepository) FindAll() ([]*model.Account, error) {
+	rowsCount := 0
+	accounts := []*model.Account{}
+
+	rows, err := r.store.db.Query(`
+		SELECT id, created, telegram_id, first_name, last_name, username, superuser FROM account ORDER BY created DESC
+		`,
+	)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		rowsCount++
+
+		a := &model.Account{}
+
+		if err := rows.Scan(
+			&a.ID,
+			&a.Created,
+			&a.TelegramID,
+			&a.FirstName,
+			&a.LastName,
+			&a.Username,
+			&a.Superuser,
+		); err != nil {
+			return nil, err
+		}
+
+		accounts = append(accounts, a)
+	}
+
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+
+	if rowsCount == 0 {
+		return nil, store.ErrRecordNotFound
+	}
+
+	return accounts, nil
+}
+
 // FindByTelegramID ...
 func (r *AccountRepository) FindByTelegramID(telegramID int64) (*model.Account, error) {
 	a := &model.Account{}

@@ -5,6 +5,8 @@ var (
 	msgBuildDate string = ""
 	msgBotInfo   string = "<b>Bot information:</b>\nVersion: %v\nBuild date: %v\nBuilt with: %v"
 
+	msgInternalError string = "Internal Server Error!\n\nSomething has gone wrong on the server"
+
 	msgHelpCommand    string = "I'll manage students homeworks\n\n<b>Commands</b>"
 	msgUserPrivateCmd string = `
 /start - will add you to the database for future use`
@@ -25,7 +27,7 @@ var (
 
 	msgUserCreated                 string = "Hello, <b>%v!</b>\nAccount created successfully:\n\n" + msgUserInfo
 	msgUserExist                   string = "Hello, <b>%v!</b>\nAccount already exist:\n\n" + msgUserInfo
-	msgUserInfo                    string = "FirstName: %v\nLastName: %v\nUsername: %v\nSuperuser: %v"
+	msgUserInfo                    string = "First name: %v\nLast name: %v\nUsername: %v\nSuperuser: %v"
 	msgUserInsufficientPermissions string = `you have insufficient permissions, please contact teachers or mentors`
 	msgUserNotJoined               string = `please join the school first`
 	msgUserAlreadyJoined           string = "you have already joined school <b>%v</b>\n\n" + sysHomeworkAdd
