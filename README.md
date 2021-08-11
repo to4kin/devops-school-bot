@@ -69,7 +69,7 @@ There're two types of telegram chat where the bot is accepting commands: `privat
 | /start  | **Supersuser** | Start school with name == title |
 | /finish | **Supersuser** | Finish school. Homeworks are not accepted after school finished |
 | /join   | User | Add user to school as student |
-| /report | User | Provide the school progress |
+| /myreport | User | Provide the school progress |
 | /help   | User | Help message | 
 
 To add homework, use the work hashtag along with the **#homework**, for example:

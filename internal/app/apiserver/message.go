@@ -9,7 +9,7 @@ var (
 /schools - will provide the interface to manage schools`
 	msgUserGroupCmd string = `
 /join - will add you to school
-/report - will return your progress in school
+/myreport - will return your progress in school
 /help - will return this help message`
 	msgSuperuserGroupCmd string = `
 <b>Superuser only</b>

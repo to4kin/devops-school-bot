@@ -8,7 +8,7 @@ import (
 	"gopkg.in/tucnak/telebot.v3"
 )
 
-func (srv *server) handleReport(c telebot.Context) error {
+func (srv *server) handleMyReport(c telebot.Context) error {
 	if c.Message().Private() {
 		return nil
 	}
