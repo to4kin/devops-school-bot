@@ -37,7 +37,7 @@ func (srv *server) handleCallback(c telebot.Context) error {
 
 	callbackData := strings.Split(c.Callback().Data[1:], "|")
 
-	if len(callbackData) < 3 {
+	if len(callbackData) < 4 {
 		srv.logger.WithFields(logrus.Fields{
 			"callback_data": callbackData,
 		}).Error("callback is not supported")
@@ -51,16 +51,26 @@ func (srv *server) handleCallback(c telebot.Context) error {
 	callbackType := callbackData[1]
 	callbackAction := callbackData[2]
 
+	callbackFromPage, err := strconv.Atoi(callbackData[3])
+	if err != nil {
+		srv.logger.Error(err)
+		return c.Respond(&telebot.CallbackResponse{
+			Text:      msgInternalError,
+			ShowAlert: true,
+		})
+	}
+
 	srv.logger.WithFields(logrus.Fields{
-		"callback_value":  callbackValue,
-		"callback_type":   callbackType,
-		"callback_action": callbackAction,
+		"callback_value":     callbackValue,
+		"callback_type":      callbackType,
+		"callback_action":    callbackAction,
+		"callback_from_page": callbackFromPage,
 	}).Debug("parse callback data")
 
 	switch callbackType {
 	case "school":
 		if callbackAction == "back_to_list" {
-			return srv.handleSchools(c)
+			return srv.schoolList(c, callbackFromPage)
 		}
 
 		if callbackAction == "previous" {
@@ -74,7 +84,7 @@ func (srv *server) handleCallback(c telebot.Context) error {
 			}
 
 			if page == 0 {
-				return srv.handleSchools(c)
+				return srv.schoolList(c, 0)
 			}
 
 			return srv.schoolsNaviButtons(c, page)
@@ -116,7 +126,7 @@ func (srv *server) handleCallback(c telebot.Context) error {
 			}
 			srv.logger.WithFields(school.LogrusFields()).Debug("school re-activated")
 
-			return srv.schoolRespond(c, school)
+			return srv.schoolRespond(c, school, callbackFromPage)
 		}
 
 		if callbackAction == "finish" {
@@ -142,7 +152,7 @@ func (srv *server) handleCallback(c telebot.Context) error {
 			}
 			srv.logger.WithFields(school.LogrusFields()).Debug("school finished")
 
-			return srv.schoolRespond(c, school)
+			return srv.schoolRespond(c, school, callbackFromPage)
 		}
 
 		if callbackAction == "get" {
@@ -159,11 +169,11 @@ func (srv *server) handleCallback(c telebot.Context) error {
 			}
 			srv.logger.WithFields(school.LogrusFields()).Debug("school found")
 
-			return srv.schoolRespond(c, school)
+			return srv.schoolRespond(c, school, callbackFromPage)
 		}
 	case "account":
 		if callbackAction == "back_to_list" {
-			return srv.handleUsers(c)
+			return srv.userList(c, callbackFromPage)
 		}
 
 		if callbackAction == "previous" {
@@ -177,7 +187,7 @@ func (srv *server) handleCallback(c telebot.Context) error {
 			}
 
 			if page == 0 {
-				return srv.handleUsers(c)
+				return srv.userList(c, 0)
 			}
 
 			return srv.usersNaviButtons(c, page)
@@ -236,7 +246,7 @@ func (srv *server) handleCallback(c telebot.Context) error {
 			}
 			srv.logger.WithFields(account.LogrusFields()).Debug("account updated")
 
-			return srv.userRespond(c, account)
+			return srv.userRespond(c, account, callbackFromPage)
 		}
 
 		if callbackAction == "set_superuser" {
@@ -272,7 +282,7 @@ func (srv *server) handleCallback(c telebot.Context) error {
 			}
 			srv.logger.WithFields(account.LogrusFields()).Debug("account updated")
 
-			return srv.userRespond(c, account)
+			return srv.userRespond(c, account, callbackFromPage)
 		}
 
 		if callbackAction == "unset_superuser" {
@@ -308,7 +318,7 @@ func (srv *server) handleCallback(c telebot.Context) error {
 			}
 			srv.logger.WithFields(account.LogrusFields()).Debug("account updated")
 
-			return srv.userRespond(c, account)
+			return srv.userRespond(c, account, callbackFromPage)
 		}
 
 		if callbackAction == "get" {
@@ -333,7 +343,7 @@ func (srv *server) handleCallback(c telebot.Context) error {
 			}
 			srv.logger.WithFields(account.LogrusFields()).Debug("account found")
 
-			return srv.userRespond(c, account)
+			return srv.userRespond(c, account, callbackFromPage)
 		}
 	}
 

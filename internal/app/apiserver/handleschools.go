@@ -15,13 +15,20 @@ func (srv *server) handleSchools(c telebot.Context) error {
 		return nil
 	}
 
+	return srv.schoolList(c, 0)
+}
+
+func (srv *server) schoolList(c telebot.Context, page int) error {
 	srv.logger.WithFields(logrus.Fields{
 		"telegram_id": c.Sender().ID,
 	}).Debug("get account from database by telegram_id")
 	account, err := srv.store.Account().FindByTelegramID(int64(c.Sender().ID))
 	if err != nil {
 		srv.logger.Error(err)
-		return nil
+		return c.Respond(&telebot.CallbackResponse{
+			Text:      msgInternalError,
+			ShowAlert: true,
+		})
 	}
 	srv.logger.WithFields(account.LogrusFields()).Debug("account found")
 
@@ -30,10 +37,10 @@ func (srv *server) handleSchools(c telebot.Context) error {
 		return c.EditOrSend(msgUserInsufficientPermissions, &telebot.SendOptions{ParseMode: "HTML"})
 	}
 
-	return srv.schoolsNaviButtons(c, 0)
+	return srv.schoolsNaviButtons(c, page)
 }
 
-func (srv *server) schoolRespond(c telebot.Context, school *model.School) error {
+func (srv *server) schoolRespond(c telebot.Context, school *model.School, page int) error {
 	srv.logger.WithFields(logrus.Fields{
 		"school_id": school.ID,
 	}).Debug("get students by school_id")
@@ -69,12 +76,12 @@ func (srv *server) schoolRespond(c telebot.Context, school *model.School) error 
 	status := ""
 	if school.Finished {
 		status = "Finished"
-		rows = append(rows, replyMarkup.Row(replyMarkup.Data("Re-Activate school", school.Title, "school", "re_activate")))
+		rows = append(rows, replyMarkup.Row(replyMarkup.Data("Re-Activate school", school.Title, "school", "re_activate", strconv.Itoa(page))))
 	} else {
 		status = "Active"
-		rows = append(rows, replyMarkup.Row(replyMarkup.Data("Finish school", school.Title, "school", "finish")))
+		rows = append(rows, replyMarkup.Row(replyMarkup.Data("Finish school", school.Title, "school", "finish", strconv.Itoa(page))))
 	}
-	rows = append(rows, replyMarkup.Row(replyMarkup.Data("<< Back to school list", school.Title, "school", "back_to_list")))
+	rows = append(rows, replyMarkup.Row(replyMarkup.Data("<< Back to school list", school.Title, "school", "back_to_list", strconv.Itoa(page))))
 	replyMarkup.Inline(rows...)
 
 	return c.EditOrSend(
@@ -98,7 +105,10 @@ func (srv *server) schoolsNaviButtons(c telebot.Context, page int) error {
 	schools, err := srv.store.School().FindAll()
 	if err != nil {
 		srv.logger.Error(err)
-		return nil
+		return c.Respond(&telebot.CallbackResponse{
+			Text:      msgInternalError,
+			ShowAlert: true,
+		})
 	}
 	srv.logger.WithFields(logrus.Fields{
 		"count": len(schools),
@@ -107,13 +117,13 @@ func (srv *server) schoolsNaviButtons(c telebot.Context, page int) error {
 	var buttons []telebot.Btn
 	replyMarkup := &telebot.ReplyMarkup{}
 	for _, school := range schools {
-		buttons = append(buttons, replyMarkup.Data(school.Title, school.Title, "school", "get"))
+		buttons = append(buttons, replyMarkup.Data(school.Title, school.Title, "school", "get", strconv.Itoa(page)))
 	}
 
 	var rows []telebot.Row
 	div, mod := len(schools)/2, len(schools)%2
-	btnNext := replyMarkup.Data("Next page >>", strconv.Itoa(page+1), "school", "next")
-	btnPrevious := replyMarkup.Data("<< Previous page", strconv.Itoa(page-1), "school", "previous")
+	btnNext := replyMarkup.Data("Next page >>", strconv.Itoa(page+1), "school", "next", strconv.Itoa(page))
+	btnPrevious := replyMarkup.Data("<< Previous page", strconv.Itoa(page-1), "school", "previous", strconv.Itoa(page))
 
 	if div >= maxRows*(page+1) {
 		for i := maxRows * page; i < maxRows*(page+1); i++ {

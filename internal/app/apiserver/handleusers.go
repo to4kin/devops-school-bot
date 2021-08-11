@@ -14,13 +14,20 @@ func (srv *server) handleUsers(c telebot.Context) error {
 		return nil
 	}
 
+	return srv.userList(c, 0)
+}
+
+func (srv *server) userList(c telebot.Context, page int) error {
 	srv.logger.WithFields(logrus.Fields{
 		"telegram_id": c.Sender().ID,
 	}).Debug("get account from database by telegram_id")
 	account, err := srv.store.Account().FindByTelegramID(int64(c.Sender().ID))
 	if err != nil {
 		srv.logger.Error(err)
-		return nil
+		return c.Respond(&telebot.CallbackResponse{
+			Text:      msgInternalError,
+			ShowAlert: true,
+		})
 	}
 	srv.logger.WithFields(account.LogrusFields()).Debug("account found")
 
@@ -29,22 +36,22 @@ func (srv *server) handleUsers(c telebot.Context) error {
 		return c.EditOrSend(msgUserInsufficientPermissions, &telebot.SendOptions{ParseMode: "HTML"})
 	}
 
-	return srv.usersNaviButtons(c, 0)
+	return srv.usersNaviButtons(c, page)
 }
 
-func (srv *server) userRespond(c telebot.Context, account *model.Account) error {
+func (srv *server) userRespond(c telebot.Context, account *model.Account, page int) error {
 	var rows []telebot.Row
 	replyMarkup := &telebot.ReplyMarkup{}
 	if c.Sender().ID != account.TelegramID {
 		if account.Superuser {
-			rows = append(rows, replyMarkup.Row(replyMarkup.Data("Unset Superuser", strconv.FormatInt(account.TelegramID, 10), "account", "unset_superuser")))
+			rows = append(rows, replyMarkup.Row(replyMarkup.Data("Unset Superuser", strconv.FormatInt(account.TelegramID, 10), "account", "unset_superuser", strconv.Itoa(page))))
 		} else {
-			rows = append(rows, replyMarkup.Row(replyMarkup.Data("Set Superuser", strconv.FormatInt(account.TelegramID, 10), "account", "set_superuser")))
+			rows = append(rows, replyMarkup.Row(replyMarkup.Data("Set Superuser", strconv.FormatInt(account.TelegramID, 10), "account", "set_superuser", strconv.Itoa(page))))
 		}
 	} else {
-		rows = append(rows, replyMarkup.Row(replyMarkup.Data("Update account", strconv.FormatInt(account.TelegramID, 10), "account", "update")))
+		rows = append(rows, replyMarkup.Row(replyMarkup.Data("Update account", strconv.FormatInt(account.TelegramID, 10), "account", "update", strconv.Itoa(page))))
 	}
-	rows = append(rows, replyMarkup.Row(replyMarkup.Data("<< Back to user list", strconv.FormatInt(account.TelegramID, 10), "account", "back_to_list")))
+	rows = append(rows, replyMarkup.Row(replyMarkup.Data("<< Back to user list", strconv.FormatInt(account.TelegramID, 10), "account", "back_to_list", strconv.Itoa(page))))
 	replyMarkup.Inline(rows...)
 
 	return c.EditOrSend(
@@ -65,7 +72,10 @@ func (srv *server) usersNaviButtons(c telebot.Context, page int) error {
 	accounts, err := srv.store.Account().FindAll()
 	if err != nil {
 		srv.logger.Error(err)
-		return nil
+		return c.Respond(&telebot.CallbackResponse{
+			Text:      msgInternalError,
+			ShowAlert: true,
+		})
 	}
 	srv.logger.WithFields(logrus.Fields{
 		"count": len(accounts),
@@ -74,13 +84,13 @@ func (srv *server) usersNaviButtons(c telebot.Context, page int) error {
 	var buttons []telebot.Btn
 	replyMarkup := &telebot.ReplyMarkup{}
 	for _, account := range accounts {
-		buttons = append(buttons, replyMarkup.Data(account.Username, strconv.FormatInt(account.TelegramID, 10), "account", "get"))
+		buttons = append(buttons, replyMarkup.Data(account.Username, strconv.FormatInt(account.TelegramID, 10), "account", "get", strconv.Itoa(page)))
 	}
 
 	var rows []telebot.Row
 	div, mod := len(accounts)/2, len(accounts)%2
-	btnNext := replyMarkup.Data("Next page >>", strconv.Itoa(page+1), "account", "next")
-	btnPrevious := replyMarkup.Data("<< Previous page", strconv.Itoa(page-1), "account", "previous")
+	btnNext := replyMarkup.Data("Next page >>", strconv.Itoa(page+1), "account", "next", strconv.Itoa(page))
+	btnPrevious := replyMarkup.Data("<< Previous page", strconv.Itoa(page-1), "account", "previous", strconv.Itoa(page))
 
 	if div >= maxRows*(page+1) {
 		for i := maxRows * page; i < maxRows*(page+1); i++ {
