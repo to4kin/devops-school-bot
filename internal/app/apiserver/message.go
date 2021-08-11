@@ -1,6 +1,10 @@
 package apiserver
 
 var (
+	msgVersion   string = "dev"
+	msgBuildDate string = ""
+	msgBotInfo   string = "<b>Bot information:</b>\nVersion: %v\nBuild date: %v\nBuilt with: %v"
+
 	msgHelpCommand    string = "I'll manage students homeworks\n\n<b>Commands</b>"
 	msgUserPrivateCmd string = `
 /start - will add you to the database for future use`

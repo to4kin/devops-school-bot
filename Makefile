@@ -15,7 +15,7 @@ M = $(shell printf "\033[34;1m▶\033[0m")
 all: fmt lint | $(BIN) ; $(info $(M) building executable…) @ ## Build program binary
 	$Q $(GO) build \
 		-tags release \
-		-ldflags '-X $(MODULE)/cmd.version=$(VERSION) -X $(MODULE)/cmd.buildDate=$(DATE)' \
+		-ldflags '-X $(MODULE)/cmd.version=$(VERSION) -X $(MODULE)/internal/app/apiserver.msgVersion=$(VERSION) -X $(MODULE)/internal/app/apiserver.msgBuildDate=$(DATE) -X $(MODULE)/cmd.buildDate=$(DATE)' \
 		-o $(BIN)/$(basename $(MODULE)) main.go
 
 # Tools
