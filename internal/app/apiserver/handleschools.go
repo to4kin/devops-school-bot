@@ -5,10 +5,6 @@ import (
 	"gopkg.in/tucnak/telebot.v3"
 )
 
-var (
-	maxRows = 3
-)
-
 func (srv *server) handleSchools(c telebot.Context) error {
 	if !c.Message().Private() {
 		return nil
@@ -29,5 +25,5 @@ func (srv *server) handleSchools(c telebot.Context) error {
 		return c.Reply(msgUserInsufficientPermissions, &telebot.SendOptions{ParseMode: "HTML"})
 	}
 
-	return srv.schoolListButtons(c, 0)
+	return srv.schoolNaviButtons(c, 0)
 }

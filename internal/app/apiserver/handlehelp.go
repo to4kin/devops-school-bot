@@ -8,7 +8,11 @@ import (
 
 func (srv *server) handleHelp(c telebot.Context) error {
 	message := msgHelpCommand
-	message += msgUserGroupCmd
+	if c.Message().Private() {
+		message += msgUserPrivateCmd
+	} else {
+		message += msgUserGroupCmd
+	}
 
 	srv.logger.WithFields(logrus.Fields{
 		"telegram_id": c.Sender().ID,
@@ -24,7 +28,11 @@ func (srv *server) handleHelp(c telebot.Context) error {
 		srv.logger.WithFields(account.LogrusFields()).Debug("account found")
 
 		if account.Superuser {
-			message += msgSuperuserGroupCmd
+			if c.Message().Private() {
+				message += msgSuperuserPrivateCmd
+			} else {
+				message += msgSuperuserGroupCmd
+			}
 		}
 	}
 

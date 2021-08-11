@@ -1,7 +1,12 @@
 package apiserver
 
 var (
-	msgHelpCommand  string = "I'll manage students homeworks\n\n<b>Commands</b>"
+	msgHelpCommand    string = "I'll manage students homeworks\n\n<b>Commands</b>"
+	msgUserPrivateCmd string = `
+/start - will add you to the database for future use`
+	msgSuperuserPrivateCmd string = `
+<b>Superuser only</b>
+/schools - will provide the interface to manage schools`
 	msgUserGroupCmd string = `
 /join - will add you to school
 /report - will return your progress in school

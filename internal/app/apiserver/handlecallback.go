@@ -10,6 +10,10 @@ import (
 	"gopkg.in/tucnak/telebot.v3"
 )
 
+var (
+	maxRows = 3
+)
+
 func (srv *server) handleCallback(c telebot.Context) error {
 	srv.logger.WithFields(logrus.Fields{
 		"callback_data": c.Callback().Data[1:],
@@ -45,7 +49,7 @@ func (srv *server) handleCallback(c telebot.Context) error {
 				return srv.handleSchools(c)
 			}
 
-			return srv.schoolListButtons(c, page)
+			return srv.schoolNaviButtons(c, page)
 		}
 
 		if callbackAction == "next" {
@@ -55,7 +59,7 @@ func (srv *server) handleCallback(c telebot.Context) error {
 				return nil
 			}
 
-			return srv.schoolListButtons(c, page)
+			return srv.schoolNaviButtons(c, page)
 		}
 
 		if callbackAction == "re_activate" {
@@ -166,7 +170,7 @@ func (srv *server) schoolRespond(c telebot.Context, school *model.School) error 
 	)
 }
 
-func (srv *server) schoolListButtons(c telebot.Context, page int) error {
+func (srv *server) schoolNaviButtons(c telebot.Context, page int) error {
 	srv.logger.Debug("get all schools")
 	schools, err := srv.store.School().FindAll()
 	if err != nil {
