@@ -18,6 +18,24 @@ func TestStudentRepository_Create(t *testing.T) {
 
 	assert.NoError(t, s.Student().Create(testStudent))
 	assert.NotNil(t, testStudent)
+
+	assert.EqualError(t, s.Student().Create(testStudent), store.ErrRecordIsExist.Error())
+}
+
+func TestStudentRepository_FindBySchoolID(t *testing.T) {
+	s := teststore.New()
+	testStudent := model.TestStudent(t)
+
+	_, err := s.Student().FindBySchoolID(testStudent.School.ID)
+	assert.EqualError(t, err, store.ErrRecordNotFound.Error())
+
+	assert.NoError(t, s.Account().Create(testStudent.Account))
+	assert.NoError(t, s.School().Create(testStudent.School))
+	assert.NoError(t, s.Student().Create(testStudent))
+
+	student, err := s.Student().FindBySchoolID(testStudent.School.ID)
+	assert.NoError(t, err)
+	assert.NotNil(t, student)
 }
 
 func TestStudentRepository_FindByAccountIDSchoolID(t *testing.T) {

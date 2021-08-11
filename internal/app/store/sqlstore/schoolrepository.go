@@ -18,15 +18,6 @@ func (r *SchoolRepository) Create(s *model.School) error {
 		return err
 	}
 
-	school, err := r.store.schoolRepository.FindByChatID(s.ChatID)
-	if err != nil && err != store.ErrRecordNotFound {
-		return err
-	}
-
-	if school != nil {
-		return store.ErrSchoolIsExist
-	}
-
 	return r.store.db.QueryRow(
 		"INSERT INTO school (created, title, chat_id, finished) VALUES ($1, $2, $3, $4) RETURNING id",
 		s.Created,
@@ -36,6 +27,24 @@ func (r *SchoolRepository) Create(s *model.School) error {
 	).Scan(
 		&s.ID,
 	)
+}
+
+// ReActivate ...
+func (r *SchoolRepository) ReActivate(s *model.School) error {
+	if err := r.store.db.QueryRow(
+		"UPDATE school SET finished = false WHERE id = $1 RETURNING finished",
+		s.ID,
+	).Scan(
+		&s.Finished,
+	); err != nil {
+		if err == sql.ErrNoRows {
+			return store.ErrRecordNotFound
+		}
+
+		return err
+	}
+
+	return nil
 }
 
 // Finish ...
@@ -54,6 +63,49 @@ func (r *SchoolRepository) Finish(s *model.School) error {
 	}
 
 	return nil
+}
+
+// FindAll ...
+func (r *SchoolRepository) FindAll() ([]*model.School, error) {
+	rowsCount := 0
+	schools := []*model.School{}
+
+	rows, err := r.store.db.Query(`
+		SELECT id, created, title, chat_id, finished FROM school ORDER BY created DESC
+		`,
+	)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		rowsCount++
+
+		s := &model.School{}
+
+		if err := rows.Scan(
+			&s.ID,
+			&s.Created,
+			&s.Title,
+			&s.ChatID,
+			&s.Finished,
+		); err != nil {
+			return nil, err
+		}
+
+		schools = append(schools, s)
+	}
+
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+
+	if rowsCount == 0 {
+		return nil, store.ErrRecordNotFound
+	}
+
+	return schools, nil
 }
 
 // FindByTitle ...

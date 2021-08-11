@@ -20,6 +20,7 @@ func TestHomeworkRepository_Create(t *testing.T) {
 
 	assert.NoError(t, s.Homework().Create(h))
 	assert.NotNil(t, h)
+	assert.EqualError(t, s.Homework().Create(h), store.ErrRecordIsExist.Error())
 }
 
 func TestHomeworkRepository_FindByStudentID(t *testing.T) {

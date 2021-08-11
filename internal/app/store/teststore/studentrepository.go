@@ -8,7 +8,7 @@ import (
 // StudentRepository ...
 type StudentRepository struct {
 	store    *Store
-	students map[int64]map[int64]*model.Student
+	students []*model.Student
 }
 
 // Create ...
@@ -17,25 +17,43 @@ func (r *StudentRepository) Create(s *model.Student) error {
 		return err
 	}
 
-	val := make(map[int64]*model.Student)
-	val[s.School.ID] = s
-	r.students[s.Account.ID] = val
-	s.ID = int64(len(r.students))
+	student, err := r.store.studentRepository.FindByAccountIDSchoolID(s.Account.ID, s.School.ID)
+	if err != nil && err != store.ErrRecordNotFound {
+		return err
+	}
 
+	if student != nil {
+		return store.ErrRecordIsExist
+	}
+
+	r.students = append(r.students, s)
 	return nil
+}
+
+// FindBySchoolID ...
+func (r *StudentRepository) FindBySchoolID(schoolID int64) ([]*model.Student, error) {
+	result := []*model.Student{}
+
+	for _, student := range r.students {
+		if student.School.ID == schoolID {
+			result = append(result, student)
+		}
+	}
+
+	if len(result) == 0 {
+		return nil, store.ErrRecordNotFound
+	}
+
+	return result, nil
 }
 
 // FindByAccountIDSchoolID ...
 func (r *StudentRepository) FindByAccountIDSchoolID(accountID int64, schoolID int64) (*model.Student, error) {
-	schools, ok := r.students[accountID]
-	if !ok {
-		return nil, store.ErrRecordNotFound
+	for _, s := range r.students {
+		if s.Account.ID == accountID && s.School.ID == schoolID {
+			return s, nil
+		}
 	}
 
-	student, ok := schools[schoolID]
-	if !ok {
-		return nil, store.ErrRecordNotFound
-	}
-
-	return student, nil
+	return nil, store.ErrRecordNotFound
 }

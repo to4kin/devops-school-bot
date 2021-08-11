@@ -27,7 +27,7 @@ func (store *Store) Account() store.AccountRepository {
 
 	store.accountRepository = &AccountRepository{
 		store:    store,
-		accounts: make(map[int64]*model.Account),
+		accounts: []*model.Account{},
 	}
 
 	return store.accountRepository
@@ -41,7 +41,7 @@ func (store *Store) School() store.SchoolRepository {
 
 	store.schoolRepository = &SchoolRepository{
 		store:   store,
-		schools: make(map[string]*model.School),
+		schools: []*model.School{},
 	}
 
 	return store.schoolRepository
@@ -55,7 +55,7 @@ func (store *Store) Lesson() store.LessonRepository {
 
 	store.lessonRepository = &LessonRepository{
 		store:   store,
-		lessons: make(map[string]*model.Lesson),
+		lessons: []*model.Lesson{},
 	}
 
 	return store.lessonRepository
@@ -69,7 +69,7 @@ func (store *Store) Student() store.StudentRepository {
 
 	store.studentRepository = &StudentRepository{
 		store:    store,
-		students: make(map[int64]map[int64]*model.Student),
+		students: []*model.Student{},
 	}
 
 	return store.studentRepository
@@ -83,7 +83,7 @@ func (store *Store) Homework() store.HomeworkRepository {
 
 	store.homeworkRepository = &HomeworkRepository{
 		store:     store,
-		homeworks: make(map[int64]map[int64]*model.Homework),
+		homeworks: []*model.Homework{},
 	}
 
 	return store.homeworkRepository

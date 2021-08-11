@@ -8,7 +8,7 @@ import (
 // LessonRepository ...
 type LessonRepository struct {
 	store   *Store
-	lessons map[string]*model.Lesson
+	lessons []*model.Lesson
 }
 
 // Create ...
@@ -17,9 +17,16 @@ func (r *LessonRepository) Create(l *model.Lesson) error {
 		return err
 	}
 
-	r.lessons[l.Title] = l
-	l.ID = int64(len(r.lessons))
+	lesson, err := r.store.lessonRepository.FindByTitle(l.Title)
+	if err != nil && err != store.ErrRecordNotFound {
+		return err
+	}
 
+	if lesson != nil {
+		return store.ErrRecordIsExist
+	}
+
+	r.lessons = append(r.lessons, l)
 	return nil
 }
 
@@ -36,12 +43,13 @@ func (r *LessonRepository) FindByID(lessonID int64) (*model.Lesson, error) {
 
 // FindByTitle ...
 func (r *LessonRepository) FindByTitle(title string) (*model.Lesson, error) {
-	l, ok := r.lessons[title]
-	if !ok {
-		return nil, store.ErrRecordNotFound
+	for _, lesson := range r.lessons {
+		if lesson.Title == title {
+			return lesson, nil
+		}
 	}
 
-	return l, nil
+	return nil, store.ErrRecordNotFound
 }
 
 // FindBySchoolID ...
@@ -52,8 +60,14 @@ func (r *LessonRepository) FindBySchoolID(schoolID int64) ([]*model.Lesson, erro
 		return nil, store.ErrRecordNotFound
 	}
 
-	students, ok := r.store.studentRepository.students[schoolID]
-	if !ok {
+	students := []*model.Student{}
+	for _, student := range r.store.studentRepository.students {
+		if student.School.ID == schoolID {
+			students = append(students, student)
+		}
+	}
+
+	if len(students) == 0 {
 		return nil, store.ErrRecordNotFound
 	}
 
@@ -62,16 +76,9 @@ func (r *LessonRepository) FindBySchoolID(schoolID int64) ([]*model.Lesson, erro
 	}
 
 	for _, student := range students {
-		homeworks, ok := r.store.homeworkRepository.homeworks[student.ID]
-		if !ok {
-			continue
-		}
-
-		for _, homework := range homeworks {
-			for _, lesson := range r.lessons {
-				if lesson.ID == homework.Lesson.ID {
-					l = appendLesson(l, lesson)
-				}
+		for _, homework := range r.store.homeworkRepository.homeworks {
+			if homework.Student.ID == student.ID {
+				l = appendLesson(l, homework.Lesson)
 			}
 		}
 	}

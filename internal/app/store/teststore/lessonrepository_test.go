@@ -15,6 +15,8 @@ func TestLesson_Create(t *testing.T) {
 
 	assert.NoError(t, s.Lesson().Create(l))
 	assert.NotNil(t, l)
+
+	assert.EqualError(t, s.Lesson().Create(l), store.ErrRecordIsExist.Error())
 }
 
 func TestLesson_Find(t *testing.T) {

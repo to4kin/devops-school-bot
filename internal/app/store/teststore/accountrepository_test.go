@@ -15,6 +15,7 @@ func TestAccountRepository_Create(t *testing.T) {
 
 	assert.NoError(t, s.Account().Create(a))
 	assert.NotNil(t, a)
+	assert.EqualError(t, s.Account().Create(a), store.ErrRecordIsExist.Error())
 }
 
 func TestAccountRepository_FindByTelegramID(t *testing.T) {

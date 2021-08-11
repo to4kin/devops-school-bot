@@ -14,6 +14,9 @@ var (
 	msgWelcomeToSchool string = "<b>Welcome to %v!</b>\n\nI'll manage all your progress and provide the report if needed.\n" +
 		sysHomeworkAdd + "\n\n" + sysHomeworkGuide
 
+	msgUserCreated                 string = "Hello, <b>%v!</b>\nAccount created successfully:\n\n" + msgUserInfo
+	msgUserExist                   string = "Hello, <b>%v!</b>\nAccount already exist:\n\n" + msgUserInfo
+	msgUserInfo                    string = "FirstName: %v\nLastName: %v\nUsername: %v\nSuperuser: %v"
 	msgUserInsufficientPermissions string = `you have insufficient permissions, please contact teachers or mentors`
 	msgUserNotJoined               string = `please join the school first`
 	msgUserAlreadyJoined           string = "you have already joined school <b>%v</b>\n\n" + sysHomeworkAdd
@@ -23,6 +26,7 @@ var (
 	msgSchoolAlreadyStarted  string = `school <b>%v</b> already started`
 	msgSchoolAlreadyFinished string = `school <b>%v</b> already finished`
 	msgSchoolFinished        string = `school <b>%v</b> finished`
+	msgSchoolInfo            string = "<b>%v</b>\n\nCreated: %v\nStudents: %v\nHomeworks: %v\nStatus: %v"
 
 	msgHomeworkNotProvided string = "you haven't submitted your homework yet\n\n" + sysHomeworkAdd
 	msgHomeworkReport      string = "Hello, @%v!\n\n" + sysHomeworkGuide + "\n\nYour progress in <b>%v</b>:\n"

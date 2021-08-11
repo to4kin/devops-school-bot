@@ -52,7 +52,9 @@ func (srv *server) configureBotHandler() {
 	srv.bot.Handle("/join", srv.handleJoin)
 	srv.bot.Handle("/report", srv.handleReport)
 	srv.bot.Handle("/help", srv.handleHelp)
+	srv.bot.Handle("/schools", srv.handleSchools)
 	srv.bot.Handle(telebot.OnText, srv.handleOnText)
+	srv.bot.Handle(telebot.OnCallback, srv.handleCallback)
 }
 
 func (srv *server) botWebHookHandler() http.HandlerFunc {

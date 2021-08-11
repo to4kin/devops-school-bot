@@ -8,7 +8,7 @@ import (
 // SchoolRepository ...
 type SchoolRepository struct {
 	store   *Store
-	schools map[string]*model.School
+	schools []*model.School
 }
 
 // Create ...
@@ -23,13 +23,24 @@ func (r *SchoolRepository) Create(s *model.School) error {
 	}
 
 	if school != nil {
-		return store.ErrSchoolIsExist
+		return store.ErrRecordIsExist
 	}
 
-	r.schools[s.Title] = s
-	s.ID = int64(len(r.schools))
-
+	r.schools = append(r.schools, s)
 	return nil
+}
+
+// ReActivate ...
+func (r *SchoolRepository) ReActivate(s *model.School) error {
+	for _, school := range r.schools {
+		if school.ID == s.ID {
+			s.Finished = false
+			school = s
+			return nil
+		}
+	}
+
+	return store.ErrRecordNotFound
 }
 
 // Finish ...
@@ -45,14 +56,24 @@ func (r *SchoolRepository) Finish(s *model.School) error {
 	return store.ErrRecordNotFound
 }
 
-// FindByTitle ...
-func (r *SchoolRepository) FindByTitle(title string) (*model.School, error) {
-	s, ok := r.schools[title]
-	if !ok {
+// FindAll ...
+func (r *SchoolRepository) FindAll() ([]*model.School, error) {
+	if len(r.schools) == 0 {
 		return nil, store.ErrRecordNotFound
 	}
 
-	return s, nil
+	return r.schools, nil
+}
+
+// FindByTitle ...
+func (r *SchoolRepository) FindByTitle(title string) (*model.School, error) {
+	for _, school := range r.schools {
+		if school.Title == title {
+			return school, nil
+		}
+	}
+
+	return nil, store.ErrRecordNotFound
 }
 
 // FindByChatID ...

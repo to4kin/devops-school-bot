@@ -11,7 +11,9 @@ type AccountRepository interface {
 // SchoolRepository ...
 type SchoolRepository interface {
 	Create(*model.School) error
+	ReActivate(*model.School) error
 	Finish(*model.School) error
+	FindAll() ([]*model.School, error)
 	FindByTitle(string) (*model.School, error)
 	FindByChatID(int64) (*model.School, error)
 }
@@ -27,6 +29,7 @@ type LessonRepository interface {
 // StudentRepository ...
 type StudentRepository interface {
 	Create(*model.Student) error
+	FindBySchoolID(int64) ([]*model.Student, error)
 	FindByAccountIDSchoolID(int64, int64) (*model.Student, error)
 }
 

@@ -20,7 +20,24 @@ func TestSchoolRepository_Create(t *testing.T) {
 	assert.NotNil(t, school)
 
 	err := s.School().Create(school)
-	assert.EqualError(t, err, store.ErrSchoolIsExist.Error())
+	assert.Error(t, err)
+}
+
+func TestSchoolRepository_ReActivate(t *testing.T) {
+	db, teardown := sqlstore.TestDb(t, databaseURL, migrations)
+	defer teardown("school")
+
+	s := sqlstore.New(db)
+	school := model.TestSchool(t)
+
+	assert.EqualError(t, s.School().ReActivate(school), store.ErrRecordNotFound.Error())
+	assert.NoError(t, s.School().Create(school))
+
+	assert.NoError(t, s.School().Finish(school))
+	assert.Equal(t, true, school.Finished)
+
+	assert.NoError(t, s.School().ReActivate(school))
+	assert.Equal(t, false, school.Finished)
 }
 
 func TestSchoolRepository_Finish(t *testing.T) {
@@ -35,6 +52,23 @@ func TestSchoolRepository_Finish(t *testing.T) {
 
 	assert.NoError(t, s.School().Finish(school))
 	assert.Equal(t, true, school.Finished)
+}
+
+func TestSchoolRepository_FindAll(t *testing.T) {
+	db, teardown := sqlstore.TestDb(t, databaseURL, migrations)
+	defer teardown("school")
+
+	s := sqlstore.New(db)
+	school := model.TestSchool(t)
+
+	schools, err := s.School().FindAll()
+	assert.EqualError(t, err, store.ErrRecordNotFound.Error())
+	assert.Nil(t, schools)
+	assert.NoError(t, s.School().Create(school))
+
+	schools, err = s.School().FindAll()
+	assert.NoError(t, err)
+	assert.NotNil(t, schools)
 }
 
 func TestSchoolRepository_FindByTitle(t *testing.T) {
