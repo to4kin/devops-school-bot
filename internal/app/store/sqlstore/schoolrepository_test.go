@@ -23,35 +23,21 @@ func TestSchoolRepository_Create(t *testing.T) {
 	assert.Error(t, err)
 }
 
-func TestSchoolRepository_ReActivate(t *testing.T) {
+func TestSchoolRepository_Update(t *testing.T) {
 	db, teardown := sqlstore.TestDb(t, databaseURL, migrations)
 	defer teardown("school")
 
 	s := sqlstore.New(db)
 	school := model.TestSchool(t)
 
-	assert.EqualError(t, s.School().ReActivate(school), store.ErrRecordNotFound.Error())
+	assert.EqualError(t, s.School().Update(school), store.ErrRecordNotFound.Error())
 	assert.NoError(t, s.School().Create(school))
 
-	assert.NoError(t, s.School().Finish(school))
-	assert.Equal(t, true, school.Finished)
+	school.Title = "NewTitle"
+	school.Active = false
 
-	assert.NoError(t, s.School().ReActivate(school))
-	assert.Equal(t, false, school.Finished)
-}
-
-func TestSchoolRepository_Finish(t *testing.T) {
-	db, teardown := sqlstore.TestDb(t, databaseURL, migrations)
-	defer teardown("school")
-
-	s := sqlstore.New(db)
-	school := model.TestSchool(t)
-
-	assert.EqualError(t, s.School().Finish(school), store.ErrRecordNotFound.Error())
-	assert.NoError(t, s.School().Create(school))
-
-	assert.NoError(t, s.School().Finish(school))
-	assert.Equal(t, true, school.Finished)
+	assert.NoError(t, s.School().Update(school))
+	assert.Equal(t, false, school.Active)
 }
 
 func TestSchoolRepository_FindAll(t *testing.T) {
@@ -69,6 +55,23 @@ func TestSchoolRepository_FindAll(t *testing.T) {
 	schools, err = s.School().FindAll()
 	assert.NoError(t, err)
 	assert.NotNil(t, schools)
+}
+
+func TestSchoolRepository_FindByID(t *testing.T) {
+	db, teardown := sqlstore.TestDb(t, databaseURL, migrations)
+	defer teardown("school")
+
+	s := sqlstore.New(db)
+	testSchool := model.TestSchool(t)
+
+	_, err := s.School().FindByID(testSchool.ID)
+	assert.EqualError(t, err, store.ErrRecordNotFound.Error())
+
+	assert.NoError(t, s.School().Create(testSchool))
+
+	school, err := s.School().FindByID(testSchool.ID)
+	assert.NoError(t, err)
+	assert.NotNil(t, school)
 }
 
 func TestSchoolRepository_FindByTitle(t *testing.T) {

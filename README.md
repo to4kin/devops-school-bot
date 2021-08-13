@@ -59,6 +59,7 @@ There're two types of telegram chat where the bot is accepting commands: `privat
 | Command | Roles | Description |
 | ------- | ----- | ----------- |
 | /schools | **Supersuser** | Provide the interface to manage schools |
+| /users | **Supersuser** | Provide the interface to manage users |
 | /start  | User | Add user to the database for future use |
 | /help   | User | Help message | 
 

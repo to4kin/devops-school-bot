@@ -30,6 +30,26 @@ func (r *StudentRepository) Create(s *model.Student) error {
 	return nil
 }
 
+// FindAll ...
+func (r *StudentRepository) FindAll() ([]*model.Student, error) {
+	if len(r.students) == 0 {
+		return nil, store.ErrRecordNotFound
+	}
+
+	return r.students, nil
+}
+
+// FindByID ...
+func (r *StudentRepository) FindByID(id int64) (*model.Student, error) {
+	for _, s := range r.students {
+		if s.ID == id {
+			return s, nil
+		}
+	}
+
+	return nil, store.ErrRecordNotFound
+}
+
 // FindBySchoolID ...
 func (r *StudentRepository) FindBySchoolID(schoolID int64) ([]*model.Student, error) {
 	result := []*model.Student{}

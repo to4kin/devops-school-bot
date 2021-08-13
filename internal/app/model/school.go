@@ -10,11 +10,11 @@ import (
 
 // School ...
 type School struct {
-	ID       int64     `json:"id"`
-	Created  time.Time `json:"created"`
-	Title    string    `json:"title"`
-	ChatID   int64     `json:"chat_id"`
-	Finished bool      `json:"finished"`
+	ID      int64     `json:"id,string"`
+	Created time.Time `json:"created"`
+	Title   string    `json:"title"`
+	ChatID  int64     `json:"chat_id,string"`
+	Active  bool      `json:"active,string"`
 }
 
 // Validate ...
@@ -40,9 +40,9 @@ func (s *School) ToString() string {
 // LogrusFields ...
 func (s *School) LogrusFields() logrus.Fields {
 	return logrus.Fields{
-		"id":       s.ID,
-		"title":    s.Title,
-		"chat_id":  s.ChatID,
-		"finished": s.Finished,
+		"id":      s.ID,
+		"title":   s.Title,
+		"chat_id": s.ChatID,
+		"active":  s.Active,
 	}
 }

@@ -10,13 +10,13 @@ import (
 
 // Account ...
 type Account struct {
-	ID         int64     `json:"id"`
+	ID         int64     `json:"id,string"`
 	Created    time.Time `json:"created"`
-	TelegramID int64     `json:"telegram_id"`
+	TelegramID int64     `json:"telegram_id,string"`
 	FirstName  string    `json:"first_name"`
 	LastName   string    `json:"last_name"`
 	Username   string    `json:"username"`
-	Superuser  bool      `json:"superuser"`
+	Superuser  bool      `json:"superuser,string"`
 }
 
 // Validate ...

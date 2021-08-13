@@ -19,41 +19,25 @@ func (r *SchoolRepository) Create(s *model.School) error {
 	}
 
 	return r.store.db.QueryRow(
-		"INSERT INTO school (created, title, chat_id, finished) VALUES ($1, $2, $3, $4) RETURNING id",
+		"INSERT INTO school (created, title, chat_id, active) VALUES ($1, $2, $3, $4) RETURNING id",
 		s.Created,
 		s.Title,
 		s.ChatID,
-		s.Finished,
+		s.Active,
 	).Scan(
 		&s.ID,
 	)
 }
 
-// ReActivate ...
-func (r *SchoolRepository) ReActivate(s *model.School) error {
+// Update ...
+func (r *SchoolRepository) Update(s *model.School) error {
 	if err := r.store.db.QueryRow(
-		"UPDATE school SET finished = false WHERE id = $1 RETURNING finished",
+		"UPDATE school SET title = $2, active = $3 WHERE id = $1 RETURNING id",
 		s.ID,
+		s.Title,
+		s.Active,
 	).Scan(
-		&s.Finished,
-	); err != nil {
-		if err == sql.ErrNoRows {
-			return store.ErrRecordNotFound
-		}
-
-		return err
-	}
-
-	return nil
-}
-
-// Finish ...
-func (r *SchoolRepository) Finish(s *model.School) error {
-	if err := r.store.db.QueryRow(
-		"UPDATE school SET finished = true WHERE id = $1 RETURNING finished",
-		s.ID,
-	).Scan(
-		&s.Finished,
+		&s.ID,
 	); err != nil {
 		if err == sql.ErrNoRows {
 			return store.ErrRecordNotFound
@@ -71,7 +55,7 @@ func (r *SchoolRepository) FindAll() ([]*model.School, error) {
 	schools := []*model.School{}
 
 	rows, err := r.store.db.Query(`
-		SELECT id, created, title, chat_id, finished FROM school ORDER BY created DESC
+		SELECT id, created, title, chat_id, active FROM school ORDER BY created DESC
 		`,
 	)
 	if err != nil {
@@ -89,7 +73,7 @@ func (r *SchoolRepository) FindAll() ([]*model.School, error) {
 			&s.Created,
 			&s.Title,
 			&s.ChatID,
-			&s.Finished,
+			&s.Active,
 		); err != nil {
 			return nil, err
 		}
@@ -108,18 +92,42 @@ func (r *SchoolRepository) FindAll() ([]*model.School, error) {
 	return schools, nil
 }
 
+// FindByID ...
+func (r *SchoolRepository) FindByID(id int64) (*model.School, error) {
+	s := &model.School{}
+	if err := r.store.db.QueryRow(
+		"SELECT id, created, title, chat_id, active FROM school WHERE id = $1",
+		id,
+	).Scan(
+		&s.ID,
+		&s.Created,
+		&s.Title,
+		&s.ChatID,
+		&s.Active,
+	); err != nil {
+		if err == sql.ErrNoRows {
+			return nil, store.ErrRecordNotFound
+		}
+
+		return nil, err
+	}
+
+	return s, nil
+
+}
+
 // FindByTitle ...
 func (r *SchoolRepository) FindByTitle(title string) (*model.School, error) {
 	s := &model.School{}
 	if err := r.store.db.QueryRow(
-		"SELECT id, created, title, chat_id, finished FROM school WHERE title = $1",
+		"SELECT id, created, title, chat_id, active FROM school WHERE title = $1",
 		title,
 	).Scan(
 		&s.ID,
 		&s.Created,
 		&s.Title,
 		&s.ChatID,
-		&s.Finished,
+		&s.Active,
 	); err != nil {
 		if err == sql.ErrNoRows {
 			return nil, store.ErrRecordNotFound
@@ -136,14 +144,14 @@ func (r *SchoolRepository) FindByTitle(title string) (*model.School, error) {
 func (r *SchoolRepository) FindByChatID(chatID int64) (*model.School, error) {
 	s := &model.School{}
 	if err := r.store.db.QueryRow(
-		"SELECT id, created, title, chat_id, finished FROM school WHERE chat_id = $1",
+		"SELECT id, created, title, chat_id, active FROM school WHERE chat_id = $1",
 		chatID,
 	).Scan(
 		&s.ID,
 		&s.Created,
 		&s.Title,
 		&s.ChatID,
-		&s.Finished,
+		&s.Active,
 	); err != nil {
 		if err == sql.ErrNoRows {
 			return nil, store.ErrRecordNotFound

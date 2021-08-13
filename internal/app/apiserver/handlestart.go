@@ -74,10 +74,10 @@ func (srv *server) handleStart(c telebot.Context) error {
 		if err == store.ErrRecordNotFound {
 			srv.logger.Debug("school not found, will create a new one")
 			school = &model.School{
-				Created:  time.Now(),
-				Title:    c.Message().Chat.Title,
-				ChatID:   c.Message().Chat.ID,
-				Finished: false,
+				Created: time.Now(),
+				Title:   c.Message().Chat.Title,
+				ChatID:  c.Message().Chat.ID,
+				Active:  true,
 			}
 
 			if err := srv.store.School().Create(school); err != nil {
@@ -93,7 +93,7 @@ func (srv *server) handleStart(c telebot.Context) error {
 		return nil
 	}
 
-	if school.Finished {
+	if !school.Active {
 		srv.logger.WithFields(school.LogrusFields()).Debug("school already finished")
 		return c.Reply(fmt.Sprintf(msgSchoolAlreadyFinished, school.Title), &telebot.SendOptions{ParseMode: "HTML"})
 	}

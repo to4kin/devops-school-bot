@@ -32,7 +32,7 @@ func (srv *server) handleOnText(c telebot.Context) error {
 		}
 		srv.logger.WithFields(school.LogrusFields()).Debug("school found")
 
-		if school.Finished {
+		if !school.Active {
 			srv.logger.WithFields(school.LogrusFields()).Debug("school already finished")
 			return nil
 		}

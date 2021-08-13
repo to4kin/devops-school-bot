@@ -15,10 +15,10 @@ func (srv *server) handleSchools(c telebot.Context) error {
 		return nil
 	}
 
-	return srv.schoolList(c, 0)
+	return srv.schoolsList(c, 0)
 }
 
-func (srv *server) schoolList(c telebot.Context, page int) error {
+func (srv *server) schoolsList(c telebot.Context, page int) error {
 	srv.logger.WithFields(logrus.Fields{
 		"telegram_id": c.Sender().ID,
 	}).Debug("get account from database by telegram_id")
@@ -40,7 +40,7 @@ func (srv *server) schoolList(c telebot.Context, page int) error {
 	return srv.schoolsNaviButtons(c, page)
 }
 
-func (srv *server) schoolRespond(c telebot.Context, school *model.School, page int) error {
+func (srv *server) schoolRespond(c telebot.Context, school *model.School, fromPage int) error {
 	srv.logger.WithFields(logrus.Fields{
 		"school_id": school.ID,
 	}).Debug("get students by school_id")
@@ -74,14 +74,17 @@ func (srv *server) schoolRespond(c telebot.Context, school *model.School, page i
 	var rows []telebot.Row
 	replyMarkup := &telebot.ReplyMarkup{}
 	status := ""
-	if school.Finished {
-		status = "Finished"
-		rows = append(rows, replyMarkup.Row(replyMarkup.Data("Re-Activate school", school.Title, "school", "re_activate", strconv.Itoa(page))))
-	} else {
+	if school.Active {
 		status = "Active"
-		rows = append(rows, replyMarkup.Row(replyMarkup.Data("Finish school", school.Title, "school", "finish", strconv.Itoa(page))))
+		rows = append(rows, replyMarkup.Row(replyMarkup.Data("Finish school", strconv.FormatInt(school.ID, 10), "school", "finish", strconv.Itoa(fromPage))))
+	} else {
+		status = "Finished"
+		rows = append(rows, replyMarkup.Row(replyMarkup.Data("Re-Activate school", strconv.FormatInt(school.ID, 10), "school", "re_activate", strconv.Itoa(fromPage))))
 	}
-	rows = append(rows, replyMarkup.Row(replyMarkup.Data("<< Back to school list", school.Title, "school", "back_to_list", strconv.Itoa(page))))
+	if len(students) > 0 {
+		rows = append(rows, replyMarkup.Row(replyMarkup.Data("Students", strconv.FormatInt(school.ID, 10), "student", "go_to_list", strconv.Itoa(0))))
+	}
+	rows = append(rows, replyMarkup.Row(replyMarkup.Data("<< Back to school list", strconv.FormatInt(school.ID, 10), "school", "back_to_list", strconv.Itoa(fromPage))))
 	replyMarkup.Inline(rows...)
 
 	return c.EditOrSend(
@@ -117,7 +120,7 @@ func (srv *server) schoolsNaviButtons(c telebot.Context, page int) error {
 	var buttons []telebot.Btn
 	replyMarkup := &telebot.ReplyMarkup{}
 	for _, school := range schools {
-		buttons = append(buttons, replyMarkup.Data(school.Title, school.Title, "school", "get", strconv.Itoa(page)))
+		buttons = append(buttons, replyMarkup.Data(school.Title, strconv.FormatInt(school.ID, 10), "school", "get", strconv.Itoa(page)))
 	}
 
 	var rows []telebot.Row

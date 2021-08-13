@@ -12,7 +12,8 @@ var (
 /start - will add you to the database for future use`
 	msgSuperuserPrivateCmd string = `
 <b>Superuser only</b>
-/schools - will provide the interface to manage schools`
+/schools - will provide the interface to manage schools
+/users - will provide the interface to manage users`
 	msgUserGroupCmd string = `
 /join - will add you to school
 /myreport - will return your progress in school
@@ -27,7 +28,7 @@ var (
 
 	msgUserCreated                 string = "Hello, <b>%v!</b>\nAccount created successfully:\n\n" + msgUserInfo
 	msgUserExist                   string = "Hello, <b>%v!</b>\nAccount already exist:\n\n" + msgUserInfo
-	msgUserInfo                    string = "First name: %v\nLast name: %v\nUsername: %v\nSuperuser: %v"
+	msgUserInfo                    string = "Account info:\n\nFirst name: %v\nLast name: %v\nUsername: %v\nSuperuser: %v"
 	msgUserInsufficientPermissions string = `you have insufficient permissions, please contact teachers or mentors`
 	msgUserNotJoined               string = `please join the school first`
 	msgUserAlreadyJoined           string = "you have already joined school <b>%v</b>\n\n" + sysHomeworkAdd

@@ -39,7 +39,7 @@ func (r *HomeworkRepository) FindByStudentID(studentID int64) ([]*model.Homework
 		SELECT hw.id, hw.created, hw.message_id, hw.verify,
 			st.id, st.created, st.active,
 			acc.id, acc.created, acc.telegram_id, acc.first_name, acc.last_name, acc.username, acc.superuser,
-			sch.id, sch.created,sch.title, sch.finished,
+			sch.id, sch.created,sch.title, sch.active,
 			les.id, les.title
 		FROM homework hw
 		JOIN student st ON st.id = hw.student_id
@@ -84,7 +84,7 @@ func (r *HomeworkRepository) FindByStudentID(studentID int64) ([]*model.Homework
 			&h.Student.School.ID,
 			&h.Student.School.Created,
 			&h.Student.School.Title,
-			&h.Student.School.Finished,
+			&h.Student.School.Active,
 			&h.Lesson.ID,
 			&h.Lesson.Title,
 		); err != nil {
@@ -114,7 +114,7 @@ func (r *HomeworkRepository) FindBySchoolID(schoolID int64) ([]*model.Homework, 
 		SELECT hw.id, hw.created, hw.message_id, hw.verify,
 			st.id, st.created, st.active,
 			acc.id, acc.created, acc.telegram_id, acc.first_name, acc.last_name, acc.username, acc.superuser,
-			sch.id, sch.created, sch.title, sch.finished,
+			sch.id, sch.created, sch.title, sch.active,
 			les.id, les.title
 		FROM homework hw
 		JOIN student st ON st.id = hw.student_id
@@ -159,7 +159,7 @@ func (r *HomeworkRepository) FindBySchoolID(schoolID int64) ([]*model.Homework, 
 			&h.Student.School.ID,
 			&h.Student.Account.Created,
 			&h.Student.School.Title,
-			&h.Student.School.Finished,
+			&h.Student.School.Active,
 			&h.Lesson.ID,
 			&h.Lesson.Title,
 		); err != nil {
@@ -194,7 +194,7 @@ func (r *HomeworkRepository) FindByStudentIDLessonID(studentID int64, lessonID i
 		SELECT hw.id, hw.created, hw.message_id, hw.verify,
 			st.id, st.created, st.active,
 			acc.id, acc.created, acc.telegram_id, acc.first_name, acc.last_name, acc.username, acc.superuser,
-			sch.id, sch.created, sch.title, sch.finished,
+			sch.id, sch.created, sch.title, sch.active,
 			les.id, les.title
 		FROM homework hw
 		JOIN student st ON st.id = hw.student_id
@@ -223,7 +223,7 @@ func (r *HomeworkRepository) FindByStudentIDLessonID(studentID int64, lessonID i
 		&h.Student.School.ID,
 		&h.Student.Account.Created,
 		&h.Student.School.Title,
-		&h.Student.School.Finished,
+		&h.Student.School.Active,
 		&h.Lesson.ID,
 		&h.Lesson.Title,
 	); err != nil {

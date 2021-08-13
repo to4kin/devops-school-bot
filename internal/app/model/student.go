@@ -10,11 +10,11 @@ import (
 
 // Student ...
 type Student struct {
-	ID      int64     `json:"id"`
+	ID      int64     `json:"id,string"`
 	Created time.Time `json:"created"`
 	Account *Account  `json:"account"`
 	School  *School   `json:"school"`
-	Active  bool      `json:"active"`
+	Active  bool      `json:"active,string"`
 }
 
 // Validate ...

@@ -59,7 +59,7 @@ func (srv *server) handleJoin(c telebot.Context) error {
 	}
 	srv.logger.WithFields(school.LogrusFields()).Debug("school found")
 
-	if school.Finished {
+	if !school.Active {
 		srv.logger.WithFields(school.LogrusFields()).Debug("school already finished")
 		return c.Reply(fmt.Sprintf(msgSchoolAlreadyFinished, school.Title), &telebot.SendOptions{ParseMode: "HTML"})
 	}

@@ -20,10 +20,10 @@ func TestAccount(t *testing.T) *Account {
 // TestSchool ...
 func TestSchool(t *testing.T) *School {
 	return &School{
-		Created:  time.Now(),
-		Title:    "DevOps School 2021.2",
-		ChatID:   int64(99999),
-		Finished: false,
+		Created: time.Now(),
+		Title:   "Title",
+		ChatID:  int64(99999),
+		Active:  true,
 	}
 }
 

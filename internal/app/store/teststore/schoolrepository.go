@@ -30,25 +30,12 @@ func (r *SchoolRepository) Create(s *model.School) error {
 	return nil
 }
 
-// ReActivate ...
-func (r *SchoolRepository) ReActivate(s *model.School) error {
+// Update ...
+func (r *SchoolRepository) Update(s *model.School) error {
 	for _, school := range r.schools {
 		if school.ID == s.ID {
-			s.Finished = false
-			school = s
-			return nil
-		}
-	}
-
-	return store.ErrRecordNotFound
-}
-
-// Finish ...
-func (r *SchoolRepository) Finish(s *model.School) error {
-	for _, school := range r.schools {
-		if school.ID == s.ID {
-			s.Finished = true
-			school = s
+			school.Title = s.Title
+			school.Active = s.Active
 			return nil
 		}
 	}
@@ -63,6 +50,17 @@ func (r *SchoolRepository) FindAll() ([]*model.School, error) {
 	}
 
 	return r.schools, nil
+}
+
+// FindByID ...
+func (r *SchoolRepository) FindByID(id int64) (*model.School, error) {
+	for _, school := range r.schools {
+		if school.ID == id {
+			return school, nil
+		}
+	}
+
+	return nil, store.ErrRecordNotFound
 }
 
 // FindByTitle ...

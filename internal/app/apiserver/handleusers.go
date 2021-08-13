@@ -14,10 +14,10 @@ func (srv *server) handleUsers(c telebot.Context) error {
 		return nil
 	}
 
-	return srv.userList(c, 0)
+	return srv.usersList(c, 0)
 }
 
-func (srv *server) userList(c telebot.Context, page int) error {
+func (srv *server) usersList(c telebot.Context, page int) error {
 	srv.logger.WithFields(logrus.Fields{
 		"telegram_id": c.Sender().ID,
 	}).Debug("get account from database by telegram_id")
@@ -39,19 +39,26 @@ func (srv *server) userList(c telebot.Context, page int) error {
 	return srv.usersNaviButtons(c, page)
 }
 
-func (srv *server) userRespond(c telebot.Context, account *model.Account, page int) error {
+func (srv *server) userRespond(c telebot.Context, account *model.Account, fromPage int) error {
+	// callback := &model.Callback{
+	// 	Type:    "account",
+	// 	Content: account,
+	// }
+
 	var rows []telebot.Row
 	replyMarkup := &telebot.ReplyMarkup{}
 	if c.Sender().ID != account.TelegramID {
 		if account.Superuser {
-			rows = append(rows, replyMarkup.Row(replyMarkup.Data("Unset Superuser", strconv.FormatInt(account.TelegramID, 10), "account", "unset_superuser", strconv.Itoa(page))))
+			rows = append(rows, replyMarkup.Row(replyMarkup.Data("Unset Superuser", strconv.FormatInt(account.TelegramID, 10), "account", "unset_superuser", strconv.Itoa(fromPage))))
 		} else {
-			rows = append(rows, replyMarkup.Row(replyMarkup.Data("Set Superuser", strconv.FormatInt(account.TelegramID, 10), "account", "set_superuser", strconv.Itoa(page))))
+			rows = append(rows, replyMarkup.Row(replyMarkup.Data("Set Superuser", strconv.FormatInt(account.TelegramID, 10), "account", "set_superuser", strconv.Itoa(fromPage))))
 		}
 	} else {
-		rows = append(rows, replyMarkup.Row(replyMarkup.Data("Update account", strconv.FormatInt(account.TelegramID, 10), "account", "update", strconv.Itoa(page))))
+		rows = append(rows, replyMarkup.Row(replyMarkup.Data("Update account", strconv.FormatInt(account.TelegramID, 10), "account", "update", strconv.Itoa(fromPage))))
 	}
-	rows = append(rows, replyMarkup.Row(replyMarkup.Data("<< Back to user list", strconv.FormatInt(account.TelegramID, 10), "account", "back_to_list", strconv.Itoa(page))))
+	rows = append(rows, replyMarkup.Row(replyMarkup.Data("<< Back to user list", strconv.FormatInt(account.TelegramID, 10), "account", "back_to_list", strconv.Itoa(fromPage))))
+
+	//rows = append(rows, replyMarkup.Row(replyMarkup.Data("<< Back to user list", strconv.FormatInt(account.TelegramID, 10), callback.ToString())))
 	replyMarkup.Inline(rows...)
 
 	return c.EditOrSend(
