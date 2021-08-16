@@ -58,6 +58,23 @@ func TestAccountRepository_FindAll(t *testing.T) {
 	assert.NotNil(t, accounts)
 }
 
+func TestAccountRepository_FindByID(t *testing.T) {
+	db, teardown := sqlstore.TestDb(t, databaseURL, migrations)
+	defer teardown("account")
+
+	s := sqlstore.New(db)
+	a := model.TestAccount(t)
+
+	_, err := s.Account().FindByID(a.ID)
+	assert.EqualError(t, err, store.ErrRecordNotFound.Error())
+
+	assert.NoError(t, s.Account().Create(a))
+
+	account, err := s.Account().FindByID(a.ID)
+	assert.NoError(t, err)
+	assert.NotNil(t, account)
+}
+
 func TestAccountRepository_FindByTelegramID(t *testing.T) {
 	db, teardown := sqlstore.TestDb(t, databaseURL, migrations)
 	defer teardown("account")

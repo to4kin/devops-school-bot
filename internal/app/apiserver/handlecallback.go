@@ -1,10 +1,10 @@
 package apiserver
 
 import (
-	"strconv"
 	"strings"
 
 	"github.com/sirupsen/logrus"
+	"gitlab.devops.telekom.de/tvpp/prototypes/devops-school-bot/internal/app/model"
 	"gopkg.in/tucnak/telebot.v3"
 )
 
@@ -36,84 +36,28 @@ func (srv *server) handleCallback(c telebot.Context) error {
 	}
 
 	callbackData := strings.Split(c.Callback().Data[1:], "|")
+	callbackUnique := callbackData[0]
 
-	if len(callbackData) < 4 {
-		srv.logger.WithFields(logrus.Fields{
-			"callback_data": callbackData,
-		}).Error("callback is not supported")
-		return c.Respond(&telebot.CallbackResponse{
-			Text:      msgInternalError,
-			ShowAlert: true,
-		})
-	}
-
-	callbackValue := callbackData[0]
-	callbackType := callbackData[1]
-	callbackAction := callbackData[2]
-
-	callbackFromPage, err := strconv.Atoi(callbackData[3])
-	if err != nil {
-		srv.logger.Error(err)
-		return c.Respond(&telebot.CallbackResponse{
-			Text:      msgInternalError,
-			ShowAlert: true,
-		})
-	}
+	callback := &model.Callback{}
+	callback.Unmarshal([]byte(callbackData[1]))
 
 	srv.logger.WithFields(logrus.Fields{
-		"callback_value":     callbackValue,
-		"callback_type":      callbackType,
-		"callback_action":    callbackAction,
-		"callback_from_page": callbackFromPage,
+		"callback_type":   callback.Type,
+		"callback_id":     callback.ID,
+		"callback_unique": callbackUnique,
 	}).Debug("parse callback data")
 
-	switch callbackType {
+	switch callback.Type {
 	case "school":
-		switch callbackAction {
-		case "back_to_list":
-			return srv.schoolsList(c, callbackFromPage)
-
-		case "previous":
-			page, err := strconv.Atoi(callbackValue)
-			if err != nil {
-				srv.logger.Error(err)
-				return c.Respond(&telebot.CallbackResponse{
-					Text:      msgInternalError,
-					ShowAlert: true,
-				})
-			}
-
-			if page == 0 {
-				return srv.schoolsList(c, 0)
-			}
-
-			return srv.schoolsNaviButtons(c, page)
-
-		case "next":
-			page, err := strconv.Atoi(callbackValue)
-			if err != nil {
-				srv.logger.Error(err)
-				return c.Respond(&telebot.CallbackResponse{
-					Text:      msgInternalError,
-					ShowAlert: true,
-				})
-			}
-
-			return srv.schoolsNaviButtons(c, page)
+		switch callbackUnique {
+		case "schools_list", "next", "previous":
+			return srv.schoolsNaviButtons(c, callback)
 
 		case "re_activate":
 			srv.logger.WithFields(logrus.Fields{
-				"chat_id": callbackValue,
-			}).Debug("get school by chat_id")
-			schoolID, err := strconv.ParseInt(callbackValue, 10, 64)
-			if err != nil {
-				srv.logger.Error(err)
-				return c.Respond(&telebot.CallbackResponse{
-					Text:      msgInternalError,
-					ShowAlert: true,
-				})
-			}
-			school, err := srv.store.School().FindByID(schoolID)
+				"id": callback.ID,
+			}).Debug("get school by id")
+			school, err := srv.store.School().FindByID(callback.ID)
 			if err != nil {
 				srv.logger.Error(err)
 				return c.Respond(&telebot.CallbackResponse{
@@ -122,7 +66,6 @@ func (srv *server) handleCallback(c telebot.Context) error {
 				})
 			}
 			srv.logger.WithFields(school.LogrusFields()).Debug("school found")
-
 			school.Active = true
 			if err := srv.store.School().Update(school); err != nil {
 				srv.logger.Error(err)
@@ -133,21 +76,13 @@ func (srv *server) handleCallback(c telebot.Context) error {
 			}
 			srv.logger.WithFields(school.LogrusFields()).Debug("school re-activated")
 
-			return srv.schoolRespond(c, school, callbackFromPage)
+			return srv.schoolRespond(c, callback)
 
 		case "finish":
 			srv.logger.WithFields(logrus.Fields{
-				"chat_id": callbackValue,
-			}).Debug("get school by chat_id")
-			schoolID, err := strconv.ParseInt(callbackValue, 10, 64)
-			if err != nil {
-				srv.logger.Error(err)
-				return c.Respond(&telebot.CallbackResponse{
-					Text:      msgInternalError,
-					ShowAlert: true,
-				})
-			}
-			school, err := srv.store.School().FindByID(schoolID)
+				"id": callback.ID,
+			}).Debug("get school by id")
+			school, err := srv.store.School().FindByID(callback.ID)
 			if err != nil {
 				srv.logger.Error(err)
 				return c.Respond(&telebot.CallbackResponse{
@@ -156,7 +91,6 @@ func (srv *server) handleCallback(c telebot.Context) error {
 				})
 			}
 			srv.logger.WithFields(school.LogrusFields()).Debug("school found")
-
 			school.Active = false
 			if err := srv.store.School().Update(school); err != nil {
 				srv.logger.Error(err)
@@ -167,78 +101,21 @@ func (srv *server) handleCallback(c telebot.Context) error {
 			}
 			srv.logger.WithFields(school.LogrusFields()).Debug("school finished")
 
-			return srv.schoolRespond(c, school, callbackFromPage)
+			return srv.schoolRespond(c, callback)
 
 		case "get":
-			srv.logger.WithFields(logrus.Fields{
-				"chat_id": callbackValue,
-			}).Debug("get school by chat_id")
-			schoolID, err := strconv.ParseInt(callbackValue, 10, 64)
-			if err != nil {
-				srv.logger.Error(err)
-				return c.Respond(&telebot.CallbackResponse{
-					Text:      msgInternalError,
-					ShowAlert: true,
-				})
-			}
-			school, err := srv.store.School().FindByID(schoolID)
-			if err != nil {
-				srv.logger.Error(err)
-				return c.Respond(&telebot.CallbackResponse{
-					Text:      msgInternalError,
-					ShowAlert: true,
-				})
-			}
-			srv.logger.WithFields(school.LogrusFields()).Debug("school found")
-
-			return srv.schoolRespond(c, school, callbackFromPage)
+			return srv.schoolRespond(c, callback)
 		}
 	case "account":
-		switch callbackAction {
-		case "back_to_list":
-			return srv.usersList(c, callbackFromPage)
-
-		case "previous":
-			page, err := strconv.Atoi(callbackValue)
-			if err != nil {
-				srv.logger.Error(err)
-				return c.Respond(&telebot.CallbackResponse{
-					Text:      msgInternalError,
-					ShowAlert: true,
-				})
-			}
-
-			if page == 0 {
-				return srv.usersList(c, 0)
-			}
-
-			return srv.usersNaviButtons(c, page)
-
-		case "next":
-			page, err := strconv.Atoi(callbackValue)
-			if err != nil {
-				srv.logger.Error(err)
-				return c.Respond(&telebot.CallbackResponse{
-					Text:      msgInternalError,
-					ShowAlert: true,
-				})
-			}
-
-			return srv.usersNaviButtons(c, page)
+		switch callbackUnique {
+		case "accounts_list", "next", "previous":
+			return srv.usersNaviButtons(c, callback)
 
 		case "update":
 			srv.logger.WithFields(logrus.Fields{
-				"telegram_id": callbackValue,
-			}).Debug("get account by telegram_id")
-			telegramID, err := strconv.ParseInt(callbackValue, 10, 64)
-			if err != nil {
-				srv.logger.Error(err)
-				return c.Respond(&telebot.CallbackResponse{
-					Text:      msgInternalError,
-					ShowAlert: true,
-				})
-			}
-			account, err := srv.store.Account().FindByTelegramID(telegramID)
+				"id": callback.ID,
+			}).Debug("get account from database by id")
+			account, err := srv.store.Account().FindByID(callback.ID)
 			if err != nil {
 				srv.logger.Error(err)
 				return c.Respond(&telebot.CallbackResponse{
@@ -266,21 +143,13 @@ func (srv *server) handleCallback(c telebot.Context) error {
 			}
 			srv.logger.WithFields(account.LogrusFields()).Debug("account updated")
 
-			return srv.userRespond(c, account, callbackFromPage)
+			return srv.userRespond(c, callback)
 
 		case "set_superuser":
 			srv.logger.WithFields(logrus.Fields{
-				"telegram_id": callbackValue,
-			}).Debug("get account by telegram_id")
-			telegramID, err := strconv.ParseInt(callbackValue, 10, 64)
-			if err != nil {
-				srv.logger.Error(err)
-				return c.Respond(&telebot.CallbackResponse{
-					Text:      msgInternalError,
-					ShowAlert: true,
-				})
-			}
-			account, err := srv.store.Account().FindByTelegramID(telegramID)
+				"id": callback.ID,
+			}).Debug("get account from database by id")
+			account, err := srv.store.Account().FindByID(callback.ID)
 			if err != nil {
 				srv.logger.Error(err)
 				return c.Respond(&telebot.CallbackResponse{
@@ -289,7 +158,6 @@ func (srv *server) handleCallback(c telebot.Context) error {
 				})
 			}
 			srv.logger.WithFields(account.LogrusFields()).Debug("account found")
-
 			account.Superuser = true
 
 			if err := srv.store.Account().Update(account); err != nil {
@@ -301,21 +169,13 @@ func (srv *server) handleCallback(c telebot.Context) error {
 			}
 			srv.logger.WithFields(account.LogrusFields()).Debug("account updated")
 
-			return srv.userRespond(c, account, callbackFromPage)
+			return srv.userRespond(c, callback)
 
 		case "unset_superuser":
 			srv.logger.WithFields(logrus.Fields{
-				"telegram_id": callbackValue,
-			}).Debug("get account by telegram_id")
-			telegramID, err := strconv.ParseInt(callbackValue, 10, 64)
-			if err != nil {
-				srv.logger.Error(err)
-				return c.Respond(&telebot.CallbackResponse{
-					Text:      msgInternalError,
-					ShowAlert: true,
-				})
-			}
-			account, err := srv.store.Account().FindByTelegramID(telegramID)
+				"id": callback.ID,
+			}).Debug("get account from database by id")
+			account, err := srv.store.Account().FindByID(callback.ID)
 			if err != nil {
 				srv.logger.Error(err)
 				return c.Respond(&telebot.CallbackResponse{
@@ -324,7 +184,6 @@ func (srv *server) handleCallback(c telebot.Context) error {
 				})
 			}
 			srv.logger.WithFields(account.LogrusFields()).Debug("account found")
-
 			account.Superuser = false
 
 			if err := srv.store.Account().Update(account); err != nil {
@@ -336,127 +195,19 @@ func (srv *server) handleCallback(c telebot.Context) error {
 			}
 			srv.logger.WithFields(account.LogrusFields()).Debug("account updated")
 
-			return srv.userRespond(c, account, callbackFromPage)
+			return srv.userRespond(c, callback)
 
 		case "get":
-			srv.logger.WithFields(logrus.Fields{
-				"telegram_id": callbackValue,
-			}).Debug("get account by telegram_id")
-			telegramID, err := strconv.ParseInt(callbackValue, 10, 64)
-			if err != nil {
-				srv.logger.Error(err)
-				return c.Respond(&telebot.CallbackResponse{
-					Text:      msgInternalError,
-					ShowAlert: true,
-				})
-			}
-			account, err := srv.store.Account().FindByTelegramID(telegramID)
-			if err != nil {
-				srv.logger.Error(err)
-				return c.Respond(&telebot.CallbackResponse{
-					Text:      msgInternalError,
-					ShowAlert: true,
-				})
-			}
-			srv.logger.WithFields(account.LogrusFields()).Debug("account found")
-
-			return srv.userRespond(c, account, callbackFromPage)
+			return srv.userRespond(c, callback)
 
 		}
 	case "student":
-		switch callbackAction {
-		case "go_to_list":
-			schoolID, err := strconv.ParseInt(callbackValue, 10, 64)
-			if err != nil {
-				srv.logger.Error(err)
-				return c.Respond(&telebot.CallbackResponse{
-					Text:      msgInternalError,
-					ShowAlert: true,
-				})
-			}
-			return srv.studentsList(c, schoolID, callbackFromPage)
-
-		case "back_to_list":
-			schoolID, err := strconv.ParseInt(callbackData[4], 10, 64)
-			if err != nil {
-				srv.logger.Error(err)
-				return c.Respond(&telebot.CallbackResponse{
-					Text:      msgInternalError,
-					ShowAlert: true,
-				})
-			}
-
-			return srv.studentsList(c, schoolID, callbackFromPage)
-
-		case "previous":
-			page, err := strconv.Atoi(callbackValue)
-			if err != nil {
-				srv.logger.Error(err)
-				return c.Respond(&telebot.CallbackResponse{
-					Text:      msgInternalError,
-					ShowAlert: true,
-				})
-			}
-
-			schoolID, err := strconv.ParseInt(callbackData[4], 10, 64)
-			if err != nil {
-				srv.logger.Error(err)
-				return c.Respond(&telebot.CallbackResponse{
-					Text:      msgInternalError,
-					ShowAlert: true,
-				})
-			}
-
-			if page == 0 {
-				return srv.studentsList(c, schoolID, 0)
-			}
-
-			return srv.studentsNaviButtons(c, schoolID, page)
-
-		case "next":
-			page, err := strconv.Atoi(callbackValue)
-			if err != nil {
-				srv.logger.Error(err)
-				return c.Respond(&telebot.CallbackResponse{
-					Text:      msgInternalError,
-					ShowAlert: true,
-				})
-			}
-
-			schoolID, err := strconv.ParseInt(callbackData[4], 10, 64)
-			if err != nil {
-				srv.logger.Error(err)
-				return c.Respond(&telebot.CallbackResponse{
-					Text:      msgInternalError,
-					ShowAlert: true,
-				})
-			}
-
-			return srv.studentsNaviButtons(c, schoolID, page)
+		switch callbackUnique {
+		case "students_list", "next", "previous":
+			return srv.studentsNaviButtons(c, callback)
 
 		case "get":
-			srv.logger.WithFields(logrus.Fields{
-				"id": callbackValue,
-			}).Debug("get student by id")
-			studentID, err := strconv.ParseInt(callbackValue, 10, 64)
-			if err != nil {
-				srv.logger.Error(err)
-				return c.Respond(&telebot.CallbackResponse{
-					Text:      msgInternalError,
-					ShowAlert: true,
-				})
-			}
-			student, err := srv.store.Student().FindByID(studentID)
-			if err != nil {
-				srv.logger.Error(err)
-				return c.Respond(&telebot.CallbackResponse{
-					Text:      msgInternalError,
-					ShowAlert: true,
-				})
-			}
-			srv.logger.WithFields(student.LogrusFields()).Debug("student found")
-
-			return srv.studentRespond(c, student, callbackFromPage)
+			return srv.studentRespond(c, callback)
 
 		}
 	}

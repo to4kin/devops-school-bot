@@ -16,91 +16,34 @@ func TestCallback_UnmarshalJSON(t *testing.T) {
 		isValid bool
 	}{
 		{
-			name: "valid_account",
+			name: "valid_json",
 			a: func() []byte {
 				return []byte(`
 				{
-					"action": "get",
 					"type": "account",
-					"content": {
-						"id": "99999",
-						"created": "2006-01-02T15:04:05Z",
-						"telegram_id": "99999",
-						"first_name": "FirstName",
-						"last_name": "LastName",
-						"username": "Username",
-						"superuser": "false"
-					}
+					"id": "99999"
 				}`)
 			},
 			isValid: true,
 		},
 		{
-			name: "valid_school",
+			name: "invalid_json",
 			a: func() []byte {
 				return []byte(`
 				{
-					"action": "get",
-					"type": "school",
-					"content": {
-						"id": "99999",
-						"created": "2006-01-02T15:04:05Z",
-						"title": "Title",
-						"chat_id": "99999",
-						"active": "true"
-					}
+					"type": "account",
+					"id": "99999",
 				}`)
 			},
-			isValid: true,
+			isValid: false,
 		},
 		{
-			name: "valid_student",
+			name: "invalid_id",
 			a: func() []byte {
 				return []byte(`
 				{
-					"action": "get",
-					"type": "student",
-					"content": {
-						"id": "99999",
-						"created": "2006-01-02T15:04:05Z",
-						"account": {
-							"id": "99999",
-							"created": "2006-01-02T15:04:05Z",
-							"telegram_id": "99999",
-							"first_name": "FirstName",
-							"last_name": "LastName",
-							"username": "Username",
-							"superuser": "false"
-						},
-						"school": {
-							"id": "99999",
-							"created": "2006-01-02T15:04:05Z",
-							"title": "Title",
-							"chat_id": "99999",
-							"active": "true"
-						},
-						"active": "true"
-					}
-				}`)
-			},
-			isValid: true,
-		},
-		{
-			name: "unsupported_type",
-			a: func() []byte {
-				return []byte(`
-				{
-					"action": "get",
-					"type": "unsupported_type",
-					"content": {
-						"id": "99999",
-						"created": "2006-01-02T15:04:05Z",
-						"telegram_id": "99999",
-						"first_name": "FirstName",
-						"last_name": "LastName",
-						"username": "Username",
-						"superuser": "false"
-					}
+					"type": "account",
+					"id": "invalid",
 				}`)
 			},
 			isValid: false,
@@ -110,9 +53,9 @@ func TestCallback_UnmarshalJSON(t *testing.T) {
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
 			if tc.isValid {
-				assert.NoError(t, callback.UnmarshalJSON(tc.a()))
+				assert.NoError(t, callback.Unmarshal(tc.a()))
 			} else {
-				assert.Error(t, callback.UnmarshalJSON(tc.a()))
+				assert.Error(t, callback.Unmarshal(tc.a()))
 			}
 		})
 	}

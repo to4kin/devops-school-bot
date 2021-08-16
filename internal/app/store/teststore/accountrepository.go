@@ -54,6 +54,17 @@ func (r *AccountRepository) FindAll() ([]*model.Account, error) {
 	return r.accounts, nil
 }
 
+// FindByID ...
+func (r *AccountRepository) FindByID(id int64) (*model.Account, error) {
+	for _, account := range r.accounts {
+		if account.ID == id {
+			return account, nil
+		}
+	}
+
+	return nil, store.ErrRecordNotFound
+}
+
 // FindByTelegramID ...
 func (r *AccountRepository) FindByTelegramID(telegramID int64) (*model.Account, error) {
 	for _, account := range r.accounts {

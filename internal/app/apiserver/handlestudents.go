@@ -2,18 +2,17 @@ package apiserver
 
 import (
 	"fmt"
-	"strconv"
 
 	"github.com/sirupsen/logrus"
 	"gitlab.devops.telekom.de/tvpp/prototypes/devops-school-bot/internal/app/model"
 	"gopkg.in/tucnak/telebot.v3"
 )
 
-func (srv *server) studentsList(c telebot.Context, schoolID int64, page int) error {
+func (srv *server) studentRespond(c telebot.Context, callback *model.Callback) error {
 	srv.logger.WithFields(logrus.Fields{
-		"telegram_id": c.Sender().ID,
-	}).Debug("get account from database by telegram_id")
-	account, err := srv.store.Account().FindByTelegramID(int64(c.Sender().ID))
+		"id": callback.ID,
+	}).Debug("get student from database by id")
+	student, err := srv.store.Student().FindByID(callback.ID)
 	if err != nil {
 		srv.logger.Error(err)
 		return c.Respond(&telebot.CallbackResponse{
@@ -21,32 +20,12 @@ func (srv *server) studentsList(c telebot.Context, schoolID int64, page int) err
 			ShowAlert: true,
 		})
 	}
-	srv.logger.WithFields(account.LogrusFields()).Debug("account found")
+	srv.logger.WithFields(student.LogrusFields()).Debug("student found")
 
-	if !account.Superuser {
-		srv.logger.WithFields(account.LogrusFields()).Debug("account has insufficient permissions")
-		return c.EditOrSend(msgUserInsufficientPermissions, &telebot.SendOptions{ParseMode: "HTML"})
-	}
-
-	return srv.studentsNaviButtons(c, schoolID, page)
-}
-
-func (srv *server) studentRespond(c telebot.Context, student *model.Student, fromPage int) error {
 	var rows []telebot.Row
 	replyMarkup := &telebot.ReplyMarkup{}
-	rows = append(
-		rows,
-		replyMarkup.Row(
-			replyMarkup.Data(
-				"<< Back to student list",
-				strconv.FormatInt(student.ID, 10),
-				"student",
-				"back_to_list",
-				strconv.Itoa(fromPage),
-				strconv.FormatInt(student.School.ID, 10),
-			),
-		),
-	)
+	callback.ID = student.School.ID
+	rows = append(rows, replyMarkup.Row(replyMarkup.Data("<< Back to student list", "students_list", callback.ToString())))
 	replyMarkup.Inline(rows...)
 
 	return c.EditOrSend(
@@ -62,11 +41,11 @@ func (srv *server) studentRespond(c telebot.Context, student *model.Student, fro
 	)
 }
 
-func (srv *server) studentsNaviButtons(c telebot.Context, schoolID int64, page int) error {
+func (srv *server) studentsNaviButtons(c telebot.Context, callback *model.Callback) error {
 	srv.logger.WithFields(logrus.Fields{
-		"school_id": schoolID,
+		"school_id": callback.ID,
 	}).Debug("get all students by school_id")
-	students, err := srv.store.Student().FindBySchoolID(schoolID)
+	students, err := srv.store.Student().FindBySchoolID(callback.ID)
 	if err != nil {
 		srv.logger.Error(err)
 		return c.Respond(&telebot.CallbackResponse{
@@ -78,22 +57,47 @@ func (srv *server) studentsNaviButtons(c telebot.Context, schoolID int64, page i
 		"count": len(students),
 	}).Debug("students found")
 
+	page := 0
+	for i, student := range students {
+		if callback.ID == student.ID {
+			page = i / (maxRows * 2)
+			break
+		}
+	}
+
 	var buttons []telebot.Btn
 	replyMarkup := &telebot.ReplyMarkup{}
 	for _, student := range students {
-		buttons = append(buttons, replyMarkup.Data(student.Account.Username, strconv.FormatInt(student.ID, 10), "student", "get", strconv.Itoa(page)))
+		studentCallback := &model.Callback{
+			Type: callback.Type,
+			ID:   student.ID,
+		}
+		buttons = append(buttons, replyMarkup.Data(student.Account.Username, "get", studentCallback.ToString()))
 	}
 
 	var rows []telebot.Row
 	div, mod := len(students)/2, len(students)%2
-	btnNext := replyMarkup.Data("Next page >>", strconv.Itoa(page+1), "student", "next", strconv.Itoa(page), strconv.FormatInt(schoolID, 10))
-	btnPrevious := replyMarkup.Data("<< Previous page", strconv.Itoa(page-1), "student", "previous", strconv.Itoa(page), strconv.FormatInt(schoolID, 10))
+
+	nextCallback := &model.Callback{
+		Type: callback.Type,
+	}
+
+	previousCallback := &model.Callback{
+		Type: callback.Type,
+	}
 
 	if div >= maxRows*(page+1) {
 		for i := maxRows * page; i < maxRows*(page+1); i++ {
 			rows = append(rows, replyMarkup.Row(buttons[i*2], buttons[i*2+1]))
 		}
+
+		nextCallback.ID = students[maxRows*2*(page+1)].ID
+		btnNext := replyMarkup.Data("Next page >>", "next", nextCallback.ToString())
+
 		if page > 0 {
+			previousCallback.ID = students[maxRows*2*(page-1)].ID
+			btnPrevious := replyMarkup.Data("<< Previous page", "previous", previousCallback.ToString())
+
 			rows = append(rows, replyMarkup.Row(btnPrevious, btnNext))
 		} else {
 			rows = append(rows, replyMarkup.Row(btnNext))
@@ -106,11 +110,19 @@ func (srv *server) studentsNaviButtons(c telebot.Context, schoolID int64, page i
 			rows = append(rows, replyMarkup.Row(buttons[div*2]))
 		}
 		if page > 0 {
+			previousCallback.ID = students[maxRows*2*(page-1)].ID
+			btnPrevious := replyMarkup.Data("<< Previous page", "previous", previousCallback.ToString())
+
 			rows = append(rows, replyMarkup.Row(btnPrevious))
 		}
 	}
 
-	rows = append(rows, replyMarkup.Row(replyMarkup.Data("<< Back to school", strconv.FormatInt(schoolID, 10), "school", "get", strconv.Itoa(page))))
+	schoolCallback := &model.Callback{
+		Type: "school",
+		ID:   callback.ID,
+	}
+
+	rows = append(rows, replyMarkup.Row(replyMarkup.Data("<< Back to school", "get", schoolCallback.ToString())))
 
 	replyMarkup.Inline(rows...)
 	return c.EditOrSend("Choose a student from the list below:", replyMarkup)

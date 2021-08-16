@@ -50,6 +50,20 @@ func TestAccountRepository_FindAll(t *testing.T) {
 	assert.NotNil(t, accounts)
 }
 
+func TestAccountRepository_FindByID(t *testing.T) {
+	s := teststore.New()
+	a := model.TestAccount(t)
+
+	_, err := s.Account().FindByID(a.ID)
+	assert.EqualError(t, err, store.ErrRecordNotFound.Error())
+
+	assert.NoError(t, s.Account().Create(a))
+
+	account, err := s.Account().FindByID(a.ID)
+	assert.NoError(t, err)
+	assert.NotNil(t, account)
+}
+
 func TestAccountRepository_FindByTelegramID(t *testing.T) {
 	s := teststore.New()
 	a := model.TestAccount(t)

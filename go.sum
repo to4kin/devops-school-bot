@@ -43,6 +43,8 @@ dmitri.shuralyov.com/gpu/mtl v0.0.0-20190408044501-666a987793e9/go.mod h1:H6x//7
 github.com/Azure/go-ansiterm v0.0.0-20170929234023-d6e3b3328b78/go.mod h1:LmzpDX56iTiv29bbRTIsUNlaFfuhWRQBWjQdVyAevI8=
 github.com/BurntSushi/toml v0.3.1 h1:WXkYYl6Yr3qBf1K79EBnL4mak0OimBfB0XUf9Vl28OQ=
 github.com/BurntSushi/toml v0.3.1/go.mod h1:xHWCNGjB5oqiDr8zfno3MHue2Ht5sIBksp03qcyfWMU=
+github.com/BurntSushi/toml v0.4.1 h1:GaI7EiDXDRfa8VshkTj7Fym7ha+y8/XxIgD2okUIjLw=
+github.com/BurntSushi/toml v0.4.1/go.mod h1:CxXYINrC8qIiEnFrOxCa7Jy5BFHlXnUU2pbicEuybxQ=
 github.com/BurntSushi/xgb v0.0.0-20160522181843-27f122750802/go.mod h1:IVnqGOEym/WlBOVXweHU+Q+/VP0lqqI8lqeDx9IjBqo=
 github.com/ClickHouse/clickhouse-go v1.3.12/go.mod h1:EaI/sW7Azgz9UATzd5ZdZHRUhHgv5+JMS9NSr2smCJI=
 github.com/Microsoft/go-winio v0.4.15-0.20190919025122-fc70bd9a86b5/go.mod h1:tTuCMEN+UleMWgg9dVx4Hu52b1bJo+59jBh3ajtinzw=
@@ -790,6 +792,8 @@ gopkg.in/tucnak/telebot.v3 v3.0.0-20210727191609-6b6558547b11 h1:n3Old92v9u4ZZQ1
 gopkg.in/tucnak/telebot.v3 v3.0.0-20210727191609-6b6558547b11/go.mod h1:smNJjgunGCKlde5Y4fjK3wnhJs5xyNhzp+/gXE1zJik=
 gopkg.in/tucnak/telebot.v3 v3.0.0-20210730153630-0c6b451fbf66 h1:zbqhsaLytDUXKWg1IGrgud38+nToftNPREmabUSaepI=
 gopkg.in/tucnak/telebot.v3 v3.0.0-20210730153630-0c6b451fbf66/go.mod h1:smNJjgunGCKlde5Y4fjK3wnhJs5xyNhzp+/gXE1zJik=
+gopkg.in/tucnak/telebot.v3 v3.0.0-20210815175512-ae69423c6eb7 h1:BK0SgJI+vfZnCiyPAdo0r1TsaG7vT2UbHwQe4ns12mw=
+gopkg.in/tucnak/telebot.v3 v3.0.0-20210815175512-ae69423c6eb7/go.mod h1:smNJjgunGCKlde5Y4fjK3wnhJs5xyNhzp+/gXE1zJik=
 gopkg.in/yaml.v2 v2.2.2/go.mod h1:hI93XBmqTisBFMUTm0b8Fm+jr3Dg1NNxqwp+5A1VGuI=
 gopkg.in/yaml.v2 v2.2.3/go.mod h1:hI93XBmqTisBFMUTm0b8Fm+jr3Dg1NNxqwp+5A1VGuI=
 gopkg.in/yaml.v2 v2.2.4/go.mod h1:hI93XBmqTisBFMUTm0b8Fm+jr3Dg1NNxqwp+5A1VGuI=

@@ -7,6 +7,7 @@ type AccountRepository interface {
 	Create(*model.Account) error
 	Update(*model.Account) error
 	FindAll() ([]*model.Account, error)
+	FindByID(int64) (*model.Account, error)
 	FindByTelegramID(int64) (*model.Account, error)
 }
 

@@ -102,6 +102,31 @@ func (r *AccountRepository) FindAll() ([]*model.Account, error) {
 	return accounts, nil
 }
 
+// FindByID ...
+func (r *AccountRepository) FindByID(id int64) (*model.Account, error) {
+	a := &model.Account{}
+	if err := r.store.db.QueryRow(
+		"SELECT id, created, telegram_id, first_name, last_name, username, superuser FROM account WHERE id = $1",
+		id,
+	).Scan(
+		&a.ID,
+		&a.Created,
+		&a.TelegramID,
+		&a.FirstName,
+		&a.LastName,
+		&a.Username,
+		&a.Superuser,
+	); err != nil {
+		if err == sql.ErrNoRows {
+			return nil, store.ErrRecordNotFound
+		}
+
+		return nil, err
+	}
+
+	return a, nil
+}
+
 // FindByTelegramID ...
 func (r *AccountRepository) FindByTelegramID(telegramID int64) (*model.Account, error) {
 	a := &model.Account{}
