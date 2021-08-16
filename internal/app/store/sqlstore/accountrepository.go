@@ -63,7 +63,7 @@ func (r *AccountRepository) FindAll() ([]*model.Account, error) {
 	accounts := []*model.Account{}
 
 	rows, err := r.store.db.Query(`
-		SELECT id, created, telegram_id, first_name, last_name, username, superuser FROM account ORDER BY created DESC
+		SELECT id, created, telegram_id, first_name, last_name, username, superuser FROM account ORDER BY username ASC
 		`,
 	)
 	if err != nil {

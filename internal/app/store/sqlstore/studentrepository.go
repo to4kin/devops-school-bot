@@ -29,6 +29,25 @@ func (r *StudentRepository) Create(s *model.Student) error {
 	)
 }
 
+// Update ...
+func (r *StudentRepository) Update(s *model.Student) error {
+	if err := r.store.db.QueryRow(
+		"UPDATE student SET active = $2 WHERE id = $1 RETURNING id",
+		s.ID,
+		s.Active,
+	).Scan(
+		&s.ID,
+	); err != nil {
+		if err == sql.ErrNoRows {
+			return store.ErrRecordNotFound
+		}
+
+		return err
+	}
+
+	return nil
+}
+
 // FindAll ...
 func (r *StudentRepository) FindAll() ([]*model.Student, error) {
 	rowsCount := 0
@@ -41,6 +60,7 @@ func (r *StudentRepository) FindAll() ([]*model.Student, error) {
 		FROM student st 
 		JOIN account acc ON acc.id = st.account_id
 		JOIN school sch ON sch.id = st.school_id
+		ORDER BY acc.username ASC
 		`,
 	)
 	if err != nil {
@@ -146,6 +166,7 @@ func (r *StudentRepository) FindBySchoolID(schoolID int64) ([]*model.Student, er
 		JOIN account acc ON acc.id = st.account_id
 		JOIN school sch ON sch.id = st.school_id
 		WHERE st.school_id = $1
+		ORDER BY acc.username ASC
 		`,
 		schoolID,
 	)

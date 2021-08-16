@@ -38,18 +38,19 @@ var (
 	msgSchoolAlreadyStarted  string = `school <b>%v</b> already started`
 	msgSchoolAlreadyFinished string = `school <b>%v</b> already finished`
 	msgSchoolFinished        string = `school <b>%v</b> finished`
-	msgSchoolInfo            string = "<b>%v</b>\n\nCreated: %v\nStudents: %v\nHomeworks: %v\nStatus: %v"
+	msgSchoolInfo            string = "<b>%v</b>\n\nCreated: %v\nStudents: %v\nHomeworks: %v\nStatus: %v\n\nAccepted homeworks:\n%v"
+
+	msgStudentInfo string = "Student info:\n\nSchool: %v\nFirst name: %v\nLast name: %v\nStatus: %v\n\n" + sysHomeworkGuide + "\n\nHomeworks:\n%v"
 
 	msgHomeworkNotProvided string = "you haven't submitted your homework yet\n\n" + sysHomeworkAdd
 	msgHomeworkReport      string = "Hello, @%v!\n\n" + sysHomeworkGuide + "\n\nYour progress in <b>%v</b>:\n"
 
-	iconHomeworkVerified    string = `🟢`
-	iconHomeworkNotVerified string = `🟡`
-	iconHomeworkNotProvided string = `🔴`
+	iconGreenCircle string = `🟢`
+	//iconYellowCircle string = `🟡`
+	iconRedCircle string = `🔴`
 
 	sysHomeworkAdd   string = `To add homework, use the lesson hashtag along with the #homework, for example: <code>#homework #cicd</code>`
 	sysHomeworkGuide string = `Homework guide:
-` + iconHomeworkVerified + ` - homework is <b>verified</b>
-` + iconHomeworkNotVerified + ` - homework is <b>NOT verified</b>
-` + iconHomeworkNotProvided + ` - homework is <b>NOT provided</b>`
+` + iconGreenCircle + ` - homework is <b>accepted</b>
+` + iconRedCircle + ` - homework is <b>NOT provided</b>`
 )

@@ -93,16 +93,12 @@ func (srv *server) handleMyReport(c telebot.Context) error {
 		for _, homework := range studentHomeworks {
 			if homework.Lesson.ID == lesson.ID {
 				counted = true
-				if homework.Verify {
-					reportMessage += fmt.Sprintf("%v - %v\n", iconHomeworkVerified, lesson.Title)
-				} else {
-					reportMessage += fmt.Sprintf("%v - %v\n", iconHomeworkNotVerified, lesson.Title)
-				}
+				reportMessage += fmt.Sprintf("%v - %v\n", iconGreenCircle, lesson.Title)
 			}
 		}
 
 		if !counted {
-			reportMessage += fmt.Sprintf("%v - %v\n", iconHomeworkNotProvided, lesson.Title)
+			reportMessage += fmt.Sprintf("%v - %v\n", iconRedCircle, lesson.Title)
 		}
 	}
 

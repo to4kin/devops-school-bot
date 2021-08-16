@@ -30,6 +30,18 @@ func (r *StudentRepository) Create(s *model.Student) error {
 	return nil
 }
 
+// Update ...
+func (r *StudentRepository) Update(s *model.Student) error {
+	for _, student := range r.students {
+		if student.ID == s.ID {
+			student.Active = s.Active
+			return nil
+		}
+	}
+
+	return store.ErrRecordNotFound
+}
+
 // FindAll ...
 func (r *StudentRepository) FindAll() ([]*model.Student, error) {
 	if len(r.students) == 0 {

@@ -5,6 +5,7 @@ import (
 
 	"github.com/sirupsen/logrus"
 	"gitlab.devops.telekom.de/tvpp/prototypes/devops-school-bot/internal/app/model"
+	"gitlab.devops.telekom.de/tvpp/prototypes/devops-school-bot/internal/app/store"
 	"gopkg.in/tucnak/telebot.v3"
 )
 
@@ -21,17 +22,76 @@ func (srv *server) studentRespond(c telebot.Context, callback *model.Callback) e
 
 	var rows []telebot.Row
 	replyMarkup := &telebot.ReplyMarkup{}
-	callback.ID = student.School.ID
-	rows = append(rows, replyMarkup.Row(replyMarkup.Data("<< Back to student list", "students_list", callback.ToString())))
+
+	status := ""
+	if student.Active {
+		status = iconGreenCircle
+		rows = append(rows, replyMarkup.Row(replyMarkup.Data("Block student", "block", callback.ToString())))
+	} else {
+		status = iconRedCircle
+		rows = append(rows, replyMarkup.Row(replyMarkup.Data("Unblock student", "unblock", callback.ToString())))
+	}
+
+	backCallback := &model.Callback{
+		Type: callback.Type,
+		ID:   student.School.ID,
+	}
+	rows = append(rows, replyMarkup.Row(replyMarkup.Data("<< Back to student list", "students_list", backCallback.ToString())))
 	replyMarkup.Inline(rows...)
+
+	srv.logger.WithFields(logrus.Fields{
+		"student_id": callback.ID,
+	}).Debug("get homeworks by student_id")
+	homeworks, err := srv.store.Homework().FindByStudentID(callback.ID)
+	if err != nil {
+		if err == store.ErrRecordNotFound {
+			srv.logger.Debug(err)
+		} else {
+			srv.logger.Error(err)
+		}
+	}
+	srv.logger.WithFields(logrus.Fields{
+		"count": len(homeworks),
+	}).Debug("homeworks found")
+
+	srv.logger.WithFields(logrus.Fields{
+		"school_id": student.School.ID,
+	}).Debug("get all lessons from database by school_id")
+	lessons, err := srv.store.Lesson().FindBySchoolID(student.School.ID)
+	if err != nil {
+		if err == store.ErrRecordNotFound {
+			srv.logger.Debug(err)
+		} else {
+			srv.logger.Error(err)
+		}
+	}
+	srv.logger.WithFields(logrus.Fields{
+		"count": len(lessons),
+	}).Debug("lessons found")
+
+	text := ""
+	for _, lesson := range lessons {
+		counted := false
+		for _, homework := range homeworks {
+			if homework.Lesson.ID == lesson.ID {
+				counted = true
+				text += fmt.Sprintf("%v - %v\n", iconGreenCircle, lesson.Title)
+			}
+		}
+
+		if !counted {
+			text += fmt.Sprintf("%v - %v\n", iconRedCircle, lesson.Title)
+		}
+	}
 
 	return c.EditOrSend(
 		fmt.Sprintf(
-			msgUserInfo,
+			msgStudentInfo,
+			student.School.Title,
 			student.Account.FirstName,
 			student.Account.LastName,
-			student.Account.Username,
-			student.Account.Superuser,
+			status,
+			text,
 		),
 		&telebot.SendOptions{ParseMode: "HTML"},
 		replyMarkup,
@@ -66,7 +126,13 @@ func (srv *server) studentsNaviButtons(c telebot.Context, callback *model.Callba
 			Type: callback.Type,
 			ID:   student.ID,
 		}
-		buttons = append(buttons, replyMarkup.Data(student.Account.Username, "get", studentCallback.ToString()))
+
+		text := fmt.Sprintf("%v %v", iconRedCircle, student.Account.Username)
+		if student.Active {
+			text = fmt.Sprintf("%v %v", iconGreenCircle, student.Account.Username)
+		}
+
+		buttons = append(buttons, replyMarkup.Data(text, "get", studentCallback.ToString()))
 	}
 
 	var rows []telebot.Row

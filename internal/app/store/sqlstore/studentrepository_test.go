@@ -23,6 +23,25 @@ func TestStudentRepository_Create(t *testing.T) {
 	assert.NotNil(t, testStudent)
 }
 
+func TestStudentRepository_Update(t *testing.T) {
+	db, teardown := sqlstore.TestDb(t, databaseURL, migrations)
+	defer teardown("student", "school", "account")
+
+	s := sqlstore.New(db)
+	testStudent := model.TestStudent(t)
+
+	assert.EqualError(t, s.Student().Update(testStudent), store.ErrRecordNotFound.Error())
+
+	assert.NoError(t, s.Account().Create(testStudent.Account))
+	assert.NoError(t, s.School().Create(testStudent.School))
+	assert.NoError(t, s.Student().Create(testStudent))
+
+	testStudent.Active = false
+
+	assert.NoError(t, s.Student().Update(testStudent))
+	assert.Equal(t, false, testStudent.Active)
+}
+
 func TestStudentRepository_FindAll(t *testing.T) {
 	db, teardown := sqlstore.TestDb(t, databaseURL, migrations)
 	defer teardown("student", "school", "account")

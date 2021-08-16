@@ -2,6 +2,7 @@ package apiserver
 
 import (
 	"fmt"
+	"strconv"
 
 	"github.com/sirupsen/logrus"
 	"gitlab.devops.telekom.de/tvpp/prototypes/devops-school-bot/internal/app/model"
@@ -82,10 +83,10 @@ func (srv *server) schoolRespond(c telebot.Context, callback *model.Callback) er
 	replyMarkup := &telebot.ReplyMarkup{}
 	status := ""
 	if school.Active {
-		status = "Active"
+		status = iconGreenCircle
 		rows = append(rows, replyMarkup.Row(replyMarkup.Data("Finish school", "finish", callback.ToString())))
 	} else {
-		status = "Finished"
+		status = iconRedCircle
 		rows = append(rows, replyMarkup.Row(replyMarkup.Data("Re-Activate school", "re_activate", callback.ToString())))
 	}
 	if len(students) > 0 {
@@ -99,6 +100,16 @@ func (srv *server) schoolRespond(c telebot.Context, callback *model.Callback) er
 	rows = append(rows, replyMarkup.Row(replyMarkup.Data("<< Back to school list", "schools_list", callback.ToString())))
 	replyMarkup.Inline(rows...)
 
+	lessons := make(map[string]int)
+	for _, homework := range homeworks {
+		lessons[homework.Lesson.Title]++
+	}
+
+	text := ""
+	for title, count := range lessons {
+		text += fmt.Sprintf("%v - %v\n", title, strconv.Itoa(count))
+	}
+
 	return c.EditOrSend(
 		fmt.Sprintf(
 			msgSchoolInfo,
@@ -109,6 +120,7 @@ func (srv *server) schoolRespond(c telebot.Context, callback *model.Callback) er
 			len(students),
 			len(homeworks),
 			status,
+			text,
 		),
 		&telebot.SendOptions{ParseMode: "HTML"},
 		replyMarkup,
@@ -141,7 +153,13 @@ func (srv *server) schoolsNaviButtons(c telebot.Context, callback *model.Callbac
 			Type: callback.Type,
 			ID:   school.ID,
 		}
-		buttons = append(buttons, replyMarkup.Data(school.Title, "get", schoolCallback.ToString()))
+
+		text := fmt.Sprintf("%v %v", iconRedCircle, school.Title)
+		if school.Active {
+			text = fmt.Sprintf("%v %v", iconGreenCircle, school.Title)
+		}
+
+		buttons = append(buttons, replyMarkup.Data(text, "get", schoolCallback.ToString()))
 	}
 
 	var rows []telebot.Row

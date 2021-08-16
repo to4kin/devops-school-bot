@@ -77,6 +77,7 @@ func (r *LessonRepository) FindBySchoolID(schoolID int64) ([]*model.Lesson, erro
 		JOIN student ON student.id = homework.student_id
 		WHERE student.school_id = $1
 		GROUP BY lesson.id, lesson.title
+		ORDER BY lesson.title ASC
 		`,
 		schoolID,
 	)

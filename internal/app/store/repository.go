@@ -32,6 +32,7 @@ type LessonRepository interface {
 // StudentRepository ...
 type StudentRepository interface {
 	Create(*model.Student) error
+	Update(*model.Student) error
 	FindAll() ([]*model.Student, error)
 	FindByID(int64) (*model.Student, error)
 	FindBySchoolID(int64) ([]*model.Student, error)

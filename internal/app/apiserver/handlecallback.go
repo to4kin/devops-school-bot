@@ -177,6 +177,46 @@ func (srv *server) handleCallback(c telebot.Context) error {
 		case "students_list", "next", "previous":
 			return srv.studentsNaviButtons(c, callback)
 
+		case "block":
+			srv.logger.WithFields(logrus.Fields{
+				"id": callback.ID,
+			}).Debug("get student from database by id")
+			student, err := srv.store.Student().FindByID(callback.ID)
+			if err != nil {
+				srv.logger.Error(err)
+				return srv.respondAlert(c, msgInternalError)
+			}
+			srv.logger.WithFields(student.LogrusFields()).Debug("student found")
+			student.Active = false
+
+			if err := srv.store.Student().Update(student); err != nil {
+				srv.logger.Error(err)
+				return srv.respondAlert(c, msgInternalError)
+			}
+			srv.logger.WithFields(student.LogrusFields()).Debug("student updated")
+
+			return srv.studentRespond(c, callback)
+
+		case "unblock":
+			srv.logger.WithFields(logrus.Fields{
+				"id": callback.ID,
+			}).Debug("get student from database by id")
+			student, err := srv.store.Student().FindByID(callback.ID)
+			if err != nil {
+				srv.logger.Error(err)
+				return srv.respondAlert(c, msgInternalError)
+			}
+			srv.logger.WithFields(student.LogrusFields()).Debug("student found")
+			student.Active = true
+
+			if err := srv.store.Student().Update(student); err != nil {
+				srv.logger.Error(err)
+				return srv.respondAlert(c, msgInternalError)
+			}
+			srv.logger.WithFields(student.LogrusFields()).Debug("student updated")
+
+			return srv.studentRespond(c, callback)
+
 		case "get":
 			return srv.studentRespond(c, callback)
 

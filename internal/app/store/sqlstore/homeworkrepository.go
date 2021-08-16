@@ -47,6 +47,7 @@ func (r *HomeworkRepository) FindByStudentID(studentID int64) ([]*model.Homework
 		JOIN school sch ON sch.id = st.school_id
 		JOIN lesson les ON les.id = hw.lesson_id
 		WHERE hw.student_id = $1
+		ORDER BY les.title ASC
 		`,
 		studentID,
 	)
@@ -122,6 +123,7 @@ func (r *HomeworkRepository) FindBySchoolID(schoolID int64) ([]*model.Homework, 
 		JOIN school sch ON sch.id = st.school_id
 		JOIN lesson les ON les.id = hw.lesson_id
 		WHERE sch.id = $1
+		ORDER BY les.title ASC
 		`,
 		schoolID,
 	)
