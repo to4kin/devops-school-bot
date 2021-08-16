@@ -19,10 +19,7 @@ func (srv *server) handleUsers(c telebot.Context) error {
 	account, err := srv.store.Account().FindByTelegramID(int64(c.Sender().ID))
 	if err != nil {
 		srv.logger.Error(err)
-		return c.Respond(&telebot.CallbackResponse{
-			Text:      msgInternalError,
-			ShowAlert: true,
-		})
+		return srv.respondAlert(c, msgInternalError)
 	}
 	srv.logger.WithFields(account.LogrusFields()).Debug("account found")
 
@@ -46,10 +43,7 @@ func (srv *server) userRespond(c telebot.Context, callback *model.Callback) erro
 	account, err := srv.store.Account().FindByID(callback.ID)
 	if err != nil {
 		srv.logger.Error(err)
-		return c.Respond(&telebot.CallbackResponse{
-			Text:      msgInternalError,
-			ShowAlert: true,
-		})
+		return srv.respondAlert(c, msgInternalError)
 	}
 	srv.logger.WithFields(account.LogrusFields()).Debug("account found")
 
@@ -86,10 +80,7 @@ func (srv *server) usersNaviButtons(c telebot.Context, callback *model.Callback)
 	accounts, err := srv.store.Account().FindAll()
 	if err != nil {
 		srv.logger.Error(err)
-		return c.Respond(&telebot.CallbackResponse{
-			Text:      msgInternalError,
-			ShowAlert: true,
-		})
+		return srv.respondAlert(c, msgInternalError)
 	}
 	srv.logger.WithFields(logrus.Fields{
 		"count": len(accounts),

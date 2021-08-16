@@ -81,3 +81,10 @@ func (srv *server) respond(rw http.ResponseWriter, r *http.Request, code int, da
 		json.NewEncoder(rw).Encode(data)
 	}
 }
+
+func (srv *server) respondAlert(c telebot.Context, text string) error {
+	return c.Respond(&telebot.CallbackResponse{
+		Text:      text,
+		ShowAlert: true,
+	})
+}

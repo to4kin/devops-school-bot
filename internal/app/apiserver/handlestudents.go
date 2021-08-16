@@ -15,10 +15,7 @@ func (srv *server) studentRespond(c telebot.Context, callback *model.Callback) e
 	student, err := srv.store.Student().FindByID(callback.ID)
 	if err != nil {
 		srv.logger.Error(err)
-		return c.Respond(&telebot.CallbackResponse{
-			Text:      msgInternalError,
-			ShowAlert: true,
-		})
+		return srv.respondAlert(c, msgInternalError)
 	}
 	srv.logger.WithFields(student.LogrusFields()).Debug("student found")
 
@@ -48,10 +45,7 @@ func (srv *server) studentsNaviButtons(c telebot.Context, callback *model.Callba
 	students, err := srv.store.Student().FindBySchoolID(callback.ID)
 	if err != nil {
 		srv.logger.Error(err)
-		return c.Respond(&telebot.CallbackResponse{
-			Text:      msgInternalError,
-			ShowAlert: true,
-		})
+		return srv.respondAlert(c, msgInternalError)
 	}
 	srv.logger.WithFields(logrus.Fields{
 		"count": len(students),

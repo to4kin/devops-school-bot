@@ -20,10 +20,7 @@ func (srv *server) handleSchools(c telebot.Context) error {
 	account, err := srv.store.Account().FindByTelegramID(int64(c.Sender().ID))
 	if err != nil {
 		srv.logger.Error(err)
-		return c.Respond(&telebot.CallbackResponse{
-			Text:      msgInternalError,
-			ShowAlert: true,
-		})
+		return srv.respondAlert(c, msgInternalError)
 	}
 	srv.logger.WithFields(account.LogrusFields()).Debug("account found")
 
@@ -47,10 +44,7 @@ func (srv *server) schoolRespond(c telebot.Context, callback *model.Callback) er
 	school, err := srv.store.School().FindByID(callback.ID)
 	if err != nil {
 		srv.logger.Error(err)
-		return c.Respond(&telebot.CallbackResponse{
-			Text:      msgInternalError,
-			ShowAlert: true,
-		})
+		return srv.respondAlert(c, msgInternalError)
 	}
 	srv.logger.WithFields(school.LogrusFields()).Debug("school found")
 
@@ -126,10 +120,7 @@ func (srv *server) schoolsNaviButtons(c telebot.Context, callback *model.Callbac
 	schools, err := srv.store.School().FindAll()
 	if err != nil {
 		srv.logger.Error(err)
-		return c.Respond(&telebot.CallbackResponse{
-			Text:      msgInternalError,
-			ShowAlert: true,
-		})
+		return srv.respondAlert(c, msgInternalError)
 	}
 	srv.logger.WithFields(logrus.Fields{
 		"count": len(schools),
