@@ -30,6 +30,15 @@ func (r *LessonRepository) Create(l *model.Lesson) error {
 	return nil
 }
 
+// FindAll ...
+func (r *LessonRepository) FindAll() ([]*model.Lesson, error) {
+	if len(r.lessons) == 0 {
+		return nil, store.ErrRecordNotFound
+	}
+
+	return r.lessons, nil
+}
+
 // FindByID ...
 func (r *LessonRepository) FindByID(lessonID int64) (*model.Lesson, error) {
 	for _, l := range r.lessons {

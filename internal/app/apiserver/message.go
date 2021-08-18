@@ -28,7 +28,7 @@ var (
 
 	msgUserCreated                 string = "Hello, <b>%v!</b>\nAccount created successfully:\n\n" + msgUserInfo
 	msgUserExist                   string = "Hello, <b>%v!</b>\nAccount already exist:\n\n" + msgUserInfo
-	msgUserInfo                    string = "Account info:\n\nFirst name: %v\nLast name: %v\nUsername: %v\nSuperuser: %v"
+	msgUserInfo                    string = "Account info:\n\nFirst name: %v\nLast name: %v\nUsername: @%v\nSuperuser: %v"
 	msgUserInsufficientPermissions string = `you have insufficient permissions, please contact teachers or mentors`
 	msgUserNotJoined               string = `please join the school first`
 	msgUserAlreadyJoined           string = "you have already joined school <b>%v</b>\n\n" + sysHomeworkAdd
@@ -40,10 +40,11 @@ var (
 	msgSchoolFinished        string = `school <b>%v</b> finished`
 	msgSchoolInfo            string = "<b>%v</b>\n\nCreated: %v\nStudents: %v\nHomeworks: %v\nStatus: %v\n\nAccepted homeworks:\n%v"
 
-	msgStudentInfo string = "Student info:\n\nSchool: %v\nFirst name: %v\nLast name: %v\nStatus: %v\n\n" + sysHomeworkGuide + "\n\nHomeworks:\n%v"
+	msgStudentInfo string = "School: %v\n\nStudent info:\n\nFirst name: %v\nLast name: %v\nStatus: %v\n\n" + sysHomeworkGuide + "\n\nHomeworks:\n%v"
 
 	msgHomeworkNotProvided string = "you haven't submitted your homework yet\n\n" + sysHomeworkAdd
 	msgHomeworkReport      string = "Hello, @%v!\n\n" + sysHomeworkGuide + "\n\nYour progress in <b>%v</b>:\n"
+	msgHomeworkInfo        string = "School: %v\n\nHomework info:\n\nTitle: %v"
 
 	iconGreenCircle string = `🟢`
 	//iconYellowCircle string = `🟡`

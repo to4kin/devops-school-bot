@@ -221,6 +221,13 @@ func (srv *server) handleCallback(c telebot.Context) error {
 			return srv.studentRespond(c, callback)
 
 		}
+	case "homework":
+		switch callbackUnique {
+		case "homeworks_list", "next", "previous":
+			return srv.homeworksNaviButtons(c, callback)
+		case "get":
+			return srv.homeworkRespond(c, callback)
+		}
 	}
 
 	return srv.respondAlert(c, msgInternalError)

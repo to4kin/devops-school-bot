@@ -13,6 +13,11 @@ type Lesson struct {
 	Title string `json:"title"`
 }
 
+// GetID ...
+func (l *Lesson) GetID() int64 {
+	return l.ID
+}
+
 // Validate ...
 func (l *Lesson) Validate() error {
 	return validation.ValidateStruct(

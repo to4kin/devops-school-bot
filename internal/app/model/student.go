@@ -17,6 +17,11 @@ type Student struct {
 	Active  bool      `json:"active,string"`
 }
 
+// GetID ...
+func (s *Student) GetID() int64 {
+	return s.ID
+}
+
 // Validate ...
 func (s *Student) Validate() error {
 	return validation.ValidateStruct(

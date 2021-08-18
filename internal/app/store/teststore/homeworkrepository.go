@@ -30,6 +30,17 @@ func (r *HomeworkRepository) Create(h *model.Homework) error {
 	return nil
 }
 
+// FindByID ...
+func (r *HomeworkRepository) FindByID(id int64) (*model.Homework, error) {
+	for _, homework := range r.homeworks {
+		if homework.ID == id {
+			return homework, nil
+		}
+	}
+
+	return nil, store.ErrRecordNotFound
+}
+
 // FindByStudentID ...
 func (r *HomeworkRepository) FindByStudentID(studentID int64) ([]*model.Homework, error) {
 	hw := []*model.Homework{}

@@ -20,6 +20,23 @@ func TestLessonRepository_Create(t *testing.T) {
 	assert.NotNil(t, l)
 }
 
+func TestLesson_FindAll(t *testing.T) {
+	db, teardown := sqlstore.TestDb(t, databaseURL, migrations)
+	defer teardown("lesson")
+
+	s := sqlstore.New(db)
+	l := model.TestLesson(t)
+
+	_, err := s.Lesson().FindAll()
+	assert.EqualError(t, err, store.ErrRecordNotFound.Error())
+
+	assert.NoError(t, s.Lesson().Create(l))
+
+	lessons, err := s.Lesson().FindAll()
+	assert.NoError(t, err)
+	assert.NotNil(t, lessons)
+}
+
 func TestLesson_FindByID(t *testing.T) {
 	db, teardown := sqlstore.TestDb(t, databaseURL, migrations)
 	defer teardown("lesson")

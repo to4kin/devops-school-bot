@@ -24,6 +24,7 @@ type SchoolRepository interface {
 // LessonRepository ...
 type LessonRepository interface {
 	Create(*model.Lesson) error
+	FindAll() ([]*model.Lesson, error)
 	FindByID(int64) (*model.Lesson, error)
 	FindByTitle(string) (*model.Lesson, error)
 	FindBySchoolID(int64) ([]*model.Lesson, error)
@@ -42,6 +43,7 @@ type StudentRepository interface {
 // HomeworkRepository ...
 type HomeworkRepository interface {
 	Create(*model.Homework) error
+	FindByID(int64) (*model.Homework, error)
 	FindByStudentID(int64) ([]*model.Homework, error)
 	FindBySchoolID(int64) ([]*model.Homework, error)
 	FindByStudentIDLessonID(int64, int64) (*model.Homework, error)

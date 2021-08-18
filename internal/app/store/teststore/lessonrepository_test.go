@@ -19,7 +19,21 @@ func TestLesson_Create(t *testing.T) {
 	assert.EqualError(t, s.Lesson().Create(l), store.ErrRecordIsExist.Error())
 }
 
-func TestLesson_Find(t *testing.T) {
+func TestLesson_FindAll(t *testing.T) {
+	s := teststore.New()
+	l := model.TestLesson(t)
+
+	_, err := s.Lesson().FindAll()
+	assert.EqualError(t, err, store.ErrRecordNotFound.Error())
+
+	assert.NoError(t, s.Lesson().Create(l))
+
+	lessons, err := s.Lesson().FindAll()
+	assert.NoError(t, err)
+	assert.NotNil(t, lessons)
+}
+
+func TestLesson_FindByID(t *testing.T) {
 	s := teststore.New()
 	l := model.TestLesson(t)
 

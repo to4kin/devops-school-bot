@@ -33,10 +33,20 @@ func (srv *server) studentRespond(c telebot.Context, callback *model.Callback) e
 	}
 
 	backCallback := &model.Callback{
-		Type: callback.Type,
-		ID:   student.School.ID,
+		Type: "student",
+		ID:   student.ID,
 	}
 	rows = append(rows, replyMarkup.Row(replyMarkup.Data("<< Back to student list", "students_list", backCallback.ToString())))
+
+	schoolCallback := &model.Callback{
+		Type: "school",
+		ID:   student.School.ID,
+	}
+
+	toSchool := replyMarkup.Data("<< Back to school", "get", schoolCallback.ToString())
+	toSchoolList := replyMarkup.Data("<< Back to school list", "schools_list", schoolCallback.ToString())
+	rows = append(rows, replyMarkup.Row(toSchool, toSchoolList))
+
 	replyMarkup.Inline(rows...)
 
 	srv.logger.WithFields(logrus.Fields{
@@ -100,9 +110,19 @@ func (srv *server) studentRespond(c telebot.Context, callback *model.Callback) e
 
 func (srv *server) studentsNaviButtons(c telebot.Context, callback *model.Callback) error {
 	srv.logger.WithFields(logrus.Fields{
-		"school_id": callback.ID,
+		"id": callback.ID,
+	}).Debug("get student from database by id")
+	student, err := srv.store.Student().FindByID(callback.ID)
+	if err != nil {
+		srv.logger.Error(err)
+		return srv.respondAlert(c, msgInternalError)
+	}
+	srv.logger.WithFields(student.LogrusFields()).Debug("student found")
+
+	srv.logger.WithFields(logrus.Fields{
+		"school_id": student.School.ID,
 	}).Debug("get all students by school_id")
-	students, err := srv.store.Student().FindBySchoolID(callback.ID)
+	students, err := srv.store.Student().FindBySchoolID(student.School.ID)
 	if err != nil {
 		srv.logger.Error(err)
 		return srv.respondAlert(c, msgInternalError)
@@ -111,19 +131,11 @@ func (srv *server) studentsNaviButtons(c telebot.Context, callback *model.Callba
 		"count": len(students),
 	}).Debug("students found")
 
-	page := 0
-	for i, student := range students {
-		if callback.ID == student.ID {
-			page = i / (maxRows * 2)
-			break
-		}
-	}
-
 	var buttons []telebot.Btn
 	replyMarkup := &telebot.ReplyMarkup{}
 	for _, student := range students {
 		studentCallback := &model.Callback{
-			Type: callback.Type,
+			Type: "student",
 			ID:   student.ID,
 		}
 
@@ -135,55 +147,22 @@ func (srv *server) studentsNaviButtons(c telebot.Context, callback *model.Callba
 		buttons = append(buttons, replyMarkup.Data(text, "get", studentCallback.ToString()))
 	}
 
-	var rows []telebot.Row
-	div, mod := len(students)/2, len(students)%2
-
-	nextCallback := &model.Callback{
-		Type: callback.Type,
+	var interfaceSlice []model.Interface = make([]model.Interface, len(students))
+	for i, v := range students {
+		interfaceSlice[i] = v
 	}
-
-	previousCallback := &model.Callback{
-		Type: callback.Type,
-	}
-
-	if div >= maxRows*(page+1) {
-		for i := maxRows * page; i < maxRows*(page+1); i++ {
-			rows = append(rows, replyMarkup.Row(buttons[i*2], buttons[i*2+1]))
-		}
-
-		nextCallback.ID = students[maxRows*2*(page+1)].ID
-		btnNext := replyMarkup.Data("Next page >>", "next", nextCallback.ToString())
-
-		if page > 0 {
-			previousCallback.ID = students[maxRows*2*(page-1)].ID
-			btnPrevious := replyMarkup.Data("<< Previous page", "previous", previousCallback.ToString())
-
-			rows = append(rows, replyMarkup.Row(btnPrevious, btnNext))
-		} else {
-			rows = append(rows, replyMarkup.Row(btnNext))
-		}
-	} else {
-		for i := maxRows * page; i < div; i++ {
-			rows = append(rows, replyMarkup.Row(buttons[i*2], buttons[i*2+1]))
-		}
-		if mod != 0 {
-			rows = append(rows, replyMarkup.Row(buttons[div*2]))
-		}
-		if page > 0 {
-			previousCallback.ID = students[maxRows*2*(page-1)].ID
-			btnPrevious := replyMarkup.Data("<< Previous page", "previous", previousCallback.ToString())
-
-			rows = append(rows, replyMarkup.Row(btnPrevious))
-		}
-	}
+	rows := naviButtons(interfaceSlice, buttons, callback)
 
 	schoolCallback := &model.Callback{
 		Type: "school",
-		ID:   callback.ID,
+		ID:   student.School.ID,
 	}
 
-	rows = append(rows, replyMarkup.Row(replyMarkup.Data("<< Back to school", "get", schoolCallback.ToString())))
+	toSchool := replyMarkup.Data("<< Back to school", "get", schoolCallback.ToString())
+	toSchoolList := replyMarkup.Data("<< Back to school list", "schools_list", schoolCallback.ToString())
+
+	rows = append(rows, replyMarkup.Row(toSchool, toSchoolList))
 
 	replyMarkup.Inline(rows...)
-	return c.EditOrSend("Choose a student from the list below:", replyMarkup)
+	return c.EditOrSend(fmt.Sprintf("School: %v\n\nChoose a student from the list below:", student.School.Title), replyMarkup)
 }

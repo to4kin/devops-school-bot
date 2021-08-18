@@ -30,6 +30,62 @@ func (r *HomeworkRepository) Create(h *model.Homework) error {
 	)
 }
 
+// FindByID ...
+func (r *HomeworkRepository) FindByID(id int64) (*model.Homework, error) {
+	h := &model.Homework{
+		Student: &model.Student{
+			Account: &model.Account{},
+			School:  &model.School{},
+		},
+		Lesson: &model.Lesson{},
+	}
+
+	if err := r.store.db.QueryRow(`
+		SELECT hw.id, hw.created, hw.message_id, hw.verify,
+			st.id, st.created, st.active,
+			acc.id, acc.created, acc.telegram_id, acc.first_name, acc.last_name, acc.username, acc.superuser,
+			sch.id, sch.created, sch.title, sch.active,
+			les.id, les.title
+		FROM homework hw
+		JOIN student st ON st.id = hw.student_id
+		JOIN account acc ON acc.id = st.account_id
+		JOIN school sch ON sch.id = st.school_id
+		JOIN lesson les ON les.id = hw.lesson_id
+		WHERE hw.id = $1
+		`,
+		id,
+	).Scan(
+		&h.ID,
+		&h.Created,
+		&h.MessageID,
+		&h.Verify,
+		&h.Student.ID,
+		&h.Student.Created,
+		&h.Student.Active,
+		&h.Student.Account.ID,
+		&h.Student.Account.Created,
+		&h.Student.Account.TelegramID,
+		&h.Student.Account.FirstName,
+		&h.Student.Account.LastName,
+		&h.Student.Account.Username,
+		&h.Student.Account.Superuser,
+		&h.Student.School.ID,
+		&h.Student.Account.Created,
+		&h.Student.School.Title,
+		&h.Student.School.Active,
+		&h.Lesson.ID,
+		&h.Lesson.Title,
+	); err != nil {
+		if err == sql.ErrNoRows {
+			return nil, store.ErrRecordNotFound
+		}
+
+		return nil, err
+	}
+
+	return h, nil
+}
+
 // FindByStudentID ...
 func (r *HomeworkRepository) FindByStudentID(studentID int64) ([]*model.Homework, error) {
 	rowsCount := 0

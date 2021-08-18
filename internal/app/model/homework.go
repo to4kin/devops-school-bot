@@ -18,6 +18,11 @@ type Homework struct {
 	Verify    bool      `json:"verify"`
 }
 
+// GetID ...
+func (h *Homework) GetID() int64 {
+	return h.ID
+}
+
 // Validate ...
 func (h *Homework) Validate() error {
 	return validation.ValidateStruct(

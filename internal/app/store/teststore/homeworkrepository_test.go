@@ -23,6 +23,24 @@ func TestHomeworkRepository_Create(t *testing.T) {
 	assert.EqualError(t, s.Homework().Create(h), store.ErrRecordIsExist.Error())
 }
 
+func TestHomeworkRepository_FindByID(t *testing.T) {
+	s := teststore.New()
+	h := model.TestHomework(t)
+
+	_, err := s.Homework().FindByID(h.ID)
+	assert.EqualError(t, err, store.ErrRecordNotFound.Error())
+
+	assert.NoError(t, s.Account().Create(h.Student.Account))
+	assert.NoError(t, s.School().Create(h.Student.School))
+	assert.NoError(t, s.Student().Create(h.Student))
+	assert.NoError(t, s.Lesson().Create(h.Lesson))
+	assert.NoError(t, s.Homework().Create(h))
+
+	homework, err := s.Homework().FindByID(h.ID)
+	assert.NoError(t, err)
+	assert.NotNil(t, homework)
+}
+
 func TestHomeworkRepository_FindByStudentID(t *testing.T) {
 	s := teststore.New()
 	h := model.TestHomework(t)

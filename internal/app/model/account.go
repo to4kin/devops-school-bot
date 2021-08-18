@@ -19,6 +19,11 @@ type Account struct {
 	Superuser  bool      `json:"superuser,string"`
 }
 
+// GetID ...
+func (a *Account) GetID() int64 {
+	return a.ID
+}
+
 // Validate ...
 func (a *Account) Validate() error {
 	return validation.ValidateStruct(

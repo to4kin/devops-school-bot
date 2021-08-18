@@ -26,6 +26,46 @@ func (r *LessonRepository) Create(l *model.Lesson) error {
 	)
 }
 
+// FindAll ...
+func (r *LessonRepository) FindAll() ([]*model.Lesson, error) {
+	rowsCount := 0
+	lessons := []*model.Lesson{}
+
+	rows, err := r.store.db.Query(`
+		SELECT id, title FROM lesson ORDER BY title ASC
+		`,
+	)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		rowsCount++
+
+		l := &model.Lesson{}
+
+		if err := rows.Scan(
+			&l.ID,
+			&l.Title,
+		); err != nil {
+			return nil, err
+		}
+
+		lessons = append(lessons, l)
+	}
+
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+
+	if rowsCount == 0 {
+		return nil, store.ErrRecordNotFound
+	}
+
+	return lessons, nil
+}
+
 // FindByID ...
 func (r *LessonRepository) FindByID(lessonID int64) (*model.Lesson, error) {
 	l := &model.Lesson{}

@@ -86,65 +86,21 @@ func (srv *server) usersNaviButtons(c telebot.Context, callback *model.Callback)
 		"count": len(accounts),
 	}).Debug("accounts found")
 
-	page := 0
-	for i, account := range accounts {
-		if callback.ID == account.ID {
-			page = i / (maxRows * 2)
-			break
-		}
-	}
-
 	var buttons []telebot.Btn
 	replyMarkup := &telebot.ReplyMarkup{}
 	for _, account := range accounts {
 		accountCallback := &model.Callback{
-			Type: callback.Type,
+			Type: "account",
 			ID:   account.ID,
 		}
-		buttons = append(buttons, replyMarkup.Data(account.Username, "get", accountCallback.ToString()))
+		buttons = append(buttons, replyMarkup.Data("@"+account.Username, "get", accountCallback.ToString()))
 	}
 
-	var rows []telebot.Row
-	div, mod := len(accounts)/2, len(accounts)%2
-
-	nextCallback := &model.Callback{
-		Type: callback.Type,
+	var interfaceSlice []model.Interface = make([]model.Interface, len(accounts))
+	for i, v := range accounts {
+		interfaceSlice[i] = v
 	}
-
-	previousCallback := &model.Callback{
-		Type: callback.Type,
-	}
-
-	if div >= maxRows*(page+1) {
-		for i := maxRows * page; i < maxRows*(page+1); i++ {
-			rows = append(rows, replyMarkup.Row(buttons[i*2], buttons[i*2+1]))
-		}
-
-		nextCallback.ID = accounts[maxRows*2*(page+1)].ID
-		btnNext := replyMarkup.Data("Next page >>", "next", nextCallback.ToString())
-
-		if page > 0 {
-			previousCallback.ID = accounts[maxRows*2*(page-1)].ID
-			btnPrevious := replyMarkup.Data("<< Previous page", "previous", previousCallback.ToString())
-
-			rows = append(rows, replyMarkup.Row(btnPrevious, btnNext))
-		} else {
-			rows = append(rows, replyMarkup.Row(btnNext))
-		}
-	} else {
-		for i := maxRows * page; i < div; i++ {
-			rows = append(rows, replyMarkup.Row(buttons[i*2], buttons[i*2+1]))
-		}
-		if mod != 0 {
-			rows = append(rows, replyMarkup.Row(buttons[div*2]))
-		}
-		if page > 0 {
-			previousCallback.ID = accounts[maxRows*2*(page-1)].ID
-			btnPrevious := replyMarkup.Data("<< Previous page", "previous", previousCallback.ToString())
-
-			rows = append(rows, replyMarkup.Row(btnPrevious))
-		}
-	}
+	rows := naviButtons(interfaceSlice, buttons, callback)
 
 	replyMarkup.Inline(rows...)
 	return c.EditOrSend("Choose a user from the list below:", replyMarkup)

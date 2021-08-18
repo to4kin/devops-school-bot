@@ -92,9 +92,16 @@ func (srv *server) schoolRespond(c telebot.Context, callback *model.Callback) er
 	if len(students) > 0 {
 		studentCallback := &model.Callback{
 			Type: "student",
-			ID:   school.ID,
+			ID:   students[0].ID,
 		}
 		rows = append(rows, replyMarkup.Row(replyMarkup.Data("Students", "students_list", studentCallback.ToString())))
+	}
+	if len(homeworks) > 0 {
+		homeworkCallback := &model.Callback{
+			Type: "homework",
+			ID:   homeworks[0].ID,
+		}
+		rows = append(rows, replyMarkup.Row(replyMarkup.Data("Homeworks", "homeworks_list", homeworkCallback.ToString())))
 	}
 
 	rows = append(rows, replyMarkup.Row(replyMarkup.Data("<< Back to school list", "schools_list", callback.ToString())))
@@ -138,19 +145,11 @@ func (srv *server) schoolsNaviButtons(c telebot.Context, callback *model.Callbac
 		"count": len(schools),
 	}).Debug("schools found")
 
-	page := 0
-	for i, school := range schools {
-		if callback.ID == school.ID {
-			page = i / (maxRows * 2)
-			break
-		}
-	}
-
 	var buttons []telebot.Btn
 	replyMarkup := &telebot.ReplyMarkup{}
 	for _, school := range schools {
 		schoolCallback := &model.Callback{
-			Type: callback.Type,
+			Type: "school",
 			ID:   school.ID,
 		}
 
@@ -162,47 +161,11 @@ func (srv *server) schoolsNaviButtons(c telebot.Context, callback *model.Callbac
 		buttons = append(buttons, replyMarkup.Data(text, "get", schoolCallback.ToString()))
 	}
 
-	var rows []telebot.Row
-	div, mod := len(schools)/2, len(schools)%2
-
-	nextCallback := &model.Callback{
-		Type: callback.Type,
+	var interfaceSlice []model.Interface = make([]model.Interface, len(schools))
+	for i, v := range schools {
+		interfaceSlice[i] = v
 	}
-
-	previousCallback := &model.Callback{
-		Type: callback.Type,
-	}
-
-	if div >= maxRows*(page+1) {
-		for i := maxRows * page; i < maxRows*(page+1); i++ {
-			rows = append(rows, replyMarkup.Row(buttons[i*2], buttons[i*2+1]))
-		}
-
-		nextCallback.ID = schools[maxRows*2*(page+1)].ID
-		btnNext := replyMarkup.Data("Next page >>", "next", nextCallback.ToString())
-
-		if page > 0 {
-			previousCallback.ID = schools[maxRows*2*(page-1)].ID
-			btnPrevious := replyMarkup.Data("<< Previous page", "previous", previousCallback.ToString())
-
-			rows = append(rows, replyMarkup.Row(btnPrevious, btnNext))
-		} else {
-			rows = append(rows, replyMarkup.Row(btnNext))
-		}
-	} else {
-		for i := maxRows * page; i < div; i++ {
-			rows = append(rows, replyMarkup.Row(buttons[i*2], buttons[i*2+1]))
-		}
-		if mod != 0 {
-			rows = append(rows, replyMarkup.Row(buttons[div*2]))
-		}
-		if page > 0 {
-			previousCallback.ID = schools[maxRows*2*(page-1)].ID
-			btnPrevious := replyMarkup.Data("<< Previous page", "previous", previousCallback.ToString())
-
-			rows = append(rows, replyMarkup.Row(btnPrevious))
-		}
-	}
+	rows := naviButtons(interfaceSlice, buttons, callback)
 
 	replyMarkup.Inline(rows...)
 	return c.EditOrSend("Choose a school from the list below:", replyMarkup)
