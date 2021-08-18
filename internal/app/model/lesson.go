@@ -18,6 +18,11 @@ func (l *Lesson) GetID() int64 {
 	return l.ID
 }
 
+// GetButtonTitle ...
+func (l *Lesson) GetButtonTitle() string {
+	return l.Title
+}
+
 // Validate ...
 func (l *Lesson) Validate() error {
 	return validation.ValidateStruct(

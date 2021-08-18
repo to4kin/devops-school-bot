@@ -24,6 +24,11 @@ func (a *Account) GetID() int64 {
 	return a.ID
 }
 
+// GetButtonTitle ...
+func (a *Account) GetButtonTitle() string {
+	return "@" + a.Username
+}
+
 // Validate ...
 func (a *Account) Validate() error {
 	return validation.ValidateStruct(

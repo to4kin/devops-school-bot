@@ -73,27 +73,18 @@ func (srv *server) homeworksNaviButtons(c telebot.Context, callback *model.Callb
 		"count": len(homeworks),
 	}).Debug("homeworks found")
 
-	var buttons []telebot.Btn
-	replyMarkup := &telebot.ReplyMarkup{}
-	for _, homework := range homeworks {
-		homeworktCallback := &model.Callback{
-			Type: "homework",
-			ID:   homework.ID,
-		}
-
-		buttons = append(buttons, replyMarkup.Data(homework.Lesson.Title, "get", homeworktCallback.ToString()))
-	}
-
 	var interfaceSlice []model.Interface = make([]model.Interface, len(homeworks))
 	for i, v := range homeworks {
 		interfaceSlice[i] = v
 	}
-	rows := naviButtons(interfaceSlice, buttons, callback)
+	rows := naviButtons(interfaceSlice, callback)
 
 	schoolCallback := &model.Callback{
 		Type: "school",
 		ID:   homework.Student.School.ID,
 	}
+
+	replyMarkup := &telebot.ReplyMarkup{}
 
 	toSchool := replyMarkup.Data("<< Back to school", "get", schoolCallback.ToString())
 	toSchoolList := replyMarkup.Data("<< Back to school list", "schools_list", schoolCallback.ToString())

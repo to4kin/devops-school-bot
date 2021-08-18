@@ -86,22 +86,13 @@ func (srv *server) usersNaviButtons(c telebot.Context, callback *model.Callback)
 		"count": len(accounts),
 	}).Debug("accounts found")
 
-	var buttons []telebot.Btn
-	replyMarkup := &telebot.ReplyMarkup{}
-	for _, account := range accounts {
-		accountCallback := &model.Callback{
-			Type: "account",
-			ID:   account.ID,
-		}
-		buttons = append(buttons, replyMarkup.Data("@"+account.Username, "get", accountCallback.ToString()))
-	}
-
 	var interfaceSlice []model.Interface = make([]model.Interface, len(accounts))
 	for i, v := range accounts {
 		interfaceSlice[i] = v
 	}
-	rows := naviButtons(interfaceSlice, buttons, callback)
+	rows := naviButtons(interfaceSlice, callback)
 
+	replyMarkup := &telebot.ReplyMarkup{}
 	replyMarkup.Inline(rows...)
 	return c.EditOrSend("Choose a user from the list below:", replyMarkup)
 }

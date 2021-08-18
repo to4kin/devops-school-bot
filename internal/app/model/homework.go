@@ -23,6 +23,11 @@ func (h *Homework) GetID() int64 {
 	return h.ID
 }
 
+// GetButtonTitle ...
+func (h *Homework) GetButtonTitle() string {
+	return h.Lesson.Title
+}
+
 // Validate ...
 func (h *Homework) Validate() error {
 	return validation.ValidateStruct(

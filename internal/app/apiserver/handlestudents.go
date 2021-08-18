@@ -131,32 +131,18 @@ func (srv *server) studentsNaviButtons(c telebot.Context, callback *model.Callba
 		"count": len(students),
 	}).Debug("students found")
 
-	var buttons []telebot.Btn
-	replyMarkup := &telebot.ReplyMarkup{}
-	for _, student := range students {
-		studentCallback := &model.Callback{
-			Type: "student",
-			ID:   student.ID,
-		}
-
-		text := fmt.Sprintf("%v %v", iconRedCircle, student.Account.Username)
-		if student.Active {
-			text = fmt.Sprintf("%v %v", iconGreenCircle, student.Account.Username)
-		}
-
-		buttons = append(buttons, replyMarkup.Data(text, "get", studentCallback.ToString()))
-	}
-
 	var interfaceSlice []model.Interface = make([]model.Interface, len(students))
 	for i, v := range students {
 		interfaceSlice[i] = v
 	}
-	rows := naviButtons(interfaceSlice, buttons, callback)
+	rows := naviButtons(interfaceSlice, callback)
 
 	schoolCallback := &model.Callback{
 		Type: "school",
 		ID:   student.School.ID,
 	}
+
+	replyMarkup := &telebot.ReplyMarkup{}
 
 	toSchool := replyMarkup.Data("<< Back to school", "get", schoolCallback.ToString())
 	toSchoolList := replyMarkup.Data("<< Back to school list", "schools_list", schoolCallback.ToString())

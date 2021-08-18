@@ -2,6 +2,7 @@ package apiserver
 
 import (
 	"fmt"
+	"sort"
 	"strconv"
 
 	"github.com/sirupsen/logrus"
@@ -112,9 +113,16 @@ func (srv *server) schoolRespond(c telebot.Context, callback *model.Callback) er
 		lessons[homework.Lesson.Title]++
 	}
 
+	// TODO: Go runs from a random offset for map iteration. We need a workaround if we need a sorted output for map
+	var keys []string
+	for k := range lessons {
+		keys = append(keys, k)
+	}
+	sort.Strings(keys)
+
 	text := ""
-	for title, count := range lessons {
-		text += fmt.Sprintf("%v - %v\n", title, strconv.Itoa(count))
+	for _, k := range keys {
+		text += fmt.Sprintf("%v - %v\n", k, strconv.Itoa(lessons[k]))
 	}
 
 	return c.EditOrSend(
@@ -145,28 +153,13 @@ func (srv *server) schoolsNaviButtons(c telebot.Context, callback *model.Callbac
 		"count": len(schools),
 	}).Debug("schools found")
 
-	var buttons []telebot.Btn
-	replyMarkup := &telebot.ReplyMarkup{}
-	for _, school := range schools {
-		schoolCallback := &model.Callback{
-			Type: "school",
-			ID:   school.ID,
-		}
-
-		text := fmt.Sprintf("%v %v", iconRedCircle, school.Title)
-		if school.Active {
-			text = fmt.Sprintf("%v %v", iconGreenCircle, school.Title)
-		}
-
-		buttons = append(buttons, replyMarkup.Data(text, "get", schoolCallback.ToString()))
-	}
-
 	var interfaceSlice []model.Interface = make([]model.Interface, len(schools))
 	for i, v := range schools {
 		interfaceSlice[i] = v
 	}
-	rows := naviButtons(interfaceSlice, buttons, callback)
+	rows := naviButtons(interfaceSlice, callback)
 
+	replyMarkup := &telebot.ReplyMarkup{}
 	replyMarkup.Inline(rows...)
 	return c.EditOrSend("Choose a school from the list below:", replyMarkup)
 }

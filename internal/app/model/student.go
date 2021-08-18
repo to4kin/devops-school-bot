@@ -22,6 +22,15 @@ func (s *Student) GetID() int64 {
 	return s.ID
 }
 
+// GetButtonTitle ...
+func (s *Student) GetButtonTitle() string {
+	if s.Active {
+		return "🟢 @" + s.Account.Username
+	}
+
+	return "🔴 @" + s.Account.Username
+}
+
 // Validate ...
 func (s *Student) Validate() error {
 	return validation.ValidateStruct(
