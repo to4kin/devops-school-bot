@@ -1,6 +1,6 @@
 package model
 
-// Helper ...
+// Interface ...
 type Interface interface {
 	GetID() int64
 }
