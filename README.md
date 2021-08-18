@@ -69,10 +69,28 @@ There're two types of telegram chat where the bot is accepting commands: `privat
 | ------- | ----- | ----------- |
 | /start  | **Supersuser** | Start school with name == title |
 | /finish | **Supersuser** | Finish school. Homeworks are not accepted after school finished |
+| /report | **Supersuser** | Provide school progress |
+| /bigreport | **Supersuser** | Provide school progress with homework list |
 | /join   | User | Add user to school as student |
-| /myreport | User | Provide the school progress |
+| /myreport | User | Provide school progress |
+| /homeworks | User | Provide the homework list |
 | /help   | User | Help message | 
 
 To add homework, use the work hashtag along with the **#homework**, for example:
 
 **#homework #cicd**
+
+### For BotFather
+
+```
+start - Group: Start school (Superuser). Private: Add user to database
+finish - Group: Finish school (Superuser)
+join - Group: Add user to school as student
+myreport - Group: School progress
+report - Group: School progress (Superuser)
+bigreport - Group: School progress with homework list (Superuser)
+homeworks - Group: homework list
+schools - Private: Interface to manage schools (Superuser)
+users - Private: Interface to manage users (Superuser)
+help - All: Help message
+```

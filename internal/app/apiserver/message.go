@@ -17,11 +17,14 @@ var (
 	msgUserGroupCmd string = `
 /join - will add you to school
 /myreport - will return your progress in school
+/homeworks - will return homework list
 /help - will return this help message`
 	msgSuperuserGroupCmd string = `
 <b>Superuser only</b>
 /start - will create and start school
-/finish - will finish current school`
+/finish - will finish current school
+/report - will return school progress
+/bigreport - will return school progress with homework list`
 
 	msgWelcomeToSchool string = "<b>Welcome to %v!</b>\n\nI'll manage all your progress and provide the report if needed.\n" +
 		sysHomeworkAdd + "\n\n" + sysHomeworkGuide
@@ -30,7 +33,7 @@ var (
 	msgUserExist                   string = "Hello, <b>%v!</b>\nAccount already exist:\n\n" + msgUserInfo
 	msgUserInfo                    string = "Account info:\n\nFirst name: %v\nLast name: %v\nUsername: @%v\nSuperuser: %v"
 	msgUserInsufficientPermissions string = `you have insufficient permissions, please contact teachers or mentors`
-	msgUserNotJoined               string = `please join the school first`
+	msgUserNotJoined               string = `please join school first`
 	msgUserAlreadyJoined           string = "you have already joined school <b>%v</b>\n\n" + sysHomeworkAdd
 
 	msgSchoolNotFound        string = `school not started, please contact teachers or mentors`
@@ -45,6 +48,8 @@ var (
 	msgHomeworkNotProvided string = "you haven't submitted your homework yet\n\n" + sysHomeworkAdd
 	msgHomeworkReport      string = "Hello, @%v!\n\n" + sysHomeworkGuide + "\n\nYour progress in <b>%v</b>:\n"
 	msgHomeworkInfo        string = "School: %v\n\nHomework info:\n\nTitle: %v"
+
+	msgReport string = "Academic performance\n\n<b><u>Name - Accepted/Not Provided - Type</u></b>\n"
 
 	iconGreenCircle string = `🟢`
 	//iconYellowCircle string = `🟡`

@@ -3,7 +3,6 @@ package apiserver
 import (
 	"fmt"
 	"sort"
-	"strconv"
 
 	"github.com/sirupsen/logrus"
 	"gitlab.devops.telekom.de/tvpp/prototypes/devops-school-bot/internal/app/model"
@@ -122,7 +121,7 @@ func (srv *server) schoolRespond(c telebot.Context, callback *model.Callback) er
 
 	text := ""
 	for _, k := range keys {
-		text += fmt.Sprintf("%v - %v\n", k, strconv.Itoa(lessons[k]))
+		text += fmt.Sprintf("%v - %d\n", k, lessons[k])
 	}
 
 	return c.EditOrSend(
