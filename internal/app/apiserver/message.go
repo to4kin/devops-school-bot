@@ -7,30 +7,32 @@ var (
 
 	msgInternalError string = "Internal Server Error!\n\nSomething has gone wrong on the server"
 
-	msgHelpCommand    string = "I'll manage students homeworks\n\n<b>Commands</b>"
-	msgUserPrivateCmd string = `
-/start - will add you to the database for future use`
-	msgSuperuserPrivateCmd string = `
-<b>Superuser only</b>
-/schools - will provide the interface to manage schools
-/users - will provide the interface to manage users`
-	msgUserGroupCmd string = `
-/join - will add you to school
-/myreport - will return your progress in school
-/homeworks - will return homework list
-/help - will return this help message`
-	msgSuperuserGroupCmd string = `
-<b>Superuser only</b>
-/start - will create and start school
-/finish - will finish current school
-/report - will return school progress
-/bigreport - will return school progress with homework list`
+	msgHelpCommand string = `I'll manage students homeworks
+
+<b>Abbreviation</b>
+[GC] - Commands available in <b>Group chats</b>
+[PC] - Commands available in <b>Private chat</b> with bot
+[All] - Commands available in <b>All chats</b>
+[Admin] - Commands available only for bot <b>Administrators</b>
+
+<b>Commands</b>
+/start - <b>[GC][Admin]</b>: Start school. <b>[PC]</b>: Add user to database
+/finish - <b>[GC][Admin]</b>: Finish school
+/report - <b>[GC][Admin]</b>: School progress
+/fullreport - <b>[GC][Admin]</b>: School progress with homework list
+/join - <b>[GC]</b>: Join school as student
+/myreport - <b>[GC]</b>: Your progress
+/homeworks - <b>[GC]</b>: Homework list
+/schools - <b>[PC][Admin]</b>: Manage schools
+/users - <b>[PC][Admin]</b>: Manage users
+/help - <b>[All]</b>: Help message
+`
 
 	msgWelcomeToSchool string = "<b>Welcome to %v!</b>\n\nI'll manage all your progress and provide the report if needed.\n" +
 		sysHomeworkAdd + "\n\n" + sysHomeworkGuide
 
-	msgUserCreated                 string = "Hello, <b>%v!</b>\nAccount created successfully:\n\n" + msgUserInfo
-	msgUserExist                   string = "Hello, <b>%v!</b>\nAccount already exist:\n\n" + msgUserInfo
+	msgUserCreated                 string = "Hello, <b>%v!</b>\nAccount created successfully!\n\n" + msgUserInfo
+	msgUserExist                   string = "Hello, <b>%v!</b>\nAccount already exist!\n\n" + msgUserInfo
 	msgUserInfo                    string = "Account info:\n\nFirst name: %v\nLast name: %v\nUsername: @%v\nSuperuser: %v"
 	msgUserInsufficientPermissions string = `you have insufficient permissions, please contact teachers or mentors`
 	msgUserNotJoined               string = `please join school first`
@@ -43,11 +45,13 @@ var (
 	msgSchoolFinished        string = `school <b>%v</b> finished`
 	msgSchoolInfo            string = "<b>%v</b>\n\nCreated: %v\nStudents: %v\nHomeworks: %v\nStatus: %v\n\nAccepted homeworks:\n%v"
 
+	//msgStudentIsBlocked string = "Your student account was blocked!\n\nPlease contact mentors or teachers"
 	msgStudentInfo string = "School: %v\n\nStudent info:\n\nFirst name: %v\nLast name: %v\nStatus: %v\n\n" + sysHomeworkGuide + "\n\nHomeworks:\n%v"
 
 	msgHomeworkNotProvided string = "you haven't submitted your homework yet\n\n" + sysHomeworkAdd
 	msgHomeworkReport      string = "Hello, @%v!\n\n" + sysHomeworkGuide + "\n\nYour progress in <b>%v</b>:\n"
 	msgHomeworkInfo        string = "School: %v\n\nHomework info:\n\nTitle: %v"
+	msgHomeworkList        string = "<b>Homework list</b>\n\n"
 
 	msgReport string = "Academic performance\n\n<b><u>Name - Accepted/Not Provided - Type</u></b>\n"
 

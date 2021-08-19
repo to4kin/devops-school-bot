@@ -23,7 +23,7 @@ func (srv *server) handleCallback(c telebot.Context) error {
 	account, err := srv.store.Account().FindByTelegramID(int64(c.Sender().ID))
 	if err != nil {
 		srv.logger.Error(err)
-		return srv.respondAlert(c, msgInternalError)
+		return c.EditOrSend(msgInternalError, &telebot.SendOptions{ParseMode: "HTML"})
 	}
 	srv.logger.WithFields(account.LogrusFields()).Debug("account found")
 
@@ -36,7 +36,7 @@ func (srv *server) handleCallback(c telebot.Context) error {
 	callbackData := strings.Split(c.Callback().Data[1:], "|")
 
 	if len(callbackData) < 2 {
-		return srv.respondAlert(c, msgInternalError)
+		return c.EditOrSend(msgInternalError, &telebot.SendOptions{ParseMode: "HTML"})
 	}
 
 	// TODO: c.Callback().Unique is not populated, it is added to c.Callback().Data. Bug?
@@ -64,13 +64,13 @@ func (srv *server) handleCallback(c telebot.Context) error {
 			school, err := srv.store.School().FindByID(callback.ID)
 			if err != nil {
 				srv.logger.Error(err)
-				return srv.respondAlert(c, msgInternalError)
+				return c.EditOrSend(msgInternalError, &telebot.SendOptions{ParseMode: "HTML"})
 			}
 			srv.logger.WithFields(school.LogrusFields()).Debug("school found")
 			school.Active = true
 			if err := srv.store.School().Update(school); err != nil {
 				srv.logger.Error(err)
-				return srv.respondAlert(c, msgInternalError)
+				return c.EditOrSend(msgInternalError, &telebot.SendOptions{ParseMode: "HTML"})
 			}
 			srv.logger.WithFields(school.LogrusFields()).Debug("school re-activated")
 
@@ -83,13 +83,13 @@ func (srv *server) handleCallback(c telebot.Context) error {
 			school, err := srv.store.School().FindByID(callback.ID)
 			if err != nil {
 				srv.logger.Error(err)
-				return srv.respondAlert(c, msgInternalError)
+				return c.EditOrSend(msgInternalError, &telebot.SendOptions{ParseMode: "HTML"})
 			}
 			srv.logger.WithFields(school.LogrusFields()).Debug("school found")
 			school.Active = false
 			if err := srv.store.School().Update(school); err != nil {
 				srv.logger.Error(err)
-				return srv.respondAlert(c, msgInternalError)
+				return c.EditOrSend(msgInternalError, &telebot.SendOptions{ParseMode: "HTML"})
 			}
 			srv.logger.WithFields(school.LogrusFields()).Debug("school finished")
 
@@ -110,19 +110,22 @@ func (srv *server) handleCallback(c telebot.Context) error {
 			account, err := srv.store.Account().FindByID(callback.ID)
 			if err != nil {
 				srv.logger.Error(err)
-				return srv.respondAlert(c, msgInternalError)
+				return c.EditOrSend(msgInternalError, &telebot.SendOptions{ParseMode: "HTML"})
 			}
 			srv.logger.WithFields(account.LogrusFields()).Debug("account found")
 
 			if account.FirstName == c.Sender().FirstName &&
 				account.LastName == c.Sender().LastName &&
 				account.Username == c.Sender().Username {
-				return srv.respondAlert(c, "User account is up to date.\nNothing to update!")
+				return c.Respond(&telebot.CallbackResponse{
+					Text:      "User account is up to date.\nNothing to update!",
+					ShowAlert: true,
+				})
 			}
 
 			if err := srv.store.Account().Update(account); err != nil {
 				srv.logger.Error(err)
-				return srv.respondAlert(c, msgInternalError)
+				return c.EditOrSend(msgInternalError, &telebot.SendOptions{ParseMode: "HTML"})
 			}
 			srv.logger.WithFields(account.LogrusFields()).Debug("account updated")
 
@@ -135,14 +138,14 @@ func (srv *server) handleCallback(c telebot.Context) error {
 			account, err := srv.store.Account().FindByID(callback.ID)
 			if err != nil {
 				srv.logger.Error(err)
-				return srv.respondAlert(c, msgInternalError)
+				return c.EditOrSend(msgInternalError, &telebot.SendOptions{ParseMode: "HTML"})
 			}
 			srv.logger.WithFields(account.LogrusFields()).Debug("account found")
 			account.Superuser = true
 
 			if err := srv.store.Account().Update(account); err != nil {
 				srv.logger.Error(err)
-				return srv.respondAlert(c, msgInternalError)
+				return c.EditOrSend(msgInternalError, &telebot.SendOptions{ParseMode: "HTML"})
 			}
 			srv.logger.WithFields(account.LogrusFields()).Debug("account updated")
 
@@ -155,14 +158,14 @@ func (srv *server) handleCallback(c telebot.Context) error {
 			account, err := srv.store.Account().FindByID(callback.ID)
 			if err != nil {
 				srv.logger.Error(err)
-				return srv.respondAlert(c, msgInternalError)
+				return c.EditOrSend(msgInternalError, &telebot.SendOptions{ParseMode: "HTML"})
 			}
 			srv.logger.WithFields(account.LogrusFields()).Debug("account found")
 			account.Superuser = false
 
 			if err := srv.store.Account().Update(account); err != nil {
 				srv.logger.Error(err)
-				return srv.respondAlert(c, msgInternalError)
+				return c.EditOrSend(msgInternalError, &telebot.SendOptions{ParseMode: "HTML"})
 			}
 			srv.logger.WithFields(account.LogrusFields()).Debug("account updated")
 
@@ -184,14 +187,14 @@ func (srv *server) handleCallback(c telebot.Context) error {
 			student, err := srv.store.Student().FindByID(callback.ID)
 			if err != nil {
 				srv.logger.Error(err)
-				return srv.respondAlert(c, msgInternalError)
+				return c.EditOrSend(msgInternalError, &telebot.SendOptions{ParseMode: "HTML"})
 			}
 			srv.logger.WithFields(student.LogrusFields()).Debug("student found")
 			student.Active = false
 
 			if err := srv.store.Student().Update(student); err != nil {
 				srv.logger.Error(err)
-				return srv.respondAlert(c, msgInternalError)
+				return c.EditOrSend(msgInternalError, &telebot.SendOptions{ParseMode: "HTML"})
 			}
 			srv.logger.WithFields(student.LogrusFields()).Debug("student updated")
 
@@ -204,14 +207,14 @@ func (srv *server) handleCallback(c telebot.Context) error {
 			student, err := srv.store.Student().FindByID(callback.ID)
 			if err != nil {
 				srv.logger.Error(err)
-				return srv.respondAlert(c, msgInternalError)
+				return c.EditOrSend(msgInternalError, &telebot.SendOptions{ParseMode: "HTML"})
 			}
 			srv.logger.WithFields(student.LogrusFields()).Debug("student found")
 			student.Active = true
 
 			if err := srv.store.Student().Update(student); err != nil {
 				srv.logger.Error(err)
-				return srv.respondAlert(c, msgInternalError)
+				return c.EditOrSend(msgInternalError, &telebot.SendOptions{ParseMode: "HTML"})
 			}
 			srv.logger.WithFields(student.LogrusFields()).Debug("student updated")
 
@@ -230,5 +233,5 @@ func (srv *server) handleCallback(c telebot.Context) error {
 		}
 	}
 
-	return srv.respondAlert(c, msgInternalError)
+	return c.EditOrSend(msgInternalError, &telebot.SendOptions{ParseMode: "HTML"})
 }

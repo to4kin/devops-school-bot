@@ -11,11 +11,6 @@ import (
 
 func (srv *server) handleHelp(c telebot.Context) error {
 	message := msgHelpCommand
-	if c.Message().Private() {
-		message += msgUserPrivateCmd
-	} else {
-		message += msgUserGroupCmd
-	}
 
 	srv.logger.WithFields(logrus.Fields{
 		"telegram_id": c.Sender().ID,
@@ -32,14 +27,10 @@ func (srv *server) handleHelp(c telebot.Context) error {
 
 		if account.Superuser {
 			if c.Message().Private() {
-				message += msgSuperuserPrivateCmd
-				message += "\n\n"
 				message += fmt.Sprintf(msgBotInfo, msgVersion, msgBuildDate, runtime.Version())
-			} else {
-				message += msgSuperuserGroupCmd
 			}
 		}
 	}
 
-	return c.Reply(message, &telebot.SendOptions{ParseMode: "HTML"})
+	return c.Reply(msgHelpCommand, &telebot.SendOptions{ParseMode: "HTML"})
 }

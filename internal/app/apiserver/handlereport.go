@@ -79,7 +79,7 @@ func (srv *server) handleReport(c telebot.Context) error {
 }
 
 func (srv *server) prepareReportMsg(students []*model.Student, lessons []*model.Lesson) (string, error) {
-	reportMessage := msgReport + "<code>"
+	reportMessage := msgReport + "<pre>"
 	for _, student := range students {
 		srv.logger.WithFields(logrus.Fields{
 			"student_id": student.ID,
@@ -111,7 +111,7 @@ func (srv *server) prepareReportMsg(students []*model.Student, lessons []*model.
 		reportMessage += fmt.Sprintf("%v %v - %d/%d - %v\n",
 			student.Account.FirstName, student.Account.LastName, acceptedHomework, notProvidedHomework, "student")
 	}
-	reportMessage += "</code>"
+	reportMessage += "</pre>"
 
 	return reportMessage, nil
 }

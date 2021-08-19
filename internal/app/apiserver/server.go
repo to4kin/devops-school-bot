@@ -52,7 +52,7 @@ func (srv *server) configureBotHandler() {
 	srv.bot.Handle("/join", srv.handleJoin)
 	srv.bot.Handle("/myreport", srv.handleMyReport)
 	srv.bot.Handle("/report", srv.handleReport)
-	srv.bot.Handle("/bigreport", srv.handleBigReport)
+	srv.bot.Handle("/fullreport", srv.handleFullReport)
 	srv.bot.Handle("/homeworks", srv.handleHomework)
 	srv.bot.Handle("/help", srv.handleHelp)
 	srv.bot.Handle("/schools", srv.handleSchools)
@@ -83,11 +83,4 @@ func (srv *server) respond(rw http.ResponseWriter, r *http.Request, code int, da
 	if data != nil {
 		json.NewEncoder(rw).Encode(data)
 	}
-}
-
-func (srv *server) respondAlert(c telebot.Context, text string) error {
-	return c.Respond(&telebot.CallbackResponse{
-		Text:      text,
-		ShowAlert: true,
-	})
 }

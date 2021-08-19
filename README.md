@@ -43,7 +43,10 @@ Flags:
 ```toml
 bind_addr = ":3000"
 log_level = "debug"
-database_url = "postgres://localhost/devops_school_dev?user=postgres&password=example&sslmode=disable"
+
+[database]
+url = "postgres://localhost/devops_school_dev?user=postgres&password=example&sslmode=disable"
+migrations = "db/migrations"
 
 [telegram_bot]
 token = "1949550059:AAHTvp0Zm5ABVDKL8LVHAYkS-PEEGGZnEJE"
@@ -52,45 +55,39 @@ verbose = false
 
 ## Bot commands
 
-There're two types of telegram chat where the bot is accepting commands: `private` and `group`
+There're two types of telegram chat where the bot is accepting commands: `private chat` and `group chat`
 
-### Private chat
+##### Abbreviation
+[GC] - Commands available in `Group chats`
+[PC] - Commands available in `Private chat` with bot
+[All] - Commands available in `All chats`
+[Admin] - Commands available only for bot `Administrators`
 
-| Command | Roles | Description |
-| ------- | ----- | ----------- |
-| /schools | **Supersuser** | Provide the interface to manage schools |
-| /users | **Supersuser** | Provide the interface to manage users |
-| /start  | User | Add user to the database for future use |
-| /help   | User | Help message | 
+##### Commands
+**/start** - [GC][Admin]: Start school. Private: Add user to database
+**/finish** - [GC][Admin]: Finish school
+**/report** - [GC][Admin]: School progress
+**/fullreport** - [GC][Admin]: School progress with homework list
+**/join** - [GC]: Join school as student
+**/myreport** - [GC]: Your progress
+**/homeworks** - [GC]: Homework list
+**/schools** - [PC][Admin]: Manage schools
+**/users** - [PC][Admin]: Manage users
+**/help** - [All]: Help message
 
-### Group chat
+To add homework, use the work hashtag along with the `#homework`, for example: `#homework #cicd`
 
-| Command | Roles | Description |
-| ------- | ----- | ----------- |
-| /start  | **Supersuser** | Start school with name == title |
-| /finish | **Supersuser** | Finish school. Homeworks are not accepted after school finished |
-| /report | **Supersuser** | Provide school progress |
-| /bigreport | **Supersuser** | Provide school progress with homework list |
-| /join   | User | Add user to school as student |
-| /myreport | User | Provide school progress |
-| /homeworks | User | Provide the homework list |
-| /help   | User | Help message | 
-
-To add homework, use the work hashtag along with the **#homework**, for example:
-
-**#homework #cicd**
-
-### For BotFather
+#### For BotFather
 
 ```
-start - Group: Start school (Superuser). Private: Add user to database
-finish - Group: Finish school (Superuser)
-join - Group: Add user to school as student
-myreport - Group: School progress
-report - Group: School progress (Superuser)
-bigreport - Group: School progress with homework list (Superuser)
-homeworks - Group: homework list
-schools - Private: Interface to manage schools (Superuser)
-users - Private: Interface to manage users (Superuser)
-help - All: Help message
+start - [GC][Admin]: Start school. [PC]: Add user to database
+finish - [GC][Admin]: Finish school
+report - [GC][Admin]: School progress
+fullreport - [GC][Admin]: School progress with homework list
+join - [GC]: Join school as student
+myreport - [GC]: Your progress
+homeworks - [GC]: Homework list
+schools - [PC][Admin]: Manage schools
+users - [PC][Admin]: Manage users
+help - [All]: Help message
 ```

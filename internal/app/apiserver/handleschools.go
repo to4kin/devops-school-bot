@@ -21,7 +21,7 @@ func (srv *server) handleSchools(c telebot.Context) error {
 	account, err := srv.store.Account().FindByTelegramID(int64(c.Sender().ID))
 	if err != nil {
 		srv.logger.Error(err)
-		return srv.respondAlert(c, msgInternalError)
+		return c.EditOrSend(msgInternalError, &telebot.SendOptions{ParseMode: "HTML"})
 	}
 	srv.logger.WithFields(account.LogrusFields()).Debug("account found")
 
@@ -30,12 +30,12 @@ func (srv *server) handleSchools(c telebot.Context) error {
 		return c.EditOrSend(msgUserInsufficientPermissions, &telebot.SendOptions{ParseMode: "HTML"})
 	}
 
-	calbback := &model.Callback{
+	callback := &model.Callback{
 		Type: "school",
 		ID:   0,
 	}
 
-	return srv.schoolsNaviButtons(c, calbback)
+	return srv.schoolsNaviButtons(c, callback)
 }
 
 func (srv *server) schoolRespond(c telebot.Context, callback *model.Callback) error {
@@ -45,7 +45,7 @@ func (srv *server) schoolRespond(c telebot.Context, callback *model.Callback) er
 	school, err := srv.store.School().FindByID(callback.ID)
 	if err != nil {
 		srv.logger.Error(err)
-		return srv.respondAlert(c, msgInternalError)
+		return c.EditOrSend(msgInternalError, &telebot.SendOptions{ParseMode: "HTML"})
 	}
 	srv.logger.WithFields(school.LogrusFields()).Debug("school found")
 
@@ -146,7 +146,7 @@ func (srv *server) schoolsNaviButtons(c telebot.Context, callback *model.Callbac
 	schools, err := srv.store.School().FindAll()
 	if err != nil {
 		srv.logger.Error(err)
-		return srv.respondAlert(c, msgInternalError)
+		return c.EditOrSend(msgInternalError, &telebot.SendOptions{ParseMode: "HTML"})
 	}
 	srv.logger.WithFields(logrus.Fields{
 		"count": len(schools),
@@ -156,7 +156,7 @@ func (srv *server) schoolsNaviButtons(c telebot.Context, callback *model.Callbac
 	for i, v := range schools {
 		interfaceSlice[i] = v
 	}
-	rows := naviButtons(interfaceSlice, callback)
+	rows := naviButtons(interfaceSlice, callback, "get")
 
 	replyMarkup := &telebot.ReplyMarkup{}
 	replyMarkup.Inline(rows...)

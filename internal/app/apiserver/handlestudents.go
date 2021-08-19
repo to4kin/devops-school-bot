@@ -16,7 +16,7 @@ func (srv *server) studentRespond(c telebot.Context, callback *model.Callback) e
 	student, err := srv.store.Student().FindByID(callback.ID)
 	if err != nil {
 		srv.logger.Error(err)
-		return srv.respondAlert(c, msgInternalError)
+		return c.EditOrSend(msgInternalError, &telebot.SendOptions{ParseMode: "HTML"})
 	}
 	srv.logger.WithFields(student.LogrusFields()).Debug("student found")
 
@@ -115,7 +115,7 @@ func (srv *server) studentsNaviButtons(c telebot.Context, callback *model.Callba
 	student, err := srv.store.Student().FindByID(callback.ID)
 	if err != nil {
 		srv.logger.Error(err)
-		return srv.respondAlert(c, msgInternalError)
+		return c.EditOrSend(msgInternalError, &telebot.SendOptions{ParseMode: "HTML"})
 	}
 	srv.logger.WithFields(student.LogrusFields()).Debug("student found")
 
@@ -125,7 +125,7 @@ func (srv *server) studentsNaviButtons(c telebot.Context, callback *model.Callba
 	students, err := srv.store.Student().FindBySchoolID(student.School.ID)
 	if err != nil {
 		srv.logger.Error(err)
-		return srv.respondAlert(c, msgInternalError)
+		return c.EditOrSend(msgInternalError, &telebot.SendOptions{ParseMode: "HTML"})
 	}
 	srv.logger.WithFields(logrus.Fields{
 		"count": len(students),
@@ -135,7 +135,7 @@ func (srv *server) studentsNaviButtons(c telebot.Context, callback *model.Callba
 	for i, v := range students {
 		interfaceSlice[i] = v
 	}
-	rows := naviButtons(interfaceSlice, callback)
+	rows := naviButtons(interfaceSlice, callback, "get")
 
 	schoolCallback := &model.Callback{
 		Type: "school",

@@ -54,7 +54,7 @@ func (srv *server) homeworkRespond(c telebot.Context, callback *model.Callback) 
 	homework, err := srv.store.Homework().FindByID(callback.ID)
 	if err != nil {
 		srv.logger.Error(err)
-		return srv.respondAlert(c, msgInternalError)
+		return c.EditOrSend(msgInternalError, &telebot.SendOptions{ParseMode: "HTML"})
 	}
 	srv.logger.WithFields(homework.LogrusFields()).Debug("homework found")
 
@@ -96,7 +96,7 @@ func (srv *server) homeworksNaviButtons(c telebot.Context, callback *model.Callb
 	homework, err := srv.store.Homework().FindByID(callback.ID)
 	if err != nil {
 		srv.logger.Error(err)
-		return srv.respondAlert(c, msgInternalError)
+		return c.EditOrSend(msgInternalError, &telebot.SendOptions{ParseMode: "HTML"})
 	}
 	srv.logger.WithFields(homework.LogrusFields()).Debug("homework found")
 
@@ -106,7 +106,7 @@ func (srv *server) homeworksNaviButtons(c telebot.Context, callback *model.Callb
 	homeworks, err := srv.store.Homework().FindBySchoolID(homework.Student.School.ID)
 	if err != nil {
 		srv.logger.Error(err)
-		return srv.respondAlert(c, msgInternalError)
+		return c.EditOrSend(msgInternalError, &telebot.SendOptions{ParseMode: "HTML"})
 	}
 	srv.logger.WithFields(logrus.Fields{
 		"count": len(homeworks),
@@ -116,7 +116,7 @@ func (srv *server) homeworksNaviButtons(c telebot.Context, callback *model.Callb
 	for i, v := range homeworks {
 		interfaceSlice[i] = v
 	}
-	rows := naviButtons(interfaceSlice, callback)
+	rows := naviButtons(interfaceSlice, callback, "get")
 
 	schoolCallback := &model.Callback{
 		Type: "school",
@@ -135,7 +135,7 @@ func (srv *server) homeworksNaviButtons(c telebot.Context, callback *model.Callb
 }
 
 func (srv *server) prepareHomeworkReportMsg(lessons []*model.Lesson) string {
-	reportMessage := "<b>Homework list</b>\n\n"
+	reportMessage := msgHomeworkList
 	for i, lesson := range lessons {
 		reportMessage += fmt.Sprintf("%d - %v\n", i+1, lesson.Title)
 	}

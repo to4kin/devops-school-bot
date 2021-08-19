@@ -5,7 +5,7 @@ import (
 	"gopkg.in/tucnak/telebot.v3"
 )
 
-func naviButtons(values []model.Interface, callback *model.Callback) []telebot.Row {
+func naviButtons(values []model.Interface, callback *model.Callback, buttonCmd string) []telebot.Row {
 	page := 0
 	for i, value := range values {
 		if callback.ID == value.GetID() {
@@ -21,7 +21,7 @@ func naviButtons(values []model.Interface, callback *model.Callback) []telebot.R
 			Type: callback.Type,
 			ID:   value.GetID(),
 		}
-		buttons = append(buttons, replyMarkup.Data(value.GetButtonTitle(), "get", valueCallback.ToString()))
+		buttons = append(buttons, replyMarkup.Data(value.GetButtonTitle(), buttonCmd, valueCallback.ToString()))
 	}
 
 	var rows []telebot.Row
