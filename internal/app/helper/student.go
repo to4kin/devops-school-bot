@@ -9,10 +9,11 @@ import (
 )
 
 var (
-	studentText        string = "School: %v\n\nStudent info:\n\nFirst name: %v\nLast name: %v\nStatus: %v\n\n" + SysHomeworkGuide + "\n\nHomeworks:\n%v"
+	studentText        string = "School: %v\n\n" + msgStudentInfo + "\n\n" + sysHomeworkGuide + "\n\nHomeworks:\n%v"
 	studentsListText   string = "School: %v\n\nChoose a student from the list below:"
 	blockStudentText   string = "Success! Student <b>%v</b> blocked"
 	unblockStudentText string = "Success! Student <b>%v</b> unblocked"
+	updateStudentText  string = "Success! Student <b>%v</b> updated. New type is %v"
 
 	backToStudentText      string = "<< Back to Student"
 	backToStudentsListText string = "<< Back to Students List"
@@ -25,7 +26,7 @@ func GetStudent(store store.Store, callback *model.Callback) (string, *telebot.R
 		return "", nil, err
 	}
 
-	var rows []telebot.Row
+	var buttons []telebot.Btn
 	replyMarkup := &telebot.ReplyMarkup{}
 
 	if student.Active {
@@ -35,7 +36,7 @@ func GetStudent(store store.Store, callback *model.Callback) (string, *telebot.R
 			Command:     "block",
 			ListCommand: callback.ListCommand,
 		}
-		rows = append(rows, replyMarkup.Row(replyMarkup.Data("Block student", blockCallback.ToString())))
+		buttons = append(buttons, replyMarkup.Data("Block student", blockCallback.ToString()))
 	} else {
 		unblockCallback := &model.Callback{
 			ID:          callback.ID,
@@ -43,7 +44,34 @@ func GetStudent(store store.Store, callback *model.Callback) (string, *telebot.R
 			Command:     "unblock",
 			ListCommand: callback.ListCommand,
 		}
-		rows = append(rows, replyMarkup.Row(replyMarkup.Data("Unblock student", unblockCallback.ToString())))
+		buttons = append(buttons, replyMarkup.Data("Unblock student", unblockCallback.ToString()))
+	}
+
+	if student.FullCourse {
+		studentCallback := &model.Callback{
+			ID:          callback.ID,
+			Type:        "student",
+			Command:     "set_listener",
+			ListCommand: callback.ListCommand,
+		}
+		buttons = append(buttons, replyMarkup.Data("Change to listener", studentCallback.ToString()))
+	} else {
+		listenerCallback := &model.Callback{
+			ID:          callback.ID,
+			Type:        "student",
+			Command:     "set_student",
+			ListCommand: callback.ListCommand,
+		}
+		buttons = append(buttons, replyMarkup.Data("Change to student", listenerCallback.ToString()))
+	}
+
+	var rows []telebot.Row
+	div, mod := len(buttons)/2, len(buttons)%2
+	for i := 0; i < div; i++ {
+		rows = append(rows, replyMarkup.Row(buttons[i*2], buttons[i*2+1]))
+	}
+	if mod != 0 {
+		rows = append(rows, replyMarkup.Row(buttons[div*2]))
 	}
 
 	backToStudentsListCallback := &model.Callback{
@@ -69,7 +97,7 @@ func GetStudent(store store.Store, callback *model.Callback) (string, *telebot.R
 			}
 		}
 
-		if !counted {
+		if !counted && student.FullCourse {
 			text += fmt.Sprintf("%v - %v\n", iconRedCircle, lesson.Title)
 		}
 	}
@@ -80,6 +108,7 @@ func GetStudent(store store.Store, callback *model.Callback) (string, *telebot.R
 			student.Account.FirstName,
 			student.Account.LastName,
 			student.GetStatusText(),
+			student.GetType(),
 			text,
 		),
 		replyMarkup,
@@ -147,6 +176,44 @@ func UnblockStudent(store store.Store, callback *model.Callback) (string, *teleb
 	fillStudentReplyMarkup(replyMarkup, callback)
 
 	return fmt.Sprintf(unblockStudentText, student.Account.Username), replyMarkup, nil
+}
+
+// SetStudent ...
+func SetStudent(store store.Store, callback *model.Callback) (string, *telebot.ReplyMarkup, error) {
+	student, err := store.Student().FindByID(callback.ID)
+	if err != nil {
+		return "", nil, err
+	}
+
+	student.FullCourse = true
+
+	if err := store.Student().Update(student); err != nil {
+		return "", nil, err
+	}
+
+	replyMarkup := &telebot.ReplyMarkup{}
+	fillStudentReplyMarkup(replyMarkup, callback)
+
+	return fmt.Sprintf(updateStudentText, student.Account.Username, student.GetType()), replyMarkup, nil
+}
+
+// SetListener ...
+func SetListener(store store.Store, callback *model.Callback) (string, *telebot.ReplyMarkup, error) {
+	student, err := store.Student().FindByID(callback.ID)
+	if err != nil {
+		return "", nil, err
+	}
+
+	student.FullCourse = false
+
+	if err := store.Student().Update(student); err != nil {
+		return "", nil, err
+	}
+
+	replyMarkup := &telebot.ReplyMarkup{}
+	fillStudentReplyMarkup(replyMarkup, callback)
+
+	return fmt.Sprintf(updateStudentText, student.Account.Username, student.GetType()), replyMarkup, nil
 }
 
 func fillStudentReplyMarkup(replyMarkup *telebot.ReplyMarkup, callback *model.Callback) {

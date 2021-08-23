@@ -11,11 +11,12 @@ import (
 
 // Student ...
 type Student struct {
-	ID      int64     `json:"id,string"`
-	Created time.Time `json:"created"`
-	Account *Account  `json:"account"`
-	School  *School   `json:"school"`
-	Active  bool      `json:"active,string"`
+	ID         int64     `json:"id,string"`
+	Created    time.Time `json:"created"`
+	Account    *Account  `json:"account"`
+	School     *School   `json:"school"`
+	Active     bool      `json:"active,string"`
+	FullCourse bool      `json:"full_course,string"`
 }
 
 // GetID ...
@@ -35,6 +36,14 @@ func (s *Student) GetStatusText() string {
 // GetButtonTitle ...
 func (s *Student) GetButtonTitle() string {
 	return fmt.Sprintf("%v @%v", s.GetStatusText(), s.Account.Username)
+}
+
+// GetType ...
+func (s *Student) GetType() string {
+	if s.FullCourse {
+		return "Student"
+	}
+	return "Listener"
 }
 
 // Validate ...
@@ -60,9 +69,10 @@ func (s *Student) ToString() string {
 // LogrusFields ...
 func (s *Student) LogrusFields() logrus.Fields {
 	return logrus.Fields{
-		"id":      s.ID,
-		"account": s.Account.LogrusFields(),
-		"school":  s.School.LogrusFields(),
-		"active":  s.Active,
+		"id":          s.ID,
+		"account":     s.Account.LogrusFields(),
+		"school":      s.School.LogrusFields(),
+		"active":      s.Active,
+		"full_course": s.FullCourse,
 	}
 }

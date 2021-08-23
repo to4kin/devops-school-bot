@@ -61,8 +61,8 @@ func (srv *server) configureBotHandler() {
 	srv.bot.Handle("/start", srv.handleStart)
 	srv.bot.Handle("/help", srv.handleHelp)
 
-	srv.bot.Handle("/joinstudent", srv.handleJoin)
-	srv.bot.Handle("/joinmodule", srv.handleJoin)
+	srv.bot.Handle("/joinstudent", srv.handleJoinStudent)
+	srv.bot.Handle("/joinmodule", srv.handleJoinModule)
 	srv.bot.Handle("/myreport", srv.handleMyReport)
 
 	srv.bot.Handle(telebot.OnText, srv.handleOnText)

@@ -61,6 +61,7 @@ There're two types of telegram chat where the bot is accepting commands: `privat
 **/start** - Add user to database
 **/joinstudent** - Join school as student
 **/joinmodule** - Join school as listener
+**/myreport** - Your progress
 **/homeworks** - Homeworks list
 **/help** - Help message
 
@@ -83,6 +84,7 @@ To add homework, use the work hashtag along with the `#homework`, for example: `
 start - Add user to database
 joinstudent - Join school as student
 joinmodule - Join school as listener
+myreport - Your progress
 homeworks - Homeworks list
 help - Help message
 schools - Manage schools

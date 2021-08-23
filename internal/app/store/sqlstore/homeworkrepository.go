@@ -42,7 +42,7 @@ func (r *HomeworkRepository) FindByID(id int64) (*model.Homework, error) {
 
 	if err := r.store.db.QueryRow(`
 		SELECT hw.id, hw.created, hw.message_id, hw.verify,
-			st.id, st.created, st.active,
+			st.id, st.created, st.active, st.full_course,
 			acc.id, acc.created, acc.telegram_id, acc.first_name, acc.last_name, acc.username, acc.superuser,
 			sch.id, sch.created, sch.title, sch.active,
 			les.id, les.title
@@ -62,6 +62,7 @@ func (r *HomeworkRepository) FindByID(id int64) (*model.Homework, error) {
 		&h.Student.ID,
 		&h.Student.Created,
 		&h.Student.Active,
+		&h.Student.FullCourse,
 		&h.Student.Account.ID,
 		&h.Student.Account.Created,
 		&h.Student.Account.TelegramID,
@@ -93,7 +94,7 @@ func (r *HomeworkRepository) FindByStudentID(studentID int64) ([]*model.Homework
 
 	rows, err := r.store.db.Query(`
 		SELECT hw.id, hw.created, hw.message_id, hw.verify,
-			st.id, st.created, st.active,
+			st.id, st.created, st.active, st.full_course,
 			acc.id, acc.created, acc.telegram_id, acc.first_name, acc.last_name, acc.username, acc.superuser,
 			sch.id, sch.created,sch.title, sch.active,
 			les.id, les.title
@@ -131,6 +132,7 @@ func (r *HomeworkRepository) FindByStudentID(studentID int64) ([]*model.Homework
 			&h.Student.ID,
 			&h.Student.Created,
 			&h.Student.Active,
+			&h.Student.FullCourse,
 			&h.Student.Account.ID,
 			&h.Student.Account.Created,
 			&h.Student.Account.TelegramID,
@@ -169,7 +171,7 @@ func (r *HomeworkRepository) FindBySchoolID(schoolID int64) ([]*model.Homework, 
 
 	rows, err := r.store.db.Query(`
 		SELECT hw.id, hw.created, hw.message_id, hw.verify,
-			st.id, st.created, st.active,
+			st.id, st.created, st.active, st.full_course,
 			acc.id, acc.created, acc.telegram_id, acc.first_name, acc.last_name, acc.username, acc.superuser,
 			sch.id, sch.created, sch.title, sch.active,
 			les.id, les.title
@@ -207,6 +209,7 @@ func (r *HomeworkRepository) FindBySchoolID(schoolID int64) ([]*model.Homework, 
 			&h.Student.ID,
 			&h.Student.Created,
 			&h.Student.Active,
+			&h.Student.FullCourse,
 			&h.Student.Account.ID,
 			&h.Student.Account.Created,
 			&h.Student.Account.TelegramID,
@@ -250,7 +253,7 @@ func (r *HomeworkRepository) FindByStudentIDLessonID(studentID int64, lessonID i
 
 	if err := r.store.db.QueryRow(`
 		SELECT hw.id, hw.created, hw.message_id, hw.verify,
-			st.id, st.created, st.active,
+			st.id, st.created, st.active, st.full_course,
 			acc.id, acc.created, acc.telegram_id, acc.first_name, acc.last_name, acc.username, acc.superuser,
 			sch.id, sch.created, sch.title, sch.active,
 			les.id, les.title
@@ -271,6 +274,7 @@ func (r *HomeworkRepository) FindByStudentIDLessonID(studentID int64, lessonID i
 		&h.Student.ID,
 		&h.Student.Created,
 		&h.Student.Active,
+		&h.Student.FullCourse,
 		&h.Student.Account.ID,
 		&h.Student.Account.Created,
 		&h.Student.Account.TelegramID,

@@ -11,8 +11,8 @@ var (
 	report string = "Academic performance\n\n<b><u>Name - Accepted/Not Provided - Type</u></b>\n"
 
 	homeworksListReport string = "<b>Homework list</b>\n\n"
-	homeworkNotProvided string = "you haven't submitted your homework yet\n\n" + SysHomeworkAdd
-	homeworkReport      string = "Hello, @%v!\n\n" + SysHomeworkGuide + "\n\nYour progress in <b>%v</b>:\n"
+	homeworkNotProvided string = "you haven't submitted your homework yet\n\n" + sysHomeworkAdd
+	homeworkReport      string = "Hello, @%v!\n\n" + msgStudentInfo + "\n\n" + sysHomeworkGuide + "\n\nYour progress in <b>%v</b>:\n"
 
 	studentIsBlocked string = "Your student account is blocked!\n\nPlease contact mentors or teachers"
 )
@@ -45,7 +45,16 @@ func GetUserReport(str store.Store, account *model.Account, school *model.School
 		return "", err
 	}
 
-	reportMessage := fmt.Sprintf(homeworkReport, account.Username, school.Title)
+	reportMessage := fmt.Sprintf(
+		homeworkReport,
+		account.Username,
+		student.Account.FirstName,
+		student.Account.LastName,
+		student.GetStatusText(),
+		student.GetType(),
+		school.Title,
+	)
+
 	for _, lesson := range allLessons {
 		counted := false
 		for _, homework := range studentHomeworks {
@@ -55,7 +64,7 @@ func GetUserReport(str store.Store, account *model.Account, school *model.School
 			}
 		}
 
-		if !counted {
+		if !counted && student.FullCourse {
 			reportMessage += fmt.Sprintf("%v - %v\n", iconRedCircle, lesson.Title)
 		}
 	}
@@ -134,13 +143,13 @@ func prepareReportMsg(store store.Store, students []*model.Student, lessons []*m
 				}
 			}
 
-			if !counted {
+			if !counted && student.FullCourse {
 				notProvidedHomework++
 			}
 		}
 
 		reportMessage += fmt.Sprintf("%v %v - %d/%d - %v\n",
-			student.Account.FirstName, student.Account.LastName, acceptedHomework, notProvidedHomework, "student")
+			student.Account.FirstName, student.Account.LastName, acceptedHomework, notProvidedHomework, student.GetType())
 	}
 	reportMessage += "</pre>"
 

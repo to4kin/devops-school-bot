@@ -11,14 +11,7 @@ import (
 	"gopkg.in/tucnak/telebot.v3"
 )
 
-var (
-	msgWelcomeToSchool string = "<b>Welcome to %v!</b>\n\nI'll manage all your progress and provide the report if needed.\n" +
-		helper.SysHomeworkAdd + "\n\n" + helper.SysHomeworkGuide
-
-	msgUserAlreadyJoined string = "you have already joined school <b>%v</b>\n\n" + helper.SysHomeworkAdd
-)
-
-func (srv *server) handleJoin(c telebot.Context) error {
+func (srv *server) handleJoinModule(c telebot.Context) error {
 	if c.Message().Private() {
 		return c.EditOrReply(helper.ErrWrongChatType, &telebot.SendOptions{ParseMode: "HTML"})
 	}
@@ -81,10 +74,11 @@ func (srv *server) handleJoin(c telebot.Context) error {
 		if err == store.ErrRecordNotFound {
 			srv.logger.Debug("student not found, will create a new one")
 			student := &model.Student{
-				Created: time.Now(),
-				Account: account,
-				School:  school,
-				Active:  true,
+				Created:    time.Now(),
+				Account:    account,
+				School:     school,
+				Active:     true,
+				FullCourse: false,
 			}
 
 			if err := srv.store.Student().Create(student); err != nil {
@@ -93,12 +87,12 @@ func (srv *server) handleJoin(c telebot.Context) error {
 			}
 
 			srv.logger.WithFields(student.LogrusFields()).Debug("student created")
-			return c.EditOrReply(fmt.Sprintf(msgWelcomeToSchool, school.Title), &telebot.SendOptions{ParseMode: "HTML"})
+			return c.EditOrReply(fmt.Sprintf(helper.MsgWelcomeToSchool, school.Title, student.GetType()), &telebot.SendOptions{ParseMode: "HTML"})
 		}
 
 		srv.logger.Error(err)
 		return c.EditOrReply(helper.ErrInternal, &telebot.SendOptions{ParseMode: "HTML"})
 	}
 	srv.logger.WithFields(student.LogrusFields()).Debug("student exist")
-	return c.EditOrReply(fmt.Sprintf(msgUserAlreadyJoined, school.Title), &telebot.SendOptions{ParseMode: "HTML"})
+	return c.EditOrReply(fmt.Sprintf(helper.MsgUserAlreadyJoined, school.Title, student.GetType()), &telebot.SendOptions{ParseMode: "HTML"})
 }

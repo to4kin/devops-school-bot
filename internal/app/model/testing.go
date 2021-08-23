@@ -37,10 +37,11 @@ func TestLesson(t *testing.T) *Lesson {
 // TestStudent ...
 func TestStudent(t *testing.T) *Student {
 	return &Student{
-		Created: time.Now(),
-		Account: TestAccount(t),
-		School:  TestSchool(t),
-		Active:  true,
+		Created:    time.Now(),
+		Account:    TestAccount(t),
+		School:     TestSchool(t),
+		Active:     true,
+		FullCourse: true,
 	}
 }
 

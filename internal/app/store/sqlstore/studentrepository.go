@@ -19,11 +19,12 @@ func (r *StudentRepository) Create(s *model.Student) error {
 	}
 
 	return r.store.db.QueryRow(
-		"INSERT INTO student (created, account_id, school_id, active) VALUES ($1, $2, $3, $4) RETURNING id",
+		"INSERT INTO student (created, account_id, school_id, active, full_course) VALUES ($1, $2, $3, $4, $5) RETURNING id",
 		s.Created,
 		s.Account.ID,
 		s.School.ID,
 		s.Active,
+		s.FullCourse,
 	).Scan(
 		&s.ID,
 	)
@@ -32,9 +33,10 @@ func (r *StudentRepository) Create(s *model.Student) error {
 // Update ...
 func (r *StudentRepository) Update(s *model.Student) error {
 	if err := r.store.db.QueryRow(
-		"UPDATE student SET active = $2 WHERE id = $1 RETURNING id",
+		"UPDATE student SET active = $2, full_course = $3 WHERE id = $1 RETURNING id",
 		s.ID,
 		s.Active,
+		s.FullCourse,
 	).Scan(
 		&s.ID,
 	); err != nil {
@@ -54,7 +56,7 @@ func (r *StudentRepository) FindAll() ([]*model.Student, error) {
 	students := []*model.Student{}
 
 	rows, err := r.store.db.Query(`
-		SELECT st.id, st.created, st.active, 
+		SELECT st.id, st.created, st.active, full_course,  
 			acc.id, acc.created, acc.telegram_id, acc.first_name, acc.last_name, acc.username, acc.superuser,
 			sch.id, sch.created, sch.title, sch.chat_id, sch.active
 		FROM student st 
@@ -80,6 +82,7 @@ func (r *StudentRepository) FindAll() ([]*model.Student, error) {
 			&s.ID,
 			&s.Created,
 			&s.Active,
+			&s.FullCourse,
 			&s.Account.ID,
 			&s.Account.Created,
 			&s.Account.TelegramID,
@@ -117,7 +120,7 @@ func (r *StudentRepository) FindByID(id int64) (*model.Student, error) {
 		School:  &model.School{},
 	}
 	if err := r.store.db.QueryRow(`
-		SELECT st.id, st.created, st.active, 
+		SELECT st.id, st.created, st.active, full_course, 
 			acc.id, acc.created, acc.telegram_id, acc.first_name, acc.last_name, acc.username, acc.superuser,
 			sch.id, sch.created, sch.title, sch.chat_id, sch.active
 		FROM student st 
@@ -130,6 +133,7 @@ func (r *StudentRepository) FindByID(id int64) (*model.Student, error) {
 		&s.ID,
 		&s.Created,
 		&s.Active,
+		&s.FullCourse,
 		&s.Account.ID,
 		&s.Account.Created,
 		&s.Account.TelegramID,
@@ -159,7 +163,7 @@ func (r *StudentRepository) FindBySchoolID(schoolID int64) ([]*model.Student, er
 	students := []*model.Student{}
 
 	rows, err := r.store.db.Query(`
-		SELECT st.id, st.created, st.active, 
+		SELECT st.id, st.created, st.active, full_course, 
 			acc.id, acc.created, acc.telegram_id, acc.first_name, acc.last_name, acc.username, acc.superuser,
 			sch.id, sch.created, sch.title, sch.chat_id, sch.active
 		FROM student st 
@@ -187,6 +191,7 @@ func (r *StudentRepository) FindBySchoolID(schoolID int64) ([]*model.Student, er
 			&s.ID,
 			&s.Created,
 			&s.Active,
+			&s.FullCourse,
 			&s.Account.ID,
 			&s.Account.Created,
 			&s.Account.TelegramID,
@@ -224,7 +229,7 @@ func (r *StudentRepository) FindByAccountIDSchoolID(accountID int64, schoolID in
 		School:  &model.School{},
 	}
 	if err := r.store.db.QueryRow(`
-		SELECT st.id, st.created, st.active, 
+		SELECT st.id, st.created, st.active, full_course, 
 			acc.id, acc.created, acc.telegram_id, acc.first_name, acc.last_name, acc.username, acc.superuser,
 			sch.id, sch.created, sch.title, sch.chat_id, sch.active
 		FROM student st 
@@ -238,6 +243,7 @@ func (r *StudentRepository) FindByAccountIDSchoolID(accountID int64, schoolID in
 		&s.ID,
 		&s.Created,
 		&s.Active,
+		&s.FullCourse,
 		&s.Account.ID,
 		&s.Account.Created,
 		&s.Account.TelegramID,

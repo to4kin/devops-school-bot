@@ -97,6 +97,12 @@ func (srv *server) handleCallback(c telebot.Context) error {
 		case "unblock":
 			replyMessage, replyMarkup, err = helper.UnblockStudent(srv.store, callback)
 
+		case "set_student":
+			replyMessage, replyMarkup, err = helper.SetStudent(srv.store, callback)
+
+		case "set_listener":
+			replyMessage, replyMarkup, err = helper.SetListener(srv.store, callback)
+
 		}
 	case "homework":
 		switch callback.Command {
@@ -110,6 +116,7 @@ func (srv *server) handleCallback(c telebot.Context) error {
 	}
 
 	if err != nil {
+		srv.logger.Error(err)
 		return c.EditOrReply(helper.ErrInternal, &telebot.SendOptions{ParseMode: "HTML"})
 	}
 
