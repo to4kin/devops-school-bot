@@ -1,9 +1,8 @@
 package apiserver
 
 import (
-	"fmt"
-
 	"github.com/sirupsen/logrus"
+	"gitlab.devops.telekom.de/tvpp/prototypes/devops-school-bot/internal/app/helper"
 	"gitlab.devops.telekom.de/tvpp/prototypes/devops-school-bot/internal/app/store"
 	"gopkg.in/tucnak/telebot.v3"
 )
@@ -21,10 +20,10 @@ func (srv *server) handleMyReport(c telebot.Context) error {
 		srv.logger.Error(err)
 
 		if err == store.ErrRecordNotFound {
-			return c.Reply(msgUserNotJoined, &telebot.SendOptions{ParseMode: "HTML"})
+			return c.EditOrReply(helper.ErrUserNotJoined, &telebot.SendOptions{ParseMode: "HTML"})
 		}
 
-		return nil
+		return c.EditOrReply(helper.ErrInternal, &telebot.SendOptions{ParseMode: "HTML"})
 	}
 	srv.logger.WithFields(account.LogrusFields()).Debug("account found")
 
@@ -36,72 +35,18 @@ func (srv *server) handleMyReport(c telebot.Context) error {
 		srv.logger.Error(err)
 
 		if err == store.ErrRecordNotFound {
-			return c.Reply(msgSchoolNotFound, &telebot.SendOptions{ParseMode: "HTML"})
+			return c.EditOrReply(helper.ErrSchoolNotStarted, &telebot.SendOptions{ParseMode: "HTML"})
 		}
 
-		return nil
+		return c.EditOrReply(helper.ErrInternal, &telebot.SendOptions{ParseMode: "HTML"})
 	}
 	srv.logger.WithFields(school.LogrusFields()).Debug("school found")
 
-	srv.logger.WithFields(logrus.Fields{
-		"account_id": account.ID,
-		"school_id":  school.ID,
-	}).Debug("get student from database by account_id and school_id")
-	student, err := srv.store.Student().FindByAccountIDSchoolID(account.ID, school.ID)
+	reportMessage, err := helper.GetUserReport(srv.store, account, school)
 	if err != nil {
-		srv.logger.Error(err)
-
-		if err == store.ErrRecordNotFound {
-			return c.Reply(msgUserNotJoined, &telebot.SendOptions{ParseMode: "HTML"})
-		}
-
-		return nil
-	}
-	srv.logger.WithFields(student.LogrusFields()).Debug("student found")
-
-	srv.logger.WithFields(logrus.Fields{
-		"student_id": student.ID,
-	}).Debug("get student homeworks from database by student_id")
-	studentHomeworks, err := srv.store.Homework().FindByStudentID(student.ID)
-	if err != nil {
-		srv.logger.Error(err)
-
-		if err == store.ErrRecordNotFound {
-			c.Reply(msgHomeworkNotProvided, &telebot.SendOptions{ParseMode: "HTML"})
-		}
-		return nil
-	}
-	srv.logger.WithFields(logrus.Fields{
-		"count": len(studentHomeworks),
-	}).Debug("homeworks found")
-
-	srv.logger.WithFields(logrus.Fields{
-		"school_id": school.ID,
-	}).Debug("get all lessons from database by school_id")
-	allLessons, err := srv.store.Lesson().FindBySchoolID(school.ID)
-	if err != nil {
-		srv.logger.Error(err)
-		return nil
-	}
-	srv.logger.WithFields(logrus.Fields{
-		"count": len(allLessons),
-	}).Debug("lessons found")
-
-	reportMessage := fmt.Sprintf(msgHomeworkReport, account.Username, school.Title)
-	for _, lesson := range allLessons {
-		counted := false
-		for _, homework := range studentHomeworks {
-			if homework.Lesson.ID == lesson.ID {
-				counted = true
-				reportMessage += fmt.Sprintf("%v - %v\n", iconGreenCircle, lesson.Title)
-			}
-		}
-
-		if !counted {
-			reportMessage += fmt.Sprintf("%v - %v\n", iconRedCircle, lesson.Title)
-		}
+		return c.EditOrReply(helper.ErrInternal, &telebot.SendOptions{ParseMode: "HTML"})
 	}
 
 	srv.logger.Debug("report sent")
-	return c.Reply(reportMessage, &telebot.SendOptions{ParseMode: "HTML"})
+	return c.EditOrReply(reportMessage, &telebot.SendOptions{ParseMode: "HTML"})
 }

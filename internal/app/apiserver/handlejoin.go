@@ -5,14 +5,22 @@ import (
 	"time"
 
 	"github.com/sirupsen/logrus"
+	"gitlab.devops.telekom.de/tvpp/prototypes/devops-school-bot/internal/app/helper"
 	"gitlab.devops.telekom.de/tvpp/prototypes/devops-school-bot/internal/app/model"
 	"gitlab.devops.telekom.de/tvpp/prototypes/devops-school-bot/internal/app/store"
 	"gopkg.in/tucnak/telebot.v3"
 )
 
+var (
+	msgWelcomeToSchool string = "<b>Welcome to %v!</b>\n\nI'll manage all your progress and provide the report if needed.\n" +
+		helper.SysHomeworkAdd + "\n\n" + helper.SysHomeworkGuide
+
+	msgUserAlreadyJoined string = "you have already joined school <b>%v</b>\n\n" + helper.SysHomeworkAdd
+)
+
 func (srv *server) handleJoin(c telebot.Context) error {
 	if c.Message().Private() {
-		return nil
+		return c.EditOrReply(helper.ErrWrongChatType, &telebot.SendOptions{ParseMode: "HTML"})
 	}
 
 	srv.logger.WithFields(logrus.Fields{
@@ -33,13 +41,13 @@ func (srv *server) handleJoin(c telebot.Context) error {
 
 			if err := srv.store.Account().Create(account); err != nil {
 				srv.logger.Error(err)
-				return nil
+				return c.EditOrReply(helper.ErrInternal, &telebot.SendOptions{ParseMode: "HTML"})
 			}
 
 			srv.logger.WithFields(account.LogrusFields()).Debug("account created")
 		} else {
 			srv.logger.Error(err)
-			return nil
+			return c.EditOrReply(helper.ErrInternal, &telebot.SendOptions{ParseMode: "HTML"})
 		}
 	} else {
 		srv.logger.WithFields(account.LogrusFields()).Debug("account found")
@@ -52,16 +60,16 @@ func (srv *server) handleJoin(c telebot.Context) error {
 	if err != nil {
 		srv.logger.Error(err)
 		if err == store.ErrRecordNotFound {
-			return c.Reply(msgSchoolNotFound, &telebot.SendOptions{ParseMode: "HTML"})
+			return c.EditOrReply(helper.ErrSchoolNotStarted, &telebot.SendOptions{ParseMode: "HTML"})
 		}
 
-		return nil
+		return c.EditOrReply(helper.ErrInternal, &telebot.SendOptions{ParseMode: "HTML"})
 	}
 	srv.logger.WithFields(school.LogrusFields()).Debug("school found")
 
 	if !school.Active {
-		srv.logger.WithFields(school.LogrusFields()).Debug("school already finished")
-		return c.Reply(fmt.Sprintf(msgSchoolAlreadyFinished, school.Title), &telebot.SendOptions{ParseMode: "HTML"})
+		srv.logger.WithFields(school.LogrusFields()).Debug("school finished")
+		return c.EditOrReply(helper.ErrSchoolNotStarted, &telebot.SendOptions{ParseMode: "HTML"})
 	}
 
 	srv.logger.WithFields(logrus.Fields{
@@ -81,16 +89,16 @@ func (srv *server) handleJoin(c telebot.Context) error {
 
 			if err := srv.store.Student().Create(student); err != nil {
 				srv.logger.Error(err)
-				return nil
+				return c.EditOrReply(helper.ErrInternal, &telebot.SendOptions{ParseMode: "HTML"})
 			}
 
 			srv.logger.WithFields(student.LogrusFields()).Debug("student created")
-			return c.Reply(fmt.Sprintf(msgWelcomeToSchool, school.Title), &telebot.SendOptions{ParseMode: "HTML"})
+			return c.EditOrReply(fmt.Sprintf(msgWelcomeToSchool, school.Title), &telebot.SendOptions{ParseMode: "HTML"})
 		}
 
 		srv.logger.Error(err)
-		return nil
+		return c.EditOrReply(helper.ErrInternal, &telebot.SendOptions{ParseMode: "HTML"})
 	}
 	srv.logger.WithFields(student.LogrusFields()).Debug("student exist")
-	return c.Reply(fmt.Sprintf(msgUserAlreadyJoined, school.Title), &telebot.SendOptions{ParseMode: "HTML"})
+	return c.EditOrReply(fmt.Sprintf(msgUserAlreadyJoined, school.Title), &telebot.SendOptions{ParseMode: "HTML"})
 }

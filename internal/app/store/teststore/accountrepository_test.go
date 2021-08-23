@@ -77,3 +77,18 @@ func TestAccountRepository_FindByTelegramID(t *testing.T) {
 	assert.NoError(t, err)
 	assert.NotNil(t, account)
 }
+
+func TestAccountRepository_FindBySuperuser(t *testing.T) {
+	s := teststore.New()
+	a := model.TestAccount(t)
+
+	_, err := s.Account().FindBySuperuser(a.Superuser)
+	assert.EqualError(t, err, store.ErrRecordNotFound.Error())
+
+	assert.NoError(t, s.Account().Create(a))
+
+	accounts, err := s.Account().FindBySuperuser(a.Superuser)
+	assert.NoError(t, err)
+	assert.NotNil(t, accounts)
+	assert.Equal(t, a.Superuser, accounts[0].Superuser)
+}

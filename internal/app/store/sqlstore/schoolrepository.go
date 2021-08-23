@@ -163,3 +163,47 @@ func (r *SchoolRepository) FindByChatID(chatID int64) (*model.School, error) {
 	return s, nil
 
 }
+
+// FindByActive ...
+func (r *SchoolRepository) FindByActive(active bool) ([]*model.School, error) {
+	rowsCount := 0
+	schools := []*model.School{}
+
+	rows, err := r.store.db.Query(`
+		SELECT id, created, title, chat_id, active FROM school WHERE active = $1 ORDER BY created DESC
+		`,
+		active,
+	)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		rowsCount++
+
+		s := &model.School{}
+
+		if err := rows.Scan(
+			&s.ID,
+			&s.Created,
+			&s.Title,
+			&s.ChatID,
+			&s.Active,
+		); err != nil {
+			return nil, err
+		}
+
+		schools = append(schools, s)
+	}
+
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+
+	if rowsCount == 0 {
+		return nil, store.ErrRecordNotFound
+	}
+
+	return schools, nil
+}

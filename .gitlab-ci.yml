@@ -1,4 +1,4 @@
-image: artifactory.devops.telekom.de/tvpp-docker/tvpp-runner:golang-1.16
+image: artifactory.devops.telekom.de/tvpp-docker/tvpp-runner:golang-1.17
 
 services:
   - postgres:12.2-alpine

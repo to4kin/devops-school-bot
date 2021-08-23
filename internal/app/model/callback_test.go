@@ -7,44 +7,39 @@ import (
 	"gitlab.devops.telekom.de/tvpp/prototypes/devops-school-bot/internal/app/model"
 )
 
-func TestCallback_UnmarshalJSON(t *testing.T) {
+func TestCallback_Unmarshal(t *testing.T) {
 	callback := &model.Callback{}
 
 	testCases := []struct {
 		name    string
-		a       func() []byte
+		a       func() string
 		isValid bool
 	}{
 		{
-			name: "valid_json",
-			a: func() []byte {
-				return []byte(`
-				{
-					"type": "account",
-					"id": "99999"
-				}`)
+			name: "valid_string",
+			a: func() string {
+				return string("99999|account|accounts|get")
 			},
 			isValid: true,
 		},
 		{
-			name: "invalid_json",
-			a: func() []byte {
-				return []byte(`
-				{
-					"type": "account",
-					"id": "99999",
-				}`)
+			name: "invalid_small_string",
+			a: func() string {
+				return string("99999|account|accounts")
+			},
+			isValid: false,
+		},
+		{
+			name: "invalid_big_string",
+			a: func() string {
+				return string("99999|account|accounts|get|somethingelse")
 			},
 			isValid: false,
 		},
 		{
 			name: "invalid_id",
-			a: func() []byte {
-				return []byte(`
-				{
-					"type": "account",
-					"id": "invalid",
-				}`)
+			a: func() string {
+				return string("invalid|account|accounts|get")
 			},
 			isValid: false,
 		},

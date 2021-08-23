@@ -9,6 +9,7 @@ type AccountRepository interface {
 	FindAll() ([]*model.Account, error)
 	FindByID(int64) (*model.Account, error)
 	FindByTelegramID(int64) (*model.Account, error)
+	FindBySuperuser(bool) ([]*model.Account, error)
 }
 
 // SchoolRepository ...
@@ -19,6 +20,7 @@ type SchoolRepository interface {
 	FindByID(int64) (*model.School, error)
 	FindByTitle(string) (*model.School, error)
 	FindByChatID(int64) (*model.School, error)
+	FindByActive(bool) ([]*model.School, error)
 }
 
 // LessonRepository ...

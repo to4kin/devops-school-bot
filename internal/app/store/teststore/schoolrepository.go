@@ -84,3 +84,19 @@ func (r *SchoolRepository) FindByChatID(chatID int64) (*model.School, error) {
 
 	return nil, store.ErrRecordNotFound
 }
+
+// FindByActive ...
+func (r *SchoolRepository) FindByActive(active bool) ([]*model.School, error) {
+	schools := []*model.School{}
+	for _, school := range r.schools {
+		if school.Active == active {
+			schools = append(schools, school)
+		}
+	}
+
+	if len(schools) == 0 {
+		return nil, store.ErrRecordNotFound
+	}
+
+	return schools, nil
+}

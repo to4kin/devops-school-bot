@@ -47,16 +47,24 @@ func (srv *server) configureLogger(logLevel string) {
 }
 
 func (srv *server) configureBotHandler() {
-	srv.bot.Handle("/start", srv.handleStart)
-	srv.bot.Handle("/finish", srv.handleFinish)
-	srv.bot.Handle("/join", srv.handleJoin)
-	srv.bot.Handle("/myreport", srv.handleMyReport)
+	srv.bot.Handle("/schools", srv.handleSchools)
+	srv.bot.Handle("/startschool", srv.handleStartSchool)
+	srv.bot.Handle("/stopschool", srv.handleStopSchool)
 	srv.bot.Handle("/report", srv.handleReport)
 	srv.bot.Handle("/fullreport", srv.handleFullReport)
 	srv.bot.Handle("/homeworks", srv.handleHomework)
-	srv.bot.Handle("/help", srv.handleHelp)
-	srv.bot.Handle("/schools", srv.handleSchools)
+
 	srv.bot.Handle("/users", srv.handleUsers)
+	srv.bot.Handle("/setsuperuser", srv.handleSetSuperuser)
+	srv.bot.Handle("/unsetsuperuser", srv.handleUnsetSuperuser)
+
+	srv.bot.Handle("/start", srv.handleStart)
+	srv.bot.Handle("/help", srv.handleHelp)
+
+	srv.bot.Handle("/joinstudent", srv.handleJoin)
+	srv.bot.Handle("/joinmodule", srv.handleJoin)
+	srv.bot.Handle("/myreport", srv.handleMyReport)
+
 	srv.bot.Handle(telebot.OnText, srv.handleOnText)
 	srv.bot.Handle(telebot.OnCallback, srv.handleCallback)
 }

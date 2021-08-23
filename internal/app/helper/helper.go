@@ -1,11 +1,15 @@
-package apiserver
+package helper
 
 import (
 	"gitlab.devops.telekom.de/tvpp/prototypes/devops-school-bot/internal/app/model"
 	"gopkg.in/tucnak/telebot.v3"
 )
 
-func naviButtons(values []model.Interface, callback *model.Callback, buttonCmd string) []telebot.Row {
+var (
+	maxRows = 3
+)
+
+func rowsWithButtons(values []model.Interface, callback *model.Callback) []telebot.Row {
 	page := 0
 	for i, value := range values {
 		if callback.ID == value.GetID() {
@@ -18,21 +22,27 @@ func naviButtons(values []model.Interface, callback *model.Callback, buttonCmd s
 	replyMarkup := &telebot.ReplyMarkup{}
 	for _, value := range values {
 		valueCallback := &model.Callback{
-			Type: callback.Type,
-			ID:   value.GetID(),
+			ID:          value.GetID(),
+			Type:        callback.Type,
+			Command:     callback.ListCommand,
+			ListCommand: callback.ListCommand,
 		}
-		buttons = append(buttons, replyMarkup.Data(value.GetButtonTitle(), buttonCmd, valueCallback.ToString()))
+		buttons = append(buttons, replyMarkup.Data(value.GetButtonTitle(), valueCallback.ToString()))
 	}
 
 	var rows []telebot.Row
 	div, mod := len(values)/2, len(values)%2
 
 	nextCallback := &model.Callback{
-		Type: callback.Type,
+		Type:        callback.Type,
+		Command:     "next",
+		ListCommand: callback.ListCommand,
 	}
 
 	previousCallback := &model.Callback{
-		Type: callback.Type,
+		Type:        callback.Type,
+		Command:     "previous",
+		ListCommand: callback.ListCommand,
 	}
 
 	if div > maxRows*(page+1) {
@@ -41,11 +51,11 @@ func naviButtons(values []model.Interface, callback *model.Callback, buttonCmd s
 		}
 
 		nextCallback.ID = values[maxRows*2*(page+1)].GetID()
-		btnNext := replyMarkup.Data("Next page >>", "next", nextCallback.ToString())
+		btnNext := replyMarkup.Data(">>", nextCallback.ToString())
 
 		if page > 0 {
 			previousCallback.ID = values[maxRows*2*(page-1)].GetID()
-			btnPrevious := replyMarkup.Data("<< Previous page", "previous", previousCallback.ToString())
+			btnPrevious := replyMarkup.Data("<<", previousCallback.ToString())
 
 			rows = append(rows, replyMarkup.Row(btnPrevious, btnNext))
 		} else {
@@ -60,7 +70,7 @@ func naviButtons(values []model.Interface, callback *model.Callback, buttonCmd s
 		}
 		if page > 0 {
 			previousCallback.ID = values[maxRows*2*(page-1)].GetID()
-			btnPrevious := replyMarkup.Data("<< Previous page", "previous", previousCallback.ToString())
+			btnPrevious := replyMarkup.Data("<<", previousCallback.ToString())
 
 			rows = append(rows, replyMarkup.Row(btnPrevious))
 		}

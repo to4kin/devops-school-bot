@@ -151,3 +151,49 @@ func (r *AccountRepository) FindByTelegramID(telegramID int64) (*model.Account, 
 
 	return a, nil
 }
+
+// FindBySuperuser ...
+func (r *AccountRepository) FindBySuperuser(superuser bool) ([]*model.Account, error) {
+	rowsCount := 0
+	accounts := []*model.Account{}
+
+	rows, err := r.store.db.Query(`
+		SELECT id, created, telegram_id, first_name, last_name, username, superuser FROM account WHERE superuser = $1 ORDER BY username ASC
+		`,
+		superuser,
+	)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		rowsCount++
+
+		a := &model.Account{}
+
+		if err := rows.Scan(
+			&a.ID,
+			&a.Created,
+			&a.TelegramID,
+			&a.FirstName,
+			&a.LastName,
+			&a.Username,
+			&a.Superuser,
+		); err != nil {
+			return nil, err
+		}
+
+		accounts = append(accounts, a)
+	}
+
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+
+	if rowsCount == 0 {
+		return nil, store.ErrRecordNotFound
+	}
+
+	return accounts, nil
+}

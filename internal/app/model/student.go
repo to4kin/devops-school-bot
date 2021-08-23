@@ -2,6 +2,7 @@ package model
 
 import (
 	"encoding/json"
+	"fmt"
 	"time"
 
 	validation "github.com/go-ozzo/ozzo-validation/v4"
@@ -22,13 +23,18 @@ func (s *Student) GetID() int64 {
 	return s.ID
 }
 
-// GetButtonTitle ...
-func (s *Student) GetButtonTitle() string {
+// GetStatusText ...
+func (s *Student) GetStatusText() string {
 	if s.Active {
-		return "🟢 @" + s.Account.Username
+		return "🟢"
 	}
 
-	return "🔴 @" + s.Account.Username
+	return "🔴"
+}
+
+// GetButtonTitle ...
+func (s *Student) GetButtonTitle() string {
+	return fmt.Sprintf("%v @%v", s.GetStatusText(), s.Account.Username)
 }
 
 // Validate ...

@@ -7,7 +7,7 @@ import (
 	"gopkg.in/tucnak/telebot.v3"
 )
 
-func (srv *server) handleUsers(c telebot.Context) error {
+func (srv *server) handleUnsetSuperuser(c telebot.Context) error {
 	if !c.Message().Private() {
 		return c.EditOrReply(helper.ErrWrongChatType, &telebot.SendOptions{ParseMode: "HTML"})
 	}
@@ -30,8 +30,8 @@ func (srv *server) handleUsers(c telebot.Context) error {
 	callback := &model.Callback{
 		ID:          0,
 		Type:        "account",
-		Command:     "get",
-		ListCommand: "get",
+		Command:     "unset_superuser",
+		ListCommand: "unset_superuser",
 	}
 
 	replyMessage, replyMarkup, err := helper.GetUsersList(srv.store, callback)

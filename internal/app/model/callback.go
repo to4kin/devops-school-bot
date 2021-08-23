@@ -1,30 +1,48 @@
 package model
 
 import (
-	"encoding/json"
+	"errors"
+	"fmt"
+	"strconv"
+	"strings"
 )
 
-// Callback ...
+var sep string = "|"
+
+// Callback represents a telebot.Callback().Data() for inline messages
 type Callback struct {
-	Type string `json:"type"`
-	ID   int64  `json:"id,string"`
+	// ID of element in database
+	ID int64
+	// Type of element
+	Type string
+	// Command for button
+	Command string
+	// Command for elements in list
+	ListCommand string
 }
 
 // ToString ...
 func (c *Callback) ToString() string {
-	str, err := json.Marshal(c)
-	if err != nil {
-		return ""
-	}
-
-	return string(str)
+	return fmt.Sprintf("%d%v%v%v%v%v%v", c.ID, sep, c.Type, sep, c.Command, sep, c.ListCommand)
 }
 
 // Unmarshal ...
-func (c *Callback) Unmarshal(b []byte) error {
-	if err := json.Unmarshal(b, c); err != nil {
+func (c *Callback) Unmarshal(s string) error {
+	str := strings.Split(s, sep)
+
+	if len(str) != 4 {
+		return errors.New("incorrect string")
+	}
+
+	var err error
+	c.ID, err = strconv.ParseInt(str[0], 10, 64)
+	if err != nil {
 		return err
 	}
+
+	c.Type = str[1]
+	c.Command = str[2]
+	c.ListCommand = str[3]
 
 	return nil
 }

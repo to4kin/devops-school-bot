@@ -9,6 +9,32 @@ import (
 	"gopkg.in/tucnak/telebot.v3"
 )
 
+var (
+	msgVersion   string = "dev"
+	msgBuildDate string = ""
+	msgBotInfo   string = "<b>Bot information:</b>\nVersion: %v\nBuild date: %v\nBuilt with: %v"
+
+	msgHelpCommand string = `I'll manage students homeworks
+<b>User Commands</b>
+/start - Add user to database
+/joinstudent - Join school as student
+/joinmodule - Join school as listener
+/homeworks - Homeworks list
+/help - Help message
+
+<b>Superuser Commands</b>
+/schools - Manage schools
+/startschool - Start school
+/stopschool - Finish school
+/report - School progress
+/fullreport - School progress with homework list
+
+/users - Manage users
+/setsuperuser - Set Superuser
+/unsetsuperuser - Unset Superuser
+`
+)
+
 func (srv *server) handleHelp(c telebot.Context) error {
 	message := msgHelpCommand
 
@@ -32,5 +58,5 @@ func (srv *server) handleHelp(c telebot.Context) error {
 		}
 	}
 
-	return c.Reply(msgHelpCommand, &telebot.SendOptions{ParseMode: "HTML"})
+	return c.EditOrReply(msgHelpCommand, &telebot.SendOptions{ParseMode: "HTML"})
 }

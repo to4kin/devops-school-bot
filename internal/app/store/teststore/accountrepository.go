@@ -75,3 +75,20 @@ func (r *AccountRepository) FindByTelegramID(telegramID int64) (*model.Account, 
 
 	return nil, store.ErrRecordNotFound
 }
+
+// FindBySuperuser ...
+func (r *AccountRepository) FindBySuperuser(superuser bool) ([]*model.Account, error) {
+	accounts := []*model.Account{}
+
+	for _, account := range r.accounts {
+		if account.Superuser == superuser {
+			accounts = append(accounts, account)
+		}
+	}
+
+	if len(accounts) == 0 {
+		return nil, store.ErrRecordNotFound
+	}
+
+	return accounts, nil
+}

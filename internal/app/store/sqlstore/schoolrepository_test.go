@@ -107,3 +107,21 @@ func TestSchoolRepository_FindByChatID(t *testing.T) {
 	assert.NoError(t, err)
 	assert.NotNil(t, school)
 }
+
+func TestSchoolRepository_FindByActive(t *testing.T) {
+	db, teardown := sqlstore.TestDb(t, databaseURL, migrations)
+	defer teardown("school")
+
+	s := sqlstore.New(db)
+	school := model.TestSchool(t)
+
+	schools, err := s.School().FindByActive(school.Active)
+	assert.EqualError(t, err, store.ErrRecordNotFound.Error())
+	assert.Nil(t, schools)
+	assert.NoError(t, s.School().Create(school))
+
+	schools, err = s.School().FindByActive(school.Active)
+	assert.NoError(t, err)
+	assert.NotNil(t, schools)
+	assert.Equal(t, school.Active, schools[0].Active)
+}
