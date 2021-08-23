@@ -9,7 +9,7 @@ import (
 )
 
 var (
-	studentText        string = "School: %v\n\n" + msgStudentInfo + "\n\n" + sysHomeworkGuide + "\n\nHomeworks:\n%v"
+	studentText        string = "School: %v\n\n" + msgStudentInfo
 	studentsListText   string = "School: %v\n\nChoose a student from the list below:"
 	blockStudentText   string = "Success! Student <b>%v</b> blocked"
 	unblockStudentText string = "Success! Student <b>%v</b> unblocked"
@@ -81,7 +81,7 @@ func GetStudent(store store.Store, callback *model.Callback) (string, *telebot.R
 		ListCommand: callback.ListCommand,
 	}
 	rows = append(rows, replyMarkup.Row(replyMarkup.Data(backToStudentsListText, backToStudentsListCallback.ToString())))
-	rows = append(rows, backToSchoolRow(replyMarkup, student.School.ID))
+	rows = append(rows, backToSchoolRow(replyMarkup, callback, student.School.ID))
 	replyMarkup.Inline(rows...)
 
 	homeworks, _ := store.Homework().FindByStudentID(callback.ID)
@@ -102,17 +102,24 @@ func GetStudent(store store.Store, callback *model.Callback) (string, *telebot.R
 		}
 	}
 
-	return fmt.Sprintf(
-			studentText,
-			student.School.Title,
-			student.Account.FirstName,
-			student.Account.LastName,
-			student.GetStatusText(),
-			student.GetType(),
-			text,
-		),
-		replyMarkup,
-		nil
+	reportMessage := fmt.Sprintf(
+		studentText,
+		student.School.Title,
+		student.Account.FirstName,
+		student.Account.LastName,
+		student.GetType(),
+		student.GetStatusText(),
+	)
+
+	if student.FullCourse {
+		reportMessage += "\n\n" + SysStudentGuide
+	} else {
+		reportMessage += "\n\n" + SysListenerGuide
+	}
+
+	reportMessage += fmt.Sprintf("\n\nHomeworks:\n%v", text)
+
+	return reportMessage, replyMarkup, nil
 }
 
 // GetStudentsList ...
@@ -134,7 +141,7 @@ func GetStudentsList(store store.Store, callback *model.Callback) (string, *tele
 	}
 
 	rows := rowsWithButtons(interfaceSlice, callback)
-	rows = append(rows, backToSchoolRow(replyMarkup, student.School.ID))
+	rows = append(rows, backToSchoolRow(replyMarkup, callback, student.School.ID))
 	replyMarkup.Inline(rows...)
 
 	return fmt.Sprintf(studentsListText, student.School.Title), replyMarkup, nil
@@ -154,7 +161,7 @@ func BlockStudent(store store.Store, callback *model.Callback) (string, *telebot
 	}
 
 	replyMarkup := &telebot.ReplyMarkup{}
-	fillStudentReplyMarkup(replyMarkup, callback)
+	replyMarkup.Inline(backToStudentRow(replyMarkup, callback, student.ID))
 
 	return fmt.Sprintf(blockStudentText, student.Account.Username), replyMarkup, nil
 }
@@ -173,7 +180,7 @@ func UnblockStudent(store store.Store, callback *model.Callback) (string, *teleb
 	}
 
 	replyMarkup := &telebot.ReplyMarkup{}
-	fillStudentReplyMarkup(replyMarkup, callback)
+	replyMarkup.Inline(backToStudentRow(replyMarkup, callback, student.ID))
 
 	return fmt.Sprintf(unblockStudentText, student.Account.Username), replyMarkup, nil
 }
@@ -192,7 +199,7 @@ func SetStudent(store store.Store, callback *model.Callback) (string, *telebot.R
 	}
 
 	replyMarkup := &telebot.ReplyMarkup{}
-	fillStudentReplyMarkup(replyMarkup, callback)
+	replyMarkup.Inline(backToStudentRow(replyMarkup, callback, student.ID))
 
 	return fmt.Sprintf(updateStudentText, student.Account.Username, student.GetType()), replyMarkup, nil
 }
@@ -211,22 +218,32 @@ func SetListener(store store.Store, callback *model.Callback) (string, *telebot.
 	}
 
 	replyMarkup := &telebot.ReplyMarkup{}
-	fillStudentReplyMarkup(replyMarkup, callback)
+	replyMarkup.Inline(backToStudentRow(replyMarkup, callback, student.ID))
 
 	return fmt.Sprintf(updateStudentText, student.Account.Username, student.GetType()), replyMarkup, nil
 }
 
-func fillStudentReplyMarkup(replyMarkup *telebot.ReplyMarkup, callback *model.Callback) {
+func backToStudentRow(replyMarkup *telebot.ReplyMarkup, callback *model.Callback, studentID int64) telebot.Row {
+	backToStudentCallback := &model.Callback{
+		ID:          studentID,
+		Type:        "student",
+		Command:     "get",
+		ListCommand: callback.ListCommand,
+	}
+
+	backToStudentsListCallback := &model.Callback{
+		ID:          studentID,
+		Type:        "student",
+		Command:     "students_list",
+		ListCommand: callback.ListCommand,
+	}
+
 	if callback.ListCommand == "get" {
-		backToStudentCallback := *callback
-		backToStudentCallback.Command = "get"
-
-		backToStudentsListCallback := *callback
-		backToStudentsListCallback.Command = "students_list"
-
-		replyMarkup.Inline(replyMarkup.Row(
+		return replyMarkup.Row(
 			replyMarkup.Data(backToStudentText, backToStudentCallback.ToString()),
 			replyMarkup.Data(backToStudentsListText, backToStudentsListCallback.ToString()),
-		))
+		)
 	}
+
+	return replyMarkup.Row(replyMarkup.Data(backToStudentsListText, backToStudentsListCallback.ToString()))
 }

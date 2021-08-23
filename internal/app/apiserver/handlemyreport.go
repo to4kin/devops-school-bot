@@ -9,7 +9,7 @@ import (
 
 func (srv *server) handleMyReport(c telebot.Context) error {
 	if c.Message().Private() {
-		return nil
+		return c.EditOrReply(helper.ErrWrongChatType, &telebot.SendOptions{ParseMode: "HTML"})
 	}
 
 	srv.logger.WithFields(logrus.Fields{

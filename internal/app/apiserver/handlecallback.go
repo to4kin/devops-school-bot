@@ -120,5 +120,9 @@ func (srv *server) handleCallback(c telebot.Context) error {
 		return c.EditOrReply(helper.ErrInternal, &telebot.SendOptions{ParseMode: "HTML"})
 	}
 
+	if replyMessage == "" {
+		return c.EditOrReply(helper.ErrInternal, &telebot.SendOptions{ParseMode: "HTML"})
+	}
+
 	return c.EditOrReply(replyMessage, &telebot.SendOptions{ParseMode: "HTML"}, replyMarkup)
 }

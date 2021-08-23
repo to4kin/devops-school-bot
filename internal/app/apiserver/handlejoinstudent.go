@@ -87,7 +87,13 @@ func (srv *server) handleJoinStudent(c telebot.Context) error {
 			}
 
 			srv.logger.WithFields(student.LogrusFields()).Debug("student created")
-			return c.EditOrReply(fmt.Sprintf(helper.MsgWelcomeToSchool, school.Title, student.GetType()), &telebot.SendOptions{ParseMode: "HTML"})
+			reportMessage := fmt.Sprintf(helper.MsgWelcomeToSchool, school.Title, student.GetType())
+			if student.FullCourse {
+				reportMessage += "\n\n" + helper.SysStudentGuide
+			} else {
+				reportMessage += "\n\n" + helper.SysListenerGuide
+			}
+			return c.EditOrReply(reportMessage, &telebot.SendOptions{ParseMode: "HTML"})
 		}
 
 		srv.logger.Error(err)

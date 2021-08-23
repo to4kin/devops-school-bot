@@ -165,7 +165,7 @@ func StartSchool(store store.Store, callback *model.Callback) (string, *telebot.
 	}
 
 	replyMarkup := &telebot.ReplyMarkup{}
-	fillSchoolReplyMarkup(replyMarkup, callback)
+	replyMarkup.Inline(backToSchoolRow(replyMarkup, callback, school.ID))
 
 	return fmt.Sprintf(startSchoolText, school.Title), replyMarkup, nil
 }
@@ -184,7 +184,7 @@ func StopSchool(store store.Store, callback *model.Callback) (string, *telebot.R
 	}
 
 	replyMarkup := &telebot.ReplyMarkup{}
-	fillSchoolReplyMarkup(replyMarkup, callback)
+	replyMarkup.Inline(backToSchoolRow(replyMarkup, callback, school.ID))
 
 	return fmt.Sprintf(stopSchoolText, school.Title), replyMarkup, nil
 }
@@ -206,7 +206,7 @@ func ReportSchool(str store.Store, callback *model.Callback) (string, *telebot.R
 	}
 
 	replyMarkup := &telebot.ReplyMarkup{}
-	fillSchoolReplyMarkup(replyMarkup, callback)
+	replyMarkup.Inline(backToSchoolRow(replyMarkup, callback, school.ID))
 
 	return fmt.Sprintf("School <b>%v</b>\n\n%v", school.Title, reportMessage), replyMarkup, nil
 }
@@ -228,7 +228,7 @@ func FullReportSchool(str store.Store, callback *model.Callback) (string, *teleb
 	}
 
 	replyMarkup := &telebot.ReplyMarkup{}
-	fillSchoolReplyMarkup(replyMarkup, callback)
+	replyMarkup.Inline(backToSchoolRow(replyMarkup, callback, school.ID))
 
 	return fmt.Sprintf("School <b>%v</b>\n\n%v", school.Title, reportMessage), replyMarkup, nil
 }
@@ -250,43 +250,32 @@ func GetSchoolHomeworks(str store.Store, callback *model.Callback) (string, *tel
 	}
 
 	replyMarkup := &telebot.ReplyMarkup{}
-	fillSchoolReplyMarkup(replyMarkup, callback)
+	replyMarkup.Inline(backToSchoolRow(replyMarkup, callback, school.ID))
 
 	return fmt.Sprintf("School <b>%v</b>\n\n%v", school.Title, reportMessage), replyMarkup, nil
 }
 
-func fillSchoolReplyMarkup(replyMarkup *telebot.ReplyMarkup, callback *model.Callback) {
-	if callback.ListCommand == "get" {
-		backToSchoolCallback := *callback
-		backToSchoolCallback.Command = "get"
-
-		backToSchoolsListCallback := *callback
-		backToSchoolsListCallback.Command = "schools_list"
-
-		replyMarkup.Inline(replyMarkup.Row(
-			replyMarkup.Data(backToSchoolText, backToSchoolCallback.ToString()),
-			replyMarkup.Data(backToSchoolsListText, backToSchoolsListCallback.ToString()),
-		))
-	}
-}
-
-func backToSchoolRow(replyMarkup *telebot.ReplyMarkup, schoolID int64) telebot.Row {
+func backToSchoolRow(replyMarkup *telebot.ReplyMarkup, callback *model.Callback, schoolID int64) telebot.Row {
 	backToSchoolCallback := &model.Callback{
 		ID:          schoolID,
 		Type:        "school",
 		Command:     "get",
-		ListCommand: "get",
+		ListCommand: callback.ListCommand,
 	}
 
 	backToSchoolsListCallback := &model.Callback{
 		ID:          schoolID,
 		Type:        "school",
 		Command:     "schools_list",
-		ListCommand: "get",
+		ListCommand: callback.ListCommand,
 	}
 
-	return replyMarkup.Row(
-		replyMarkup.Data(backToSchoolText, backToSchoolCallback.ToString()),
-		replyMarkup.Data(backToSchoolsListText, backToSchoolsListCallback.ToString()),
-	)
+	if callback.ListCommand == "get" {
+		return replyMarkup.Row(
+			replyMarkup.Data(backToSchoolText, backToSchoolCallback.ToString()),
+			replyMarkup.Data(backToSchoolsListText, backToSchoolsListCallback.ToString()),
+		)
+	}
+
+	return replyMarkup.Row(replyMarkup.Data(backToSchoolsListText, backToSchoolsListCallback.ToString()))
 }

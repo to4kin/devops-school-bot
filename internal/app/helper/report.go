@@ -12,7 +12,7 @@ var (
 
 	homeworksListReport string = "<b>Homework list</b>\n\n"
 	homeworkNotProvided string = "you haven't submitted your homework yet\n\n" + sysHomeworkAdd
-	homeworkReport      string = "Hello, @%v!\n\n" + msgStudentInfo + "\n\n" + sysHomeworkGuide + "\n\nYour progress in <b>%v</b>:\n"
+	homeworkReport      string = "Hello, @%v!\n\n" + msgStudentInfo
 
 	studentIsBlocked string = "Your student account is blocked!\n\nPlease contact mentors or teachers"
 )
@@ -50,10 +50,17 @@ func GetUserReport(str store.Store, account *model.Account, school *model.School
 		account.Username,
 		student.Account.FirstName,
 		student.Account.LastName,
-		student.GetStatusText(),
 		student.GetType(),
-		school.Title,
+		student.GetStatusText(),
 	)
+
+	if student.FullCourse {
+		reportMessage += "\n\n" + SysStudentGuide
+	} else {
+		reportMessage += "\n\n" + SysListenerGuide
+	}
+
+	reportMessage += fmt.Sprintf("\n\nYour progress in <b>%v</b>:\n", school.Title)
 
 	for _, lesson := range allLessons {
 		counted := false

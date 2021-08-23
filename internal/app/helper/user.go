@@ -103,7 +103,7 @@ func UpdateUser(store store.Store, callback *model.Callback, sender *telebot.Use
 	}
 
 	replyMarkup := &telebot.ReplyMarkup{}
-	fillUserReplyMarkup(replyMarkup, callback)
+	replyMarkup.Inline(backToUserRow(replyMarkup, callback, account.ID))
 
 	return fmt.Sprintf(updateUserText, account.Username), replyMarkup, nil
 }
@@ -122,7 +122,7 @@ func SetSuperuser(store store.Store, callback *model.Callback) (string, *telebot
 	}
 
 	replyMarkup := &telebot.ReplyMarkup{}
-	fillUserReplyMarkup(replyMarkup, callback)
+	replyMarkup.Inline(backToUserRow(replyMarkup, callback, account.ID))
 
 	return fmt.Sprintf(setSuperuserText, account.Username), replyMarkup, nil
 }
@@ -141,22 +141,32 @@ func UnsetSuperuser(store store.Store, callback *model.Callback) (string, *teleb
 	}
 
 	replyMarkup := &telebot.ReplyMarkup{}
-	fillUserReplyMarkup(replyMarkup, callback)
+	replyMarkup.Inline(backToUserRow(replyMarkup, callback, account.ID))
 
 	return fmt.Sprintf(unsetSuperuserText, account.Username), replyMarkup, nil
 }
 
-func fillUserReplyMarkup(replyMarkup *telebot.ReplyMarkup, callback *model.Callback) {
+func backToUserRow(replyMarkup *telebot.ReplyMarkup, callback *model.Callback, accountID int64) telebot.Row {
+	backToUser := &model.Callback{
+		ID:          accountID,
+		Type:        "account",
+		Command:     "get",
+		ListCommand: callback.ListCommand,
+	}
+
+	backToUsersList := &model.Callback{
+		ID:          accountID,
+		Type:        "account",
+		Command:     "accounts_list",
+		ListCommand: callback.ListCommand,
+	}
+
 	if callback.ListCommand == "get" {
-		backToUser := *callback
-		backToUser.Command = "get"
-
-		backToUsersList := *callback
-		backToUsersList.Command = "accounts_list"
-
-		replyMarkup.Inline(replyMarkup.Row(
+		return replyMarkup.Row(
 			replyMarkup.Data(backToUserText, backToUser.ToString()),
 			replyMarkup.Data(backToUsersListText, backToUsersList.ToString()),
-		))
+		)
 	}
+
+	return replyMarkup.Row(replyMarkup.Data(backToUsersListText, backToUsersList.ToString()))
 }

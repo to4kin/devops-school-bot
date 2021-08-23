@@ -16,20 +16,24 @@ var (
 
 	// MsgWelcomeToSchool ...
 	MsgWelcomeToSchool string = "<b>Welcome to %v as %v!</b>\n\nI'll manage all your progress and provide the report if needed.\n" +
-		sysHomeworkAdd + "\n\n" + sysHomeworkGuide
+		sysHomeworkAdd
 	// MsgUserAlreadyJoined ...
 	MsgUserAlreadyJoined string = "you have already joined school <b>%v</b> as %v\n\n" + sysHomeworkAdd
+
+	// SysListenerGuide ...
+	SysListenerGuide string = "Homework guide:\nPlease provide homeworks only for your module!"
+	// SysStudentGuide ...
+	SysStudentGuide string = `Homework guide:
+` + iconGreenCircle + ` - homework is <b>accepted</b>
+` + iconRedCircle + ` - homework is <b>NOT provided</b>`
 )
 
 var (
-	msgStudentInfo string = "Student info:\n\nFirst name: %v\nLast name: %v\nStatus: %v\nType: %v"
+	msgStudentInfo string = "Student info:\n\nFirst name: %v\nLast name: %v\nType: %v\nStatus: %v"
 
 	iconGreenCircle string = `🟢`
 	//iconYellowCircle string = `🟡`
 	iconRedCircle string = `🔴`
 
-	sysHomeworkAdd   string = "To add homework, use the lesson hashtag along with the #homework, for example: <code>#homework #cicd</code>"
-	sysHomeworkGuide string = `Homework guide:
-` + iconGreenCircle + ` - homework is <b>accepted</b>
-` + iconRedCircle + ` - homework is <b>NOT provided</b>`
+	sysHomeworkAdd string = "To add homework, use the lesson hashtag along with the #homework, for example: <code>#homework #cicd</code>"
 )
