@@ -80,17 +80,17 @@ To add homework, use the work hashtag along with the `#homework`, for example: `
 #### For BotFather
 
 ```
-/start - Add user to database
-/joinstudent - Join school as student
-/joinmodule - Join school as listener
-/homeworks - Homeworks list
-/help - Help message
-/schools - Manage schools
-/startschool - Start school
-/stopschool - Finish school
-/report - School progress
-/fullreport - School progress with homework list
-/users - Manage users
-/setsuperuser - Set Superuser
-/unsetsuperuser - Unset Superuser
+start - Add user to database
+joinstudent - Join school as student
+joinmodule - Join school as listener
+homeworks - Homeworks list
+help - Help message
+schools - Manage schools
+startschool - Start school
+stopschool - Finish school
+report - School progress
+fullreport - School progress with homework list
+users - Manage users
+setsuperuser - Set Superuser
+unsetsuperuser - Unset Superuser
 ```
