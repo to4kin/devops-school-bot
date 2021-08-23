@@ -22,7 +22,7 @@ func GetUserReport(str store.Store, account *model.Account, school *model.School
 	student, err := str.Student().FindByAccountIDSchoolID(account.ID, school.ID)
 	if err != nil {
 		if err == store.ErrRecordNotFound {
-			return ErrUserNotJoined.Error(), nil
+			return ErrUserNotJoined, nil
 		}
 
 		return "", err

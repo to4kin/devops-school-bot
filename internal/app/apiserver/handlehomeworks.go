@@ -48,7 +48,7 @@ func (srv *server) handleHomework(c telebot.Context) error {
 	}
 
 	if err == store.ErrRecordNotFound {
-		reportMessage = helper.ErrReportNotFound.Error()
+		reportMessage = helper.ErrReportNotFound
 	}
 
 	srv.logger.Debug("report sent")

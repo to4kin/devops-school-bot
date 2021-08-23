@@ -15,6 +15,7 @@ var (
 	msgBotInfo   string = "<b>Bot information:</b>\nVersion: %v\nBuild date: %v\nBuilt with: %v"
 
 	msgHelpCommand string = `I'll manage students homeworks
+	
 <b>User Commands</b>
 /start - Add user to database
 /joinstudent - Join school as student

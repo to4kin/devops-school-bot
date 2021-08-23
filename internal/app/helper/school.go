@@ -202,7 +202,7 @@ func ReportSchool(str store.Store, callback *model.Callback) (string, *telebot.R
 	}
 
 	if err == store.ErrRecordNotFound {
-		reportMessage = ErrReportNotFound.Error()
+		reportMessage = ErrReportNotFound
 	}
 
 	replyMarkup := &telebot.ReplyMarkup{}
@@ -224,7 +224,7 @@ func FullReportSchool(str store.Store, callback *model.Callback) (string, *teleb
 	}
 
 	if err == store.ErrRecordNotFound {
-		reportMessage = ErrReportNotFound.Error()
+		reportMessage = ErrReportNotFound
 	}
 
 	replyMarkup := &telebot.ReplyMarkup{}
@@ -246,7 +246,7 @@ func GetSchoolHomeworks(str store.Store, callback *model.Callback) (string, *tel
 	}
 
 	if err == store.ErrRecordNotFound {
-		reportMessage = ErrReportNotFound.Error()
+		reportMessage = ErrReportNotFound
 	}
 
 	replyMarkup := &telebot.ReplyMarkup{}
