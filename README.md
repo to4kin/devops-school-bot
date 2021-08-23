@@ -57,37 +57,40 @@ verbose = false
 
 There're two types of telegram chat where the bot is accepting commands: `private chat` and `group chat`
 
-##### Abbreviation
-[GC] - Commands available in `Group chats`
-[PC] - Commands available in `Private chat` with bot
-[All] - Commands available in `All chats`
-[Admin] - Commands available only for bot `Administrators`
+##### User Commands
+**/start** - Add user to database
+**/joinstudent** - Join school as student
+**/joinmodule** - Join school as listener
+**/homeworks** - Homeworks list
+**/help** - Help message
 
-##### Commands
-**/start** - [GC][Admin]: Start school. Private: Add user to database
-**/finish** - [GC][Admin]: Finish school
-**/report** - [GC][Admin]: School progress
-**/fullreport** - [GC][Admin]: School progress with homework list
-**/join** - [GC]: Join school as student
-**/myreport** - [GC]: Your progress
-**/homeworks** - [GC]: Homework list
-**/schools** - [PC][Admin]: Manage schools
-**/users** - [PC][Admin]: Manage users
-**/help** - [All]: Help message
+##### Superuser Commands
+**/schools** - Manage schools
+**/startschool** - Start school
+**/stopschool** - Finish school
+**/report** - School progress
+**/fullreport** - School progress with homework list
+
+**/users** - Manage users
+**/setsuperuser** - Set Superuser
+**/unsetsuperuser** - Unset Superuser
 
 To add homework, use the work hashtag along with the `#homework`, for example: `#homework #cicd`
 
 #### For BotFather
 
 ```
-start - [GC][Admin]: Start school. [PC]: Add user to database
-finish - [GC][Admin]: Finish school
-report - [GC][Admin]: School progress
-fullreport - [GC][Admin]: School progress with homework list
-join - [GC]: Join school as student
-myreport - [GC]: Your progress
-homeworks - [GC]: Homework list
-schools - [PC][Admin]: Manage schools
-users - [PC][Admin]: Manage users
-help - [All]: Help message
+/start - Add user to database
+/joinstudent - Join school as student
+/joinmodule - Join school as listener
+/homeworks - Homeworks list
+/help - Help message
+/schools - Manage schools
+/startschool - Start school
+/stopschool - Finish school
+/report - School progress
+/fullreport - School progress with homework list
+/users - Manage users
+/setsuperuser - Set Superuser
+/unsetsuperuser - Unset Superuser
 ```
