@@ -1,7 +1,7 @@
 image: artifactory.devops.telekom.de/tvpp-docker/tvpp-runner:golang-1.17
 
 services:
-  - postgres:12.2-alpine
+  - postgres:13.4-alpine
 
 variables:
   GOPATH: ${CI_PROJECT_DIR}/.go

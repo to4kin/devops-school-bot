@@ -13,6 +13,7 @@ Manage students progress and provide the report if needed
 * Make bot admin
 * Set a webhook to bot https address: `curl https://api.telegram.org/bot<BOT_TOKEN>/setWebhook\?url\=<BOT_HTTPS_URL>`
 * Create a config.toml file for bot, please check the example in configs folder
+* Provide the db/migrations folder
 * Start bot
 
 ### Usage
