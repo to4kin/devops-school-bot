@@ -12,7 +12,7 @@ import (
 var (
 	msgVersion   string = "dev"
 	msgBuildDate string = ""
-	msgBotInfo   string = "<b>Bot information:</b>\nVersion: %v\nBuild date: %v\nBuilt with: %v"
+	msgBotInfo   string = "\n\n<b>Bot information:</b>\nVersion: %v\nBuild date: %v\nBuilt with: %v"
 
 	msgHelpCommand string = `I'll manage students homeworks
 
@@ -60,5 +60,5 @@ func (srv *server) handleHelp(c telebot.Context) error {
 		}
 	}
 
-	return c.EditOrReply(msgHelpCommand, &telebot.SendOptions{ParseMode: "HTML"})
+	return c.EditOrReply(message, &telebot.SendOptions{ParseMode: "HTML"})
 }
