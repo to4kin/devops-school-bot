@@ -9,7 +9,6 @@ import (
 )
 
 var (
-	studentText        string = "School: %v\n\n" + msgStudentInfo
 	studentsListText   string = "School: %v\n\nChoose a student from the list below:"
 	blockStudentText   string = "Success! Student <b>%v</b> blocked"
 	unblockStudentText string = "Success! Student <b>%v</b> unblocked"

@@ -12,7 +12,7 @@ var (
 	homeworkText      string = "School: <b>%v</b>\n\nHomework info:\n\nTitle: %v"
 	homeworksListText string = "School: <b>%v</b>\n\nChoose a homework from the list below:"
 
-	backToHomeworkText      string = "<< Back to Homework"
+	//backToHomeworkText      string = "<< Back to Homework"
 	backToHomeworksListText string = "<< Back to Homeworks List"
 )
 
@@ -84,27 +84,27 @@ func removeDuplicate(slice []model.Interface) []model.Interface {
 	return list
 }
 
-func backToHomeworkRow(replyMarkup *telebot.ReplyMarkup, callback *model.Callback, homeworkID int64) telebot.Row {
-	backToHomeworkCallback := &model.Callback{
-		ID:          homeworkID,
-		Type:        "homework",
-		Command:     "get",
-		ListCommand: callback.ListCommand,
-	}
+// func backToHomeworkRow(replyMarkup *telebot.ReplyMarkup, callback *model.Callback, homeworkID int64) telebot.Row {
+// 	backToHomeworkCallback := &model.Callback{
+// 		ID:          homeworkID,
+// 		Type:        "homework",
+// 		Command:     "get",
+// 		ListCommand: callback.ListCommand,
+// 	}
 
-	backToHomeworksListCallback := &model.Callback{
-		ID:          homeworkID,
-		Type:        "homework",
-		Command:     "homeworks_list",
-		ListCommand: callback.ListCommand,
-	}
+// 	backToHomeworksListCallback := &model.Callback{
+// 		ID:          homeworkID,
+// 		Type:        "homework",
+// 		Command:     "homeworks_list",
+// 		ListCommand: callback.ListCommand,
+// 	}
 
-	if callback.ListCommand == "get" || callback.ListCommand == "merge" {
-		return replyMarkup.Row(
-			replyMarkup.Data(backToHomeworkText, backToHomeworkCallback.ToString()),
-			replyMarkup.Data(backToHomeworksListText, backToHomeworksListCallback.ToString()),
-		)
-	}
+// 	if callback.ListCommand == "get" || callback.ListCommand == "merge" {
+// 		return replyMarkup.Row(
+// 			replyMarkup.Data(backToHomeworkText, backToHomeworkCallback.ToString()),
+// 			replyMarkup.Data(backToHomeworksListText, backToHomeworksListCallback.ToString()),
+// 		)
+// 	}
 
-	return replyMarkup.Row(replyMarkup.Data(backToHomeworksListText, backToHomeworksListCallback.ToString()))
-}
+// 	return replyMarkup.Row(replyMarkup.Data(backToHomeworksListText, backToHomeworksListCallback.ToString()))
+// }
