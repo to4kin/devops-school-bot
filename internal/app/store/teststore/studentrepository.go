@@ -89,3 +89,20 @@ func (r *StudentRepository) FindByAccountIDSchoolID(accountID int64, schoolID in
 
 	return nil, store.ErrRecordNotFound
 }
+
+// FindByFullCourseSchoolID ...
+func (r *StudentRepository) FindByFullCourseSchoolID(fullCourse bool, schoolID int64) ([]*model.Student, error) {
+	result := []*model.Student{}
+
+	for _, student := range r.students {
+		if student.FullCourse == fullCourse && student.School.ID == schoolID {
+			result = append(result, student)
+		}
+	}
+
+	if len(result) == 0 {
+		return nil, store.ErrRecordNotFound
+	}
+
+	return result, nil
+}

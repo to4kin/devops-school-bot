@@ -56,23 +56,46 @@ func GetUserReport(str store.Store, account *model.Account, school *model.School
 
 	if student.FullCourse {
 		reportMessage += "\n\n" + SysStudentGuide
-	} else {
-		reportMessage += "\n\n" + SysListenerGuide
-	}
+		reportMessage += fmt.Sprintf("\n\nYour progress in <b>%v</b>:\n", school.Title)
 
-	reportMessage += fmt.Sprintf("\n\nYour progress in <b>%v</b>:\n", school.Title)
+		for _, lesson := range allLessons {
+			counted := false
+			for _, homework := range studentHomeworks {
+				if homework.Lesson.ID == lesson.ID {
+					counted = true
+					reportMessage += fmt.Sprintf("%v - %v\n", iconGreenCircle, lesson.Title)
+				}
+			}
 
-	for _, lesson := range allLessons {
-		counted := false
-		for _, homework := range studentHomeworks {
-			if homework.Lesson.ID == lesson.ID {
-				counted = true
-				reportMessage += fmt.Sprintf("%v - %v\n", iconGreenCircle, lesson.Title)
+			if !counted {
+				reportMessage += fmt.Sprintf("%v - %v\n", iconRedCircle, lesson.Title)
 			}
 		}
+	} else {
+		reportMessage += "\n\n" + SysListenerGuide
+		reportMessage += fmt.Sprintf("\n\nYour progress in <b>%v</b>:\n", school.Title)
+		studentModules := []*model.Module{}
 
-		if !counted && student.FullCourse {
-			reportMessage += fmt.Sprintf("%v - %v\n", iconRedCircle, lesson.Title)
+		for _, homework := range studentHomeworks {
+			studentModules = appendModule(studentModules, homework.Lesson.Module)
+		}
+
+		for _, module := range studentModules {
+			for _, lesson := range allLessons {
+				if module.ID == lesson.Module.ID {
+					counted := false
+					for _, homework := range studentHomeworks {
+						if homework.Lesson.ID == lesson.ID {
+							counted = true
+							reportMessage += fmt.Sprintf("%v - %v\n", iconGreenCircle, lesson.Title)
+						}
+					}
+
+					if !counted {
+						reportMessage += fmt.Sprintf("%v - %v\n", iconRedCircle, lesson.Title)
+					}
+				}
+			}
 		}
 	}
 
@@ -134,24 +157,51 @@ func GetLessonsReport(store store.Store, school *model.School) (string, error) {
 func prepareReportMsg(store store.Store, students []*model.Student, lessons []*model.Lesson) (string, error) {
 	reportMessage := report + "<pre>"
 	for _, student := range students {
+		acceptedHomework := 0
+		notProvidedHomework := 0
+
 		homeworks, err := store.Homework().FindByStudentID(student.ID)
 		if err != nil {
 			return "", err
 		}
 
-		acceptedHomework := 0
-		notProvidedHomework := 0
-		for _, lesson := range lessons {
-			counted := false
-			for _, homework := range homeworks {
-				if homework.Lesson.ID == lesson.ID {
-					counted = true
-					acceptedHomework++
+		if student.FullCourse {
+			for _, lesson := range lessons {
+				counted := false
+				for _, homework := range homeworks {
+					if homework.Lesson.ID == lesson.ID {
+						counted = true
+						acceptedHomework++
+					}
+				}
+
+				if !counted {
+					notProvidedHomework++
 				}
 			}
+		} else {
+			studentModules := []*model.Module{}
 
-			if !counted && student.FullCourse {
-				notProvidedHomework++
+			for _, homework := range homeworks {
+				studentModules = appendModule(studentModules, homework.Lesson.Module)
+			}
+
+			for _, module := range studentModules {
+				for _, lesson := range lessons {
+					if module.ID == lesson.Module.ID {
+						counted := false
+						for _, homework := range homeworks {
+							if homework.Lesson.ID == lesson.ID {
+								counted = true
+								acceptedHomework++
+							}
+						}
+
+						if !counted {
+							notProvidedHomework++
+						}
+					}
+				}
 			}
 		}
 
@@ -161,4 +211,13 @@ func prepareReportMsg(store store.Store, students []*model.Student, lessons []*m
 	reportMessage += "</pre>"
 
 	return reportMessage, nil
+}
+
+func appendModule(slice []*model.Module, homework *model.Module) []*model.Module {
+	for _, elem := range slice {
+		if elem.ID == homework.ID {
+			return slice
+		}
+	}
+	return append(slice, homework)
 }

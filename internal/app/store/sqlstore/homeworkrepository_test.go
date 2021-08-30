@@ -11,7 +11,7 @@ import (
 
 func TestHomeworkRepository_Create(t *testing.T) {
 	db, teardown := sqlstore.TestDb(t, databaseURL, migrations)
-	defer teardown("homework", "lesson", "student", "school", "account")
+	defer teardown("homework", "lesson", "module", "student", "school", "account")
 
 	s := sqlstore.New(db)
 	h := model.TestHomework(t)
@@ -19,6 +19,7 @@ func TestHomeworkRepository_Create(t *testing.T) {
 	assert.NoError(t, s.Account().Create(h.Student.Account))
 	assert.NoError(t, s.School().Create(h.Student.School))
 	assert.NoError(t, s.Student().Create(h.Student))
+	assert.NoError(t, s.Module().Create(h.Lesson.Module))
 	assert.NoError(t, s.Lesson().Create(h.Lesson))
 
 	assert.NoError(t, s.Homework().Create(h))
@@ -27,7 +28,7 @@ func TestHomeworkRepository_Create(t *testing.T) {
 
 func TestHomeworkRepository_FindByID(t *testing.T) {
 	db, teardown := sqlstore.TestDb(t, databaseURL, migrations)
-	defer teardown("homework", "lesson", "student", "school", "account")
+	defer teardown("homework", "lesson", "module", "student", "school", "account")
 
 	s := sqlstore.New(db)
 	h := model.TestHomework(t)
@@ -38,6 +39,7 @@ func TestHomeworkRepository_FindByID(t *testing.T) {
 	assert.NoError(t, s.Account().Create(h.Student.Account))
 	assert.NoError(t, s.School().Create(h.Student.School))
 	assert.NoError(t, s.Student().Create(h.Student))
+	assert.NoError(t, s.Module().Create(h.Lesson.Module))
 	assert.NoError(t, s.Lesson().Create(h.Lesson))
 	assert.NoError(t, s.Homework().Create(h))
 
@@ -48,7 +50,7 @@ func TestHomeworkRepository_FindByID(t *testing.T) {
 
 func TestHomeworkRepository_FindByStudentID(t *testing.T) {
 	db, teardown := sqlstore.TestDb(t, databaseURL, migrations)
-	defer teardown("homework", "lesson", "student", "school", "account")
+	defer teardown("homework", "lesson", "module", "student", "school", "account")
 
 	s := sqlstore.New(db)
 	h := model.TestHomework(t)
@@ -59,6 +61,7 @@ func TestHomeworkRepository_FindByStudentID(t *testing.T) {
 	assert.NoError(t, s.Account().Create(h.Student.Account))
 	assert.NoError(t, s.School().Create(h.Student.School))
 	assert.NoError(t, s.Student().Create(h.Student))
+	assert.NoError(t, s.Module().Create(h.Lesson.Module))
 	assert.NoError(t, s.Lesson().Create(h.Lesson))
 	assert.NoError(t, s.Homework().Create(h))
 
@@ -69,7 +72,7 @@ func TestHomeworkRepository_FindByStudentID(t *testing.T) {
 
 func TestHomeworkRepository_FindBySchoolID(t *testing.T) {
 	db, teardown := sqlstore.TestDb(t, databaseURL, migrations)
-	defer teardown("homework", "lesson", "student", "school", "account")
+	defer teardown("homework", "lesson", "module", "student", "school", "account")
 
 	s := sqlstore.New(db)
 	h := model.TestHomework(t)
@@ -80,6 +83,7 @@ func TestHomeworkRepository_FindBySchoolID(t *testing.T) {
 	assert.NoError(t, s.Account().Create(h.Student.Account))
 	assert.NoError(t, s.School().Create(h.Student.School))
 	assert.NoError(t, s.Student().Create(h.Student))
+	assert.NoError(t, s.Module().Create(h.Lesson.Module))
 	assert.NoError(t, s.Lesson().Create(h.Lesson))
 	assert.NoError(t, s.Homework().Create(h))
 
@@ -90,7 +94,7 @@ func TestHomeworkRepository_FindBySchoolID(t *testing.T) {
 
 func TestHomeworkRepository_FindByStudentIDLessonID(t *testing.T) {
 	db, teardown := sqlstore.TestDb(t, databaseURL, migrations)
-	defer teardown("homework", "lesson", "student", "school", "account")
+	defer teardown("homework", "lesson", "module", "student", "school", "account")
 
 	s := sqlstore.New(db)
 	h := model.TestHomework(t)
@@ -101,6 +105,7 @@ func TestHomeworkRepository_FindByStudentIDLessonID(t *testing.T) {
 	assert.NoError(t, s.Account().Create(h.Student.Account))
 	assert.NoError(t, s.School().Create(h.Student.School))
 	assert.NoError(t, s.Student().Create(h.Student))
+	assert.NoError(t, s.Module().Create(h.Lesson.Module))
 	assert.NoError(t, s.Lesson().Create(h.Lesson))
 	assert.NoError(t, s.Homework().Create(h))
 

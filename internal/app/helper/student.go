@@ -84,40 +84,10 @@ func GetStudent(store store.Store, callback *model.Callback) (string, *telebot.R
 	rows = append(rows, backToSchoolRow(replyMarkup, callback, student.School.ID))
 	replyMarkup.Inline(rows...)
 
-	homeworks, _ := store.Homework().FindByStudentID(callback.ID)
-	lessons, _ := store.Lesson().FindBySchoolID(student.School.ID)
-
-	text := ""
-	for _, lesson := range lessons {
-		counted := false
-		for _, homework := range homeworks {
-			if homework.Lesson.ID == lesson.ID {
-				counted = true
-				text += fmt.Sprintf("%v - %v\n", iconGreenCircle, lesson.Title)
-			}
-		}
-
-		if !counted && student.FullCourse {
-			text += fmt.Sprintf("%v - %v\n", iconRedCircle, lesson.Title)
-		}
+	reportMessage, err := GetUserReport(store, student.Account, student.School)
+	if err != nil {
+		return "", nil, err
 	}
-
-	reportMessage := fmt.Sprintf(
-		studentText,
-		student.School.Title,
-		student.Account.FirstName,
-		student.Account.LastName,
-		student.GetType(),
-		student.GetStatusText(),
-	)
-
-	if student.FullCourse {
-		reportMessage += "\n\n" + SysStudentGuide
-	} else {
-		reportMessage += "\n\n" + SysListenerGuide
-	}
-
-	reportMessage += fmt.Sprintf("\n\nHomeworks:\n%v", text)
 
 	return reportMessage, replyMarkup, nil
 }
@@ -129,7 +99,7 @@ func GetStudentsList(store store.Store, callback *model.Callback) (string, *tele
 		return "", nil, err
 	}
 
-	students, err := store.Student().FindBySchoolID(student.School.ID)
+	students, err := store.Student().FindByFullCourseSchoolID(student.FullCourse, student.School.ID)
 	if err != nil {
 		return "", nil, err
 	}

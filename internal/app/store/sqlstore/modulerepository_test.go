@@ -9,80 +9,78 @@ import (
 	"gitlab.devops.telekom.de/tvpp/prototypes/devops-school-bot/internal/app/store/sqlstore"
 )
 
-func TestLessonRepository_Create(t *testing.T) {
+func TestModuleRepository_Create(t *testing.T) {
 	db, teardown := sqlstore.TestDb(t, databaseURL, migrations)
-	defer teardown("lesson, module")
+	defer teardown("module")
 
 	s := sqlstore.New(db)
-	l := model.TestLesson(t)
+	m := model.TestModule(t)
 
-	assert.NoError(t, s.Module().Create(l.Module))
-	assert.NoError(t, s.Lesson().Create(l))
-	assert.NotNil(t, l)
+	assert.NoError(t, s.Module().Create(m))
+	assert.NotNil(t, m)
 }
 
-func TestLesson_FindAll(t *testing.T) {
+func TestModule_FindAll(t *testing.T) {
 	db, teardown := sqlstore.TestDb(t, databaseURL, migrations)
-	defer teardown("lesson, module")
+	defer teardown("module")
 
 	s := sqlstore.New(db)
-	l := model.TestLesson(t)
+	m := model.TestModule(t)
 
-	_, err := s.Lesson().FindAll()
+	_, err := s.Module().FindAll()
 	assert.EqualError(t, err, store.ErrRecordNotFound.Error())
 
-	assert.NoError(t, s.Module().Create(l.Module))
-	assert.NoError(t, s.Lesson().Create(l))
+	assert.NoError(t, s.Module().Create(m))
 
-	lessons, err := s.Lesson().FindAll()
+	modules, err := s.Module().FindAll()
 	assert.NoError(t, err)
-	assert.NotNil(t, lessons)
+	assert.NotNil(t, modules)
 }
 
-func TestLesson_FindByID(t *testing.T) {
+func TestModule_FindByID(t *testing.T) {
 	db, teardown := sqlstore.TestDb(t, databaseURL, migrations)
-	defer teardown("lesson, module")
+	defer teardown("module")
 
 	s := sqlstore.New(db)
-	l := model.TestLesson(t)
+	m := model.TestModule(t)
 
-	_, err := s.Lesson().FindByID(l.ID)
+	_, err := s.Module().FindByID(m.ID)
 	assert.EqualError(t, err, store.ErrRecordNotFound.Error())
 
-	assert.NoError(t, s.Module().Create(l.Module))
-	assert.NoError(t, s.Lesson().Create(l))
+	assert.NoError(t, s.Module().Create(m))
 
-	lesson, err := s.Lesson().FindByID(l.ID)
+	module, err := s.Module().FindByID(m.ID)
 	assert.NoError(t, err)
-	assert.NotNil(t, lesson)
+	assert.NotNil(t, module)
+	assert.Equal(t, m.ID, module.ID)
 }
 
-func TestLesson_FindByTitle(t *testing.T) {
+func TestModule_FindByTitle(t *testing.T) {
 	db, teardown := sqlstore.TestDb(t, databaseURL, migrations)
-	defer teardown("lesson, module")
+	defer teardown("module")
 
 	s := sqlstore.New(db)
-	l := model.TestLesson(t)
+	m := model.TestModule(t)
 
-	_, err := s.Lesson().FindByTitle(l.Title)
+	_, err := s.Module().FindByTitle(m.Title)
 	assert.EqualError(t, err, store.ErrRecordNotFound.Error())
 
-	assert.NoError(t, s.Module().Create(l.Module))
-	assert.NoError(t, s.Lesson().Create(l))
+	assert.NoError(t, s.Module().Create(m))
 
-	lesson, err := s.Lesson().FindByTitle(l.Title)
+	module, err := s.Module().FindByTitle(m.Title)
 	assert.NoError(t, err)
-	assert.NotNil(t, lesson)
+	assert.NotNil(t, module)
+	assert.Equal(t, m.Title, module.Title)
 }
 
-func TestLesson_FindBySchoolID(t *testing.T) {
+func TestModule_FindBySchoolID(t *testing.T) {
 	db, teardown := sqlstore.TestDb(t, databaseURL, migrations)
-	defer teardown("homework", "lesson", "module", "student", "school", "account")
+	defer teardown("homework", "module", "lesson", "student", "school", "account")
 
 	s := sqlstore.New(db)
 	h := model.TestHomework(t)
 
-	_, err := s.Lesson().FindBySchoolID(h.Student.School.ID)
+	_, err := s.Module().FindBySchoolID(h.Student.School.ID)
 	assert.EqualError(t, err, store.ErrRecordNotFound.Error())
 
 	assert.NoError(t, s.Account().Create(h.Student.Account))
@@ -92,7 +90,7 @@ func TestLesson_FindBySchoolID(t *testing.T) {
 	assert.NoError(t, s.Lesson().Create(h.Lesson))
 	assert.NoError(t, s.Homework().Create(h))
 
-	lesson, err := s.Lesson().FindBySchoolID(h.Student.School.ID)
+	modules, err := s.Module().FindBySchoolID(h.Student.School.ID)
 	assert.NoError(t, err)
-	assert.NotNil(t, lesson)
+	assert.NotNil(t, modules)
 }

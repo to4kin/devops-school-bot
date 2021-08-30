@@ -78,6 +78,7 @@ func TestStudentRepository_FindByID(t *testing.T) {
 	student, err := s.Student().FindByID(testStudent.ID)
 	assert.NoError(t, err)
 	assert.NotNil(t, student)
+	assert.Equal(t, testStudent.ID, student.ID)
 }
 
 func TestStudentRepository_FindBySchoolID(t *testing.T) {
@@ -94,9 +95,10 @@ func TestStudentRepository_FindBySchoolID(t *testing.T) {
 	assert.NoError(t, s.School().Create(testStudent.School))
 	assert.NoError(t, s.Student().Create(testStudent))
 
-	student, err := s.Student().FindBySchoolID(testStudent.School.ID)
+	students, err := s.Student().FindBySchoolID(testStudent.School.ID)
 	assert.NoError(t, err)
-	assert.NotNil(t, student)
+	assert.NotNil(t, students)
+	assert.Equal(t, testStudent.School.ID, students[0].School.ID)
 }
 
 func TestStudentRepository_FindByAccountIDSchoolID(t *testing.T) {
@@ -116,4 +118,26 @@ func TestStudentRepository_FindByAccountIDSchoolID(t *testing.T) {
 	student, err := s.Student().FindByAccountIDSchoolID(testStudent.Account.ID, testStudent.School.ID)
 	assert.NoError(t, err)
 	assert.NotNil(t, student)
+	assert.Equal(t, testStudent.Account.ID, student.Account.ID)
+	assert.Equal(t, testStudent.School.ID, student.School.ID)
+}
+
+func TestStudentRepository_FindByFullCourseSchoolID(t *testing.T) {
+	db, teardown := sqlstore.TestDb(t, databaseURL, migrations)
+	defer teardown("student", "school", "account")
+
+	s := sqlstore.New(db)
+	testStudent := model.TestStudent(t)
+
+	_, err := s.Student().FindByFullCourseSchoolID(testStudent.FullCourse, testStudent.School.ID)
+	assert.EqualError(t, err, store.ErrRecordNotFound.Error())
+
+	assert.NoError(t, s.Account().Create(testStudent.Account))
+	assert.NoError(t, s.School().Create(testStudent.School))
+	assert.NoError(t, s.Student().Create(testStudent))
+
+	students, err := s.Student().FindByFullCourseSchoolID(testStudent.FullCourse, testStudent.School.ID)
+	assert.NoError(t, err)
+	assert.NotNil(t, students)
+	assert.Equal(t, testStudent.FullCourse, students[0].FullCourse)
 }

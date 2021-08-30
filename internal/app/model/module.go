@@ -7,34 +7,32 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
-// Lesson ...
-type Lesson struct {
-	ID     int64   `json:"id"`
-	Title  string  `json:"title"`
-	Module *Module `json:"module"`
+// Module ...
+type Module struct {
+	ID    int64  `json:"id"`
+	Title string `json:"title"`
 }
 
 // GetID ...
-func (l *Lesson) GetID() int64 {
+func (l *Module) GetID() int64 {
 	return l.ID
 }
 
 // GetButtonTitle ...
-func (l *Lesson) GetButtonTitle() string {
+func (l *Module) GetButtonTitle() string {
 	return l.Title
 }
 
 // Validate ...
-func (l *Lesson) Validate() error {
+func (l *Module) Validate() error {
 	return validation.ValidateStruct(
 		l,
 		validation.Field(&l.Title, validation.Required),
-		validation.Field(&l.Module, validation.Required),
 	)
 }
 
 // ToString ...
-func (l *Lesson) ToString() string {
+func (l *Module) ToString() string {
 	str, err := json.MarshalIndent(l, "", "  ")
 	if err != nil {
 		return ""
@@ -44,10 +42,9 @@ func (l *Lesson) ToString() string {
 }
 
 // LogrusFields ...
-func (l *Lesson) LogrusFields() logrus.Fields {
+func (l *Module) LogrusFields() logrus.Fields {
 	return logrus.Fields{
-		"id":     l.ID,
-		"title":  l.Title,
-		"module": l.Module.LogrusFields(),
+		"id":    l.ID,
+		"title": l.Title,
 	}
 }

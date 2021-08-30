@@ -10,6 +10,7 @@ type Store struct {
 	accountRepository  *AccountRepository
 	schoolRepository   *SchoolRepository
 	lessonRepository   *LessonRepository
+	moduleRepository   *ModuleRepository
 	studentRepository  *StudentRepository
 	homeworkRepository *HomeworkRepository
 }
@@ -59,6 +60,20 @@ func (store *Store) Lesson() store.LessonRepository {
 	}
 
 	return store.lessonRepository
+}
+
+// Module ...
+func (store *Store) Module() store.ModuleRepository {
+	if store.moduleRepository != nil {
+		return store.moduleRepository
+	}
+
+	store.moduleRepository = &ModuleRepository{
+		store:   store,
+		modules: []*model.Module{},
+	}
+
+	return store.moduleRepository
 }
 
 // Student ...

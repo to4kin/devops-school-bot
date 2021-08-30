@@ -37,7 +37,9 @@ func (r *HomeworkRepository) FindByID(id int64) (*model.Homework, error) {
 			Account: &model.Account{},
 			School:  &model.School{},
 		},
-		Lesson: &model.Lesson{},
+		Lesson: &model.Lesson{
+			Module: &model.Module{},
+		},
 	}
 
 	if err := r.store.db.QueryRow(`
@@ -45,12 +47,14 @@ func (r *HomeworkRepository) FindByID(id int64) (*model.Homework, error) {
 			st.id, st.created, st.active, st.full_course,
 			acc.id, acc.created, acc.telegram_id, acc.first_name, acc.last_name, acc.username, acc.superuser,
 			sch.id, sch.created, sch.title, sch.active,
-			les.id, les.title
+			les.id, les.title,
+			mod.id, mod.title
 		FROM homework hw
 		JOIN student st ON st.id = hw.student_id
 		JOIN account acc ON acc.id = st.account_id
 		JOIN school sch ON sch.id = st.school_id
 		JOIN lesson les ON les.id = hw.lesson_id
+		JOIN module mod ON mod.id = les.module_id
 		WHERE hw.id = $1
 		`,
 		id,
@@ -76,6 +80,8 @@ func (r *HomeworkRepository) FindByID(id int64) (*model.Homework, error) {
 		&h.Student.School.Active,
 		&h.Lesson.ID,
 		&h.Lesson.Title,
+		&h.Lesson.Module.ID,
+		&h.Lesson.Module.Title,
 	); err != nil {
 		if err == sql.ErrNoRows {
 			return nil, store.ErrRecordNotFound
@@ -97,12 +103,14 @@ func (r *HomeworkRepository) FindByStudentID(studentID int64) ([]*model.Homework
 			st.id, st.created, st.active, st.full_course,
 			acc.id, acc.created, acc.telegram_id, acc.first_name, acc.last_name, acc.username, acc.superuser,
 			sch.id, sch.created,sch.title, sch.active,
-			les.id, les.title
+			les.id, les.title,
+			mod.id, mod.title
 		FROM homework hw
 		JOIN student st ON st.id = hw.student_id
 		JOIN account acc ON acc.id = st.account_id
 		JOIN school sch ON sch.id = st.school_id
 		JOIN lesson les ON les.id = hw.lesson_id
+		JOIN module mod ON mod.id = les.module_id
 		WHERE hw.student_id = $1
 		ORDER BY les.title ASC
 		`,
@@ -121,7 +129,9 @@ func (r *HomeworkRepository) FindByStudentID(studentID int64) ([]*model.Homework
 				Account: &model.Account{},
 				School:  &model.School{},
 			},
-			Lesson: &model.Lesson{},
+			Lesson: &model.Lesson{
+				Module: &model.Module{},
+			},
 		}
 
 		if err := rows.Scan(
@@ -146,6 +156,8 @@ func (r *HomeworkRepository) FindByStudentID(studentID int64) ([]*model.Homework
 			&h.Student.School.Active,
 			&h.Lesson.ID,
 			&h.Lesson.Title,
+			&h.Lesson.Module.ID,
+			&h.Lesson.Module.Title,
 		); err != nil {
 			return nil, err
 		}
@@ -174,12 +186,14 @@ func (r *HomeworkRepository) FindBySchoolID(schoolID int64) ([]*model.Homework, 
 			st.id, st.created, st.active, st.full_course,
 			acc.id, acc.created, acc.telegram_id, acc.first_name, acc.last_name, acc.username, acc.superuser,
 			sch.id, sch.created, sch.title, sch.active,
-			les.id, les.title
+			les.id, les.title,
+			mod.id, mod.title
 		FROM homework hw
 		JOIN student st ON st.id = hw.student_id
 		JOIN account acc ON acc.id = st.account_id
 		JOIN school sch ON sch.id = st.school_id
 		JOIN lesson les ON les.id = hw.lesson_id
+		JOIN module mod ON mod.id = les.module_id
 		WHERE sch.id = $1
 		ORDER BY les.title ASC
 		`,
@@ -198,7 +212,9 @@ func (r *HomeworkRepository) FindBySchoolID(schoolID int64) ([]*model.Homework, 
 				Account: &model.Account{},
 				School:  &model.School{},
 			},
-			Lesson: &model.Lesson{},
+			Lesson: &model.Lesson{
+				Module: &model.Module{},
+			},
 		}
 
 		if err := rows.Scan(
@@ -223,6 +239,8 @@ func (r *HomeworkRepository) FindBySchoolID(schoolID int64) ([]*model.Homework, 
 			&h.Student.School.Active,
 			&h.Lesson.ID,
 			&h.Lesson.Title,
+			&h.Lesson.Module.ID,
+			&h.Lesson.Module.Title,
 		); err != nil {
 			return nil, err
 		}
@@ -248,7 +266,9 @@ func (r *HomeworkRepository) FindByStudentIDLessonID(studentID int64, lessonID i
 			Account: &model.Account{},
 			School:  &model.School{},
 		},
-		Lesson: &model.Lesson{},
+		Lesson: &model.Lesson{
+			Module: &model.Module{},
+		},
 	}
 
 	if err := r.store.db.QueryRow(`
@@ -256,12 +276,14 @@ func (r *HomeworkRepository) FindByStudentIDLessonID(studentID int64, lessonID i
 			st.id, st.created, st.active, st.full_course,
 			acc.id, acc.created, acc.telegram_id, acc.first_name, acc.last_name, acc.username, acc.superuser,
 			sch.id, sch.created, sch.title, sch.active,
-			les.id, les.title
+			les.id, les.title,
+			mod.id, mod.title
 		FROM homework hw
 		JOIN student st ON st.id = hw.student_id
 		JOIN account acc ON acc.id = st.account_id
 		JOIN school sch ON sch.id = st.school_id
 		JOIN lesson les ON les.id = hw.lesson_id
+		JOIN module mod ON mod.id = les.module_id
 		WHERE hw.student_id = $1 AND hw.lesson_id = $2
 		`,
 		studentID,
@@ -288,6 +310,8 @@ func (r *HomeworkRepository) FindByStudentIDLessonID(studentID int64, lessonID i
 		&h.Student.School.Active,
 		&h.Lesson.ID,
 		&h.Lesson.Title,
+		&h.Lesson.Module.ID,
+		&h.Lesson.Module.Title,
 	); err != nil {
 		if err == sql.ErrNoRows {
 			return nil, store.ErrRecordNotFound

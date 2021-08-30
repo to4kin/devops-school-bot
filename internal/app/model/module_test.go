@@ -7,33 +7,24 @@ import (
 	"gitlab.devops.telekom.de/tvpp/prototypes/devops-school-bot/internal/app/model"
 )
 
-func TestLesson_Validate(t *testing.T) {
+func TestModule_Validate(t *testing.T) {
 	testCases := []struct {
 		name    string
-		l       func() *model.Lesson
+		l       func() *model.Module
 		isValid bool
 	}{
 		{
 			name: "valid",
-			l: func() *model.Lesson {
-				return model.TestLesson(t)
+			l: func() *model.Module {
+				return model.TestModule(t)
 			},
 			isValid: true,
 		},
 		{
 			name: "empty_title",
-			l: func() *model.Lesson {
-				l := model.TestLesson(t)
+			l: func() *model.Module {
+				l := model.TestModule(t)
 				l.Title = ""
-				return l
-			},
-			isValid: false,
-		},
-		{
-			name: "empty_module",
-			l: func() *model.Lesson {
-				l := model.TestLesson(t)
-				l.Module = &model.Module{}
 				return l
 			},
 			isValid: false,

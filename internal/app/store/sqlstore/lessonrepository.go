@@ -19,8 +19,9 @@ func (r *LessonRepository) Create(l *model.Lesson) error {
 	}
 
 	return r.store.db.QueryRow(
-		"INSERT INTO lesson (title) VALUES ($1) RETURNING id",
+		"INSERT INTO lesson (title, module_id) VALUES ($1, $2) RETURNING id",
 		l.Title,
+		l.Module.ID,
 	).Scan(
 		&l.ID,
 	)
@@ -32,7 +33,10 @@ func (r *LessonRepository) FindAll() ([]*model.Lesson, error) {
 	lessons := []*model.Lesson{}
 
 	rows, err := r.store.db.Query(`
-		SELECT id, title FROM lesson ORDER BY title ASC
+		SELECT les.id, les.title, mod.id, mod.title
+		FROM lesson les
+		JOIN module mod ON mod.id = les.module_id
+		ORDER BY les.title ASC
 		`,
 	)
 	if err != nil {
@@ -43,11 +47,15 @@ func (r *LessonRepository) FindAll() ([]*model.Lesson, error) {
 	for rows.Next() {
 		rowsCount++
 
-		l := &model.Lesson{}
+		l := &model.Lesson{
+			Module: &model.Module{},
+		}
 
 		if err := rows.Scan(
 			&l.ID,
 			&l.Title,
+			&l.Module.ID,
+			&l.Module.Title,
 		); err != nil {
 			return nil, err
 		}
@@ -68,13 +76,20 @@ func (r *LessonRepository) FindAll() ([]*model.Lesson, error) {
 
 // FindByID ...
 func (r *LessonRepository) FindByID(lessonID int64) (*model.Lesson, error) {
-	l := &model.Lesson{}
-	if err := r.store.db.QueryRow(
-		"SELECT id, title FROM lesson WHERE id = $1",
+	l := &model.Lesson{
+		Module: &model.Module{},
+	}
+	if err := r.store.db.QueryRow(`
+		SELECT les.id, les.title, mod.id, mod.title
+		FROM lesson les
+		JOIN module mod ON mod.id = les.module_id
+		WHERE les.id = $1`,
 		lessonID,
 	).Scan(
 		&l.ID,
 		&l.Title,
+		&l.Module.ID,
+		&l.Module.Title,
 	); err != nil {
 		if err == sql.ErrNoRows {
 			return nil, store.ErrRecordNotFound
@@ -88,13 +103,20 @@ func (r *LessonRepository) FindByID(lessonID int64) (*model.Lesson, error) {
 
 // FindByTitle ...
 func (r *LessonRepository) FindByTitle(title string) (*model.Lesson, error) {
-	l := &model.Lesson{}
+	l := &model.Lesson{
+		Module: &model.Module{},
+	}
 	if err := r.store.db.QueryRow(
-		"SELECT id, title FROM lesson WHERE title = $1",
+		`SELECT les.id, les.title, mod.id, mod.title
+		FROM lesson les
+		JOIN module mod ON mod.id = les.module_id
+		WHERE les.title = $1`,
 		title,
 	).Scan(
 		&l.ID,
 		&l.Title,
+		&l.Module.ID,
+		&l.Module.Title,
 	); err != nil {
 		if err == sql.ErrNoRows {
 			return nil, store.ErrRecordNotFound
@@ -112,11 +134,13 @@ func (r *LessonRepository) FindBySchoolID(schoolID int64) ([]*model.Lesson, erro
 	l := []*model.Lesson{}
 
 	rows, err := r.store.db.Query(`
-		SELECT lesson.id, lesson.title FROM lesson
+		SELECT lesson.id, lesson.title, mod.id, mod.title 
+		FROM lesson
+		JOIN module mod ON mod.id = lesson.module_id
 		JOIN homework ON homework.lesson_id = lesson.id
 		JOIN student ON student.id = homework.student_id
 		WHERE student.school_id = $1
-		GROUP BY lesson.id, lesson.title
+		GROUP BY lesson.id, lesson.title, mod.id, mod.title
 		ORDER BY lesson.title ASC
 		`,
 		schoolID,
@@ -128,9 +152,11 @@ func (r *LessonRepository) FindBySchoolID(schoolID int64) ([]*model.Lesson, erro
 
 	for rows.Next() {
 		rowsCount++
-		lesson := &model.Lesson{}
+		lesson := &model.Lesson{
+			Module: &model.Module{},
+		}
 
-		if err := rows.Scan(&lesson.ID, &lesson.Title); err != nil {
+		if err := rows.Scan(&lesson.ID, &lesson.Title, &lesson.Module.ID, &lesson.Module.Title); err != nil {
 			return nil, err
 		}
 

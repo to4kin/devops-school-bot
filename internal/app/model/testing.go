@@ -30,6 +30,14 @@ func TestSchool(t *testing.T) *School {
 // TestLesson ...
 func TestLesson(t *testing.T) *Lesson {
 	return &Lesson{
+		Title:  "golang",
+		Module: TestModule(t),
+	}
+}
+
+// TestModule ...
+func TestModule(t *testing.T) *Module {
+	return &Module{
 		Title: "golang",
 	}
 }

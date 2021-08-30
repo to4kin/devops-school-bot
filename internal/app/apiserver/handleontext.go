@@ -1,6 +1,7 @@
 package apiserver
 
 import (
+	"regexp"
 	"strings"
 	"time"
 
@@ -74,6 +75,38 @@ func (srv *server) handleOnText(c telebot.Context) error {
 					continue
 				}
 
+				reg, err := regexp.Compile("[^a-zA-Z0-9]+")
+				if err != nil {
+					srv.logger.Error(err)
+					return nil
+				}
+				moduleTitle := reg.ReplaceAllString(hashtag, "")
+
+				srv.logger.WithFields(logrus.Fields{
+					"title": moduleTitle,
+				}).Debug("get module from database by title")
+				module, err := srv.store.Module().FindByTitle(moduleTitle)
+				if err != nil {
+					if err == store.ErrRecordNotFound {
+						srv.logger.Debug("module not found, will create a new one")
+						module = &model.Module{
+							Title: moduleTitle,
+						}
+
+						if err := srv.store.Module().Create(module); err != nil {
+							srv.logger.Error(err)
+							continue
+						}
+
+						srv.logger.WithFields(module.LogrusFields()).Debug("module created")
+					} else {
+						srv.logger.Error(err)
+						continue
+					}
+				} else {
+					srv.logger.WithFields(module.LogrusFields()).Debug("module found")
+				}
+
 				srv.logger.WithFields(logrus.Fields{
 					"title": hashtag,
 				}).Debug("get lesson from database by title")
@@ -82,7 +115,8 @@ func (srv *server) handleOnText(c telebot.Context) error {
 					if err == store.ErrRecordNotFound {
 						srv.logger.Debug("lesson not found, will create a new one")
 						lesson = &model.Lesson{
-							Title: hashtag,
+							Title:  hashtag,
+							Module: module,
 						}
 
 						if err := srv.store.Lesson().Create(lesson); err != nil {

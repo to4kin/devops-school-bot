@@ -56,7 +56,7 @@ func (r *StudentRepository) FindAll() ([]*model.Student, error) {
 	students := []*model.Student{}
 
 	rows, err := r.store.db.Query(`
-		SELECT st.id, st.created, st.active, full_course,  
+		SELECT st.id, st.created, st.active, st.full_course,  
 			acc.id, acc.created, acc.telegram_id, acc.first_name, acc.last_name, acc.username, acc.superuser,
 			sch.id, sch.created, sch.title, sch.chat_id, sch.active
 		FROM student st 
@@ -120,7 +120,7 @@ func (r *StudentRepository) FindByID(id int64) (*model.Student, error) {
 		School:  &model.School{},
 	}
 	if err := r.store.db.QueryRow(`
-		SELECT st.id, st.created, st.active, full_course, 
+		SELECT st.id, st.created, st.active, st.full_course, 
 			acc.id, acc.created, acc.telegram_id, acc.first_name, acc.last_name, acc.username, acc.superuser,
 			sch.id, sch.created, sch.title, sch.chat_id, sch.active
 		FROM student st 
@@ -163,7 +163,7 @@ func (r *StudentRepository) FindBySchoolID(schoolID int64) ([]*model.Student, er
 	students := []*model.Student{}
 
 	rows, err := r.store.db.Query(`
-		SELECT st.id, st.created, st.active, full_course, 
+		SELECT st.id, st.created, st.active, st.full_course, 
 			acc.id, acc.created, acc.telegram_id, acc.first_name, acc.last_name, acc.username, acc.superuser,
 			sch.id, sch.created, sch.title, sch.chat_id, sch.active
 		FROM student st 
@@ -229,7 +229,7 @@ func (r *StudentRepository) FindByAccountIDSchoolID(accountID int64, schoolID in
 		School:  &model.School{},
 	}
 	if err := r.store.db.QueryRow(`
-		SELECT st.id, st.created, st.active, full_course, 
+		SELECT st.id, st.created, st.active, st.full_course, 
 			acc.id, acc.created, acc.telegram_id, acc.first_name, acc.last_name, acc.username, acc.superuser,
 			sch.id, sch.created, sch.title, sch.chat_id, sch.active
 		FROM student st 
@@ -265,4 +265,70 @@ func (r *StudentRepository) FindByAccountIDSchoolID(accountID int64, schoolID in
 	}
 
 	return s, nil
+}
+
+// FindByFullCourseSchoolID ...
+func (r *StudentRepository) FindByFullCourseSchoolID(fullCourse bool, schoolID int64) ([]*model.Student, error) {
+	rowsCount := 0
+	students := []*model.Student{}
+
+	rows, err := r.store.db.Query(`
+		SELECT st.id, st.created, st.active, st.full_course, 
+			acc.id, acc.created, acc.telegram_id, acc.first_name, acc.last_name, acc.username, acc.superuser,
+			sch.id, sch.created, sch.title, sch.chat_id, sch.active
+		FROM student st 
+		JOIN account acc ON acc.id = st.account_id
+		JOIN school sch ON sch.id = st.school_id
+		WHERE st.school_id = $1 AND st.full_course = $2
+		ORDER BY acc.username ASC
+		`,
+		schoolID,
+		fullCourse,
+	)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		rowsCount++
+
+		s := &model.Student{
+			Account: &model.Account{},
+			School:  &model.School{},
+		}
+
+		if err := rows.Scan(
+			&s.ID,
+			&s.Created,
+			&s.Active,
+			&s.FullCourse,
+			&s.Account.ID,
+			&s.Account.Created,
+			&s.Account.TelegramID,
+			&s.Account.FirstName,
+			&s.Account.LastName,
+			&s.Account.Username,
+			&s.Account.Superuser,
+			&s.School.ID,
+			&s.School.Created,
+			&s.School.Title,
+			&s.School.ChatID,
+			&s.School.Active,
+		); err != nil {
+			return nil, err
+		}
+
+		students = append(students, s)
+	}
+
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+
+	if rowsCount == 0 {
+		return nil, store.ErrRecordNotFound
+	}
+
+	return students, nil
 }

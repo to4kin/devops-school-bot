@@ -10,7 +10,7 @@ import (
 )
 
 var (
-	schoolText          string = "<b>%v</b>\n\nCreated: %v\nStudents: %d\nHomeworks: %d\nStatus: %v\n\nAccepted homeworks:\n%v"
+	schoolText          string = "<b>%v</b>\n\nCreated: %v\nStudents: %d\nListeners: %d\nHomeworks: %d\nStatus: %v\n\nAccepted homeworks:\n%v"
 	schoolsListText     string = "Choose a school from the list below:"
 	schoolsNotFoundText string = "There are no schools in the database. Please add first"
 	startSchoolText     string = "Success! School <b>%v</b> started"
@@ -59,7 +59,12 @@ func GetSchool(str store.Store, callback *model.Callback) (string, *telebot.Repl
 		return "", nil, err
 	}
 
-	students, err := str.Student().FindBySchoolID(school.ID)
+	students, err := str.Student().FindByFullCourseSchoolID(true, school.ID)
+	if err != nil && err != store.ErrRecordNotFound {
+		return "", nil, err
+	}
+
+	listeners, err := str.Student().FindByFullCourseSchoolID(false, school.ID)
 	if err != nil && err != store.ErrRecordNotFound {
 		return "", nil, err
 	}
@@ -88,6 +93,15 @@ func GetSchool(str store.Store, callback *model.Callback) (string, *telebot.Repl
 			ListCommand: callback.ListCommand,
 		}
 		buttons = append(buttons, replyMarkup.Data("Students", studentsListCallback.ToString()))
+	}
+	if len(listeners) > 0 {
+		listenersListCallback := &model.Callback{
+			ID:          listeners[0].ID,
+			Type:        "student",
+			Command:     "students_list",
+			ListCommand: callback.ListCommand,
+		}
+		buttons = append(buttons, replyMarkup.Data("Listeners", listenersListCallback.ToString()))
 	}
 	if len(homeworks) > 0 {
 		homeworksListCallback := &model.Callback{
@@ -145,6 +159,7 @@ func GetSchool(str store.Store, callback *model.Callback) (string, *telebot.Repl
 			school.Created.Day(), school.Created.Month(), school.Created.Year(),
 			school.Created.Hour(), school.Created.Minute(), school.Created.Second()),
 		len(students),
+		len(listeners),
 		len(homeworks),
 		school.GetStatusText(),
 		homeworksList,
