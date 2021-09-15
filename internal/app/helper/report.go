@@ -154,14 +154,14 @@ func GetLessonsReport(store store.Store, school *model.School) (string, error) {
 	return reportMessage, nil
 }
 
-func prepareReportMsg(store store.Store, students []*model.Student, lessons []*model.Lesson) (string, error) {
+func prepareReportMsg(str store.Store, students []*model.Student, lessons []*model.Lesson) (string, error) {
 	reportMessage := report + "<pre>"
 	for _, student := range students {
 		acceptedHomework := 0
 		notProvidedHomework := 0
 
-		homeworks, err := store.Homework().FindByStudentID(student.ID)
-		if err != nil {
+		homeworks, err := str.Homework().FindByStudentID(student.ID)
+		if err != nil && err != store.ErrRecordNotFound {
 			return "", err
 		}
 

@@ -66,6 +66,8 @@ func (srv *server) configureBotHandler() {
 	srv.bot.Handle("/myreport", srv.handleMyReport)
 
 	srv.bot.Handle(telebot.OnText, srv.handleOnText)
+	srv.bot.Handle(telebot.OnPhoto, srv.handleOnText)
+	srv.bot.Handle(telebot.OnDocument, srv.handleOnText)
 	srv.bot.Handle(telebot.OnCallback, srv.handleCallback)
 }
 

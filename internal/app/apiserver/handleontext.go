@@ -16,11 +16,19 @@ var (
 )
 
 func (srv *server) handleOnText(c telebot.Context) error {
-	if c.Message().Private() {
-		return nil
+	// if c.Message().Private() {
+	// 	return nil
+	// }
+
+	text := ""
+
+	if c.Message().Text != "" {
+		text = strings.ToLower(c.Message().Text)
 	}
 
-	text := strings.ToLower(c.Message().Text)
+	if c.Message().Caption != "" {
+		text = strings.ToLower(c.Message().Caption)
+	}
 
 	if strings.Contains(text, homeworkHashtag) {
 		srv.logger.WithFields(logrus.Fields{
