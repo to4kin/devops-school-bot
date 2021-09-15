@@ -16,18 +16,21 @@ var (
 )
 
 func (srv *server) handleOnText(c telebot.Context) error {
-	if c.Message().Private() {
-		return nil
-	}
+	// if c.Message().Private() {
+	// 	return nil
+	// }
 
 	text := ""
+	var entities []telebot.MessageEntity
 
 	if c.Message().Text != "" {
 		text = strings.ToLower(c.Message().Text)
+		entities = c.Message().Entities
 	}
 
 	if c.Message().Caption != "" {
 		text = strings.ToLower(c.Message().Caption)
+		entities = c.Message().CaptionEntities
 	}
 
 	if strings.Contains(text, homeworkHashtag) {
@@ -72,7 +75,7 @@ func (srv *server) handleOnText(c telebot.Context) error {
 			return nil
 		}
 
-		for _, entity := range c.Message().Entities {
+		for _, entity := range entities {
 			switch entity.Type {
 			case "hashtag":
 				hashtag := text[entity.Offset : entity.Offset+entity.Length]
