@@ -16,9 +16,9 @@ var (
 )
 
 func (srv *server) handleOnText(c telebot.Context) error {
-	// if c.Message().Private() {
-	// 	return nil
-	// }
+	if c.Message().Private() {
+		return nil
+	}
 
 	text := ""
 	var entities []telebot.MessageEntity
