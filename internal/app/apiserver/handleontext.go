@@ -26,9 +26,7 @@ func (srv *server) handleOnText(c telebot.Context) error {
 	if c.Message().Text != "" {
 		text = strings.ToLower(c.Message().Text)
 		entities = c.Message().Entities
-	}
-
-	if c.Message().Caption != "" {
+	} else {
 		text = strings.ToLower(c.Message().Caption)
 		entities = c.Message().CaptionEntities
 	}
