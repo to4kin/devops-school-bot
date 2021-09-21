@@ -26,6 +26,7 @@ func (r *LessonRepository) Create(l *model.Lesson) error {
 		return store.ErrRecordIsExist
 	}
 
+	l.ID = int64(len(r.lessons) + 1)
 	r.lessons = append(r.lessons, l)
 	return nil
 }

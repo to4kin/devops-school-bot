@@ -26,6 +26,7 @@ func (r *HomeworkRepository) Create(h *model.Homework) error {
 		return store.ErrRecordIsExist
 	}
 
+	h.ID = int64(len(r.homeworks) + 1)
 	r.homeworks = append(r.homeworks, h)
 	return nil
 }

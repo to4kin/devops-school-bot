@@ -12,12 +12,12 @@ type ModuleRepository struct {
 }
 
 // Create ...
-func (r *ModuleRepository) Create(l *model.Module) error {
-	if err := l.Validate(); err != nil {
+func (r *ModuleRepository) Create(m *model.Module) error {
+	if err := m.Validate(); err != nil {
 		return err
 	}
 
-	module, err := r.store.moduleRepository.FindByTitle(l.Title)
+	module, err := r.store.moduleRepository.FindByTitle(m.Title)
 	if err != nil && err != store.ErrRecordNotFound {
 		return err
 	}
@@ -26,7 +26,8 @@ func (r *ModuleRepository) Create(l *model.Module) error {
 		return store.ErrRecordIsExist
 	}
 
-	r.modules = append(r.modules, l)
+	m.ID = int64(len(r.modules) + 1)
+	r.modules = append(r.modules, m)
 	return nil
 }
 

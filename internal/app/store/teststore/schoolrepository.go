@@ -26,6 +26,7 @@ func (r *SchoolRepository) Create(s *model.School) error {
 		return store.ErrRecordIsExist
 	}
 
+	s.ID = int64(len(r.schools) + 1)
 	r.schools = append(r.schools, s)
 	return nil
 }

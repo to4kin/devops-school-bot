@@ -26,6 +26,7 @@ func (r *AccountRepository) Create(a *model.Account) error {
 		return store.ErrRecordIsExist
 	}
 
+	a.ID = int64(len(r.accounts) + 1)
 	r.accounts = append(r.accounts, a)
 	return nil
 }
