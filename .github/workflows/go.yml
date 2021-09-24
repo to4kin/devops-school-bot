@@ -1,0 +1,56 @@
+name: Go
+
+on: push
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    container: golang:1.17
+    env:
+      TEST_DATABASE_URL: postgres://postgres/devops_school_test?user=testuser&password=testpassword&sslmode=disable
+
+    services:
+      postgres:
+        image: postgres:13.4-alpine
+        env:
+          POSTGRES_DB: devops_school_test
+          POSTGRES_USER: testuser
+          POSTGRES_PASSWORD: testpassword
+          POSTGRES_HOST_AUTH_METHOD: trust
+        # Set health checks to wait until postgres has started
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    strategy:
+      matrix:
+        include:
+          - name: verbose
+            command: make test-verbose
+          - name: coverage
+            command: make test-coverage
+          - name: bench
+            command: make test-bench
+          - name: race
+            command: make test-race
+
+    steps:
+      - name: Check out repository code
+        uses: actions/checkout@v2
+
+      - name: ${{ matrix.name }}
+        run: ${{ matrix.command }}
+
+  build:
+    runs-on: ubuntu-latest
+    container: golang:1.17
+    needs: test
+    
+    steps:
+      - name: Check out repository code
+        uses: actions/checkout@v2
+
+      - name: Build
+        run: make all
