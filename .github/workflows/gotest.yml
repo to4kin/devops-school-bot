@@ -1,4 +1,4 @@
-name: Go
+name: Test
 
 on: push
 
@@ -42,15 +42,3 @@ jobs:
 
       - name: ${{ matrix.name }}
         run: ${{ matrix.command }}
-
-  build:
-    runs-on: ubuntu-latest
-    container: golang:1.17
-    needs: test
-    
-    steps:
-      - name: Check out repository code
-        uses: actions/checkout@v2
-
-      - name: Build
-        run: make all
