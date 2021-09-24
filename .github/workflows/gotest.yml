@@ -1,6 +1,10 @@
 name: Test
 
-on: push
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
 
 jobs:
   test:
@@ -24,21 +28,18 @@ jobs:
           --health-timeout 5s
           --health-retries 5
 
-    strategy:
-      matrix:
-        include:
-          - name: verbose
-            command: make test-verbose
-          - name: coverage
-            command: make test-coverage
-          - name: bench
-            command: make test-bench
-          - name: race
-            command: make test-race
-
     steps:
       - name: Check out repository code
         uses: actions/checkout@v2
 
-      - name: ${{ matrix.name }}
-        run: ${{ matrix.command }}
+      - name: Test verbose
+        run: make test-verbose
+      
+      - name: Test coverage
+        run: make test-coverage
+      
+      - name: Test bench
+        run: make test-bench
+      
+      - name: Test race
+        run: make test-race
