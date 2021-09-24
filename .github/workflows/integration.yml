@@ -41,7 +41,7 @@ jobs:
             .go/pkg/mod/golang.org/
             .go/pkg/mod/google.golang.org/
             .go/pkg/mod/gopkg.in/
-          key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
+          key: ${{ runner.os }}-go-${{ github.sha }}
           restore-keys: |
             ${{ runner.os }}-go-
 
@@ -72,7 +72,7 @@ jobs:
             .go/pkg/mod/golang.org/
             .go/pkg/mod/google.golang.org/
             .go/pkg/mod/gopkg.in/
-          key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
+          key: ${{ runner.os }}-go-${{ github.sha }}
           restore-keys: |
             ${{ runner.os }}-go-
 
