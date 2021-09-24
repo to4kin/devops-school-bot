@@ -1,0 +1,100 @@
+name: "tagged-release"
+
+on:
+  push:
+    tags:
+      - "v*"
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    container: golang:1.17
+    env:
+      TEST_DATABASE_URL: postgres://postgres/devops_school_test?user=testuser&password=testpassword&sslmode=disable
+
+    services:
+      postgres:
+        image: postgres:13.4-alpine
+        env:
+          POSTGRES_DB: devops_school_test
+          POSTGRES_USER: testuser
+          POSTGRES_PASSWORD: testpassword
+          POSTGRES_HOST_AUTH_METHOD: trust
+        # Set health checks to wait until postgres has started
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    steps:
+      - uses: actions/checkout@v2
+      
+      - uses: actions/cache@v2
+        with:
+          path: |
+            ~/.cache/go-build
+            ~/go/pkg/mod
+          key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
+          restore-keys: |
+            ${{ runner.os }}-go-
+
+      - name: Test verbose
+        run: make test-verbose
+      
+      - name: Test coverage
+        run: make test-coverage
+      
+      - name: Test bench
+        run: make test-bench
+      
+      - name: Test race
+        run: make test-race
+  
+  build:
+    runs-on: ubuntu-latest
+    container: golang:1.17
+    
+    steps:
+      - uses: actions/checkout@v2
+      
+      - uses: actions/cache@v2
+        with:
+          path: |
+            ~/.cache/go-build
+            ~/go/pkg/mod
+          key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
+          restore-keys: |
+            ${{ runner.os }}-go-
+      
+      - name: Cache go binary
+        uses: actions/cache@v2
+        with:
+          path: bin/
+          key: ${{ runner.os }}-binary-${{ hashFiles('**/devops-school-bot') }}
+          restore-keys: |
+            ${{ runner.os }}-binary-
+
+      - name: Build
+        run: make all
+
+  tagged-release:
+    name: "Tagged Release"
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v2
+      
+      - name: Cache go binary
+        uses: actions/cache@v2
+        with:
+          path: bin/
+          key: ${{ runner.os }}-binary-${{ hashFiles('**/devops-school-bot') }}
+          restore-keys: |
+            ${{ runner.os }}-binary-
+
+      - uses: "marvinpinto/action-automatic-releases@latest"
+        with:
+          repo_token: "${{ secrets.GITHUB_TOKEN }}"
+          prerelease: false
+          files: bin/devops-school-bot

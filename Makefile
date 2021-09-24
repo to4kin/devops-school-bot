@@ -16,7 +16,7 @@ all: fmt lint | $(BIN) ; $(info $(M) building executable…) @ ## Build program 
 	$Q $(GO) build \
 		-tags release \
 		-ldflags '-X $(MODULE)/cmd.version=$(VERSION) -X $(MODULE)/internal/app/apiserver.msgVersion=$(VERSION) -X $(MODULE)/internal/app/apiserver.msgBuildDate=$(DATE) -X $(MODULE)/cmd.buildDate=$(DATE)' \
-		-o $(BIN)/$(basename $(MODULE)) main.go
+		-o $(BIN)/$(shell basename $(MODULE)) main.go
 
 # Tools
 
