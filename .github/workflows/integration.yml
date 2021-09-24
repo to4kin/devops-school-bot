@@ -52,9 +52,5 @@ jobs:
     steps:
       - uses: actions/checkout@v2
 
-      - run: ls -la $GOPATH/pkg/mod/
-
       - name: Build
         run: make all
-      
-      - run: ls -la $GOPATH/pkg/mod/
