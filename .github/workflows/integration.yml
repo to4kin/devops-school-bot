@@ -56,10 +56,6 @@ jobs:
       
       - name: Test race
         run: make test-race
-      
-      - run: ls -la $GITHUB_WORKSPACE
-      - run: ls -la $GOPATH
-      - run: ls -la /home/runner/work/_temp/_github_home
   
   build:
     runs-on: ubuntu-latest
@@ -80,5 +76,9 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-go-
 
+      - run: ls -la $GOPATH/pkg/mod/
+
       - name: Build
         run: make all
+      
+      - run: ls -la $GOPATH/pkg/mod/
