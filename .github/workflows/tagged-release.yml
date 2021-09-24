@@ -51,47 +51,15 @@ jobs:
       - name: Test race
         run: make test-race
   
-  build:
+  release:
     runs-on: ubuntu-latest
-    container: golang:1.17
-    
+    needs: test
+
     steps:
       - uses: actions/checkout@v2
       
-      - uses: actions/cache@v2
-        with:
-          path: |
-            ~/.cache/go-build
-            ~/go/pkg/mod
-          key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
-          restore-keys: |
-            ${{ runner.os }}-go-
-      
-      - name: Cache go binary
-        uses: actions/cache@v2
-        with:
-          path: bin/
-          key: ${{ runner.os }}-binary-${{ hashFiles('**/devops-school-bot') }}
-          restore-keys: |
-            ${{ runner.os }}-binary-
-
       - name: Build
         run: make all
-
-  tagged-release:
-    name: "Tagged Release"
-    runs-on: ubuntu-latest
-
-    steps:
-      - uses: actions/checkout@v2
-      
-      - name: Cache go binary
-        uses: actions/cache@v2
-        with:
-          path: bin/
-          key: ${{ runner.os }}-binary-${{ hashFiles('**/devops-school-bot') }}
-          restore-keys: |
-            ${{ runner.os }}-binary-
 
       - uses: "marvinpinto/action-automatic-releases@latest"
         with:
