@@ -6,6 +6,9 @@ on:
   pull_request:
     branches: [ master ]
 
+env:
+  GOPATH: ${{ GITHUB_WORKSPACE }}/.go
+
 jobs:
   test:
     runs-on: ubuntu-latest
@@ -34,8 +37,10 @@ jobs:
       - uses: actions/cache@v2
         with:
           path: |
-            ~/.cache/go-build
-            ~/go/pkg/mod
+            .go/pkg/mod/github.com/
+            .go/pkg/mod/golang.org/
+            .go/pkg/mod/google.golang.org/
+            .go/pkg/mod/gopkg.in/
           key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
           restore-keys: |
             ${{ runner.os }}-go-
@@ -63,8 +68,10 @@ jobs:
       - uses: actions/cache@v2
         with:
           path: |
-            ~/.cache/go-build
-            ~/go/pkg/mod
+            .go/pkg/mod/github.com/
+            .go/pkg/mod/golang.org/
+            .go/pkg/mod/google.golang.org/
+            .go/pkg/mod/gopkg.in/
           key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
           restore-keys: |
             ${{ runner.os }}-go-
