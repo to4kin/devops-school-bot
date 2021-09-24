@@ -6,7 +6,6 @@ jobs:
   build:
     runs-on: ubuntu-latest
     container: golang:1.17
-    needs: test
     
     steps:
       - name: Check out repository code
