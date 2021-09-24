@@ -5,14 +5,12 @@ on:
     tags:
       - "v*"
 
-env:
-  GOPATH: ${{ github.workspace }}/.go
-
 jobs:
   test:
     runs-on: ubuntu-latest
     container: golang:1.17
     env:
+      TEST_TELEGRAM_TOKEN: ${{ secrets.TEST_TELEGRAM_TOKEN }}
       TEST_DATABASE_URL: postgres://postgres/devops_school_test?user=testuser&password=testpassword&sslmode=disable
 
     services:
@@ -32,17 +30,6 @@ jobs:
 
     steps:
       - uses: actions/checkout@v2
-      
-      - uses: actions/cache@v2
-        with:
-          path: |
-            .go/pkg/mod/github.com/
-            .go/pkg/mod/golang.org/
-            .go/pkg/mod/google.golang.org/
-            .go/pkg/mod/gopkg.in/
-          key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
-          restore-keys: |
-            ${{ runner.os }}-go-
 
       - name: Test verbose
         run: make test-verbose
@@ -63,17 +50,6 @@ jobs:
 
     steps:
       - uses: actions/checkout@v2
-      
-      - uses: actions/cache@v2
-        with:
-          path: |
-            .go/pkg/mod/github.com/
-            .go/pkg/mod/golang.org/
-            .go/pkg/mod/google.golang.org/
-            .go/pkg/mod/gopkg.in/
-          key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
-          restore-keys: |
-            ${{ runner.os }}-go-
       
       - name: Build
         run: make all

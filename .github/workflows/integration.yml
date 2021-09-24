@@ -11,6 +11,7 @@ jobs:
     runs-on: ubuntu-latest
     container: golang:1.17
     env:
+      TEST_TELEGRAM_TOKEN: ${{ secrets.TEST_TELEGRAM_TOKEN }}
       TEST_DATABASE_URL: postgres://postgres/devops_school_test?user=testuser&password=testpassword&sslmode=disable
 
     services:
@@ -31,15 +32,6 @@ jobs:
     steps:
       - uses: actions/checkout@v2
 
-      - uses: actions/cache@v2
-        with:
-          path: |
-            ~/.cache/go-build
-            ~/go/pkg/mod
-          key: ${{ runner.os }}-go-${{ github.sha }}
-          restore-keys: |
-            ${{ runner.os }}-go-
-
       - name: Test verbose
         run: make test-verbose
       
@@ -59,15 +51,6 @@ jobs:
     
     steps:
       - uses: actions/checkout@v2
-      
-      - uses: actions/cache@v2
-        with:
-          path: |
-            ~/.cache/go-build
-            ~/go/pkg/mod
-          key: ${{ runner.os }}-go-${{ github.sha }}
-          restore-keys: |
-            ${{ runner.os }}-go-
 
       - run: ls -la $GOPATH/pkg/mod/
 
