@@ -11,7 +11,7 @@ jobs:
     runs-on: ubuntu-latest
     container: golang:1.17
     env:
-      GOPATH: $GITHUB_WORKSPACE/.go
+      GOPATH: ${{ github.workspace }}/.go
       TEST_DATABASE_URL: postgres://postgres/devops_school_test?user=testuser&password=testpassword&sslmode=disable
 
     services:
@@ -59,7 +59,7 @@ jobs:
     runs-on: ubuntu-latest
     container: golang:1.17
     env:
-      GOPATH: $GITHUB_WORKSPACE/.go
+      GOPATH: ${{ github.workspace }}/.go
     needs: test
     
     steps:
