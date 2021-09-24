@@ -58,6 +58,7 @@ jobs:
   
   release:
     runs-on: ubuntu-latest
+    container: golang:1.17
     needs: test
 
     steps:

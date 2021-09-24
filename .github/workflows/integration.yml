@@ -56,6 +56,10 @@ jobs:
       
       - name: Test race
         run: make test-race
+      
+      - run: ls -la $GITHUB_WORKSPACE
+      - run: ls -la $GOPATH
+      - run: ls -la /home/runner/work/_temp/_github_home
   
   build:
     runs-on: ubuntu-latest
