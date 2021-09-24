@@ -5,12 +5,12 @@ go 1.17
 require (
 	github.com/BurntSushi/toml v0.4.1
 	github.com/go-ozzo/ozzo-validation/v4 v4.3.0
-	github.com/golang-migrate/migrate/v4 v4.14.1
+	github.com/golang-migrate/migrate/v4 v4.15.0
 	github.com/gorilla/mux v1.8.0
 	github.com/sirupsen/logrus v1.8.1
 	github.com/spf13/cobra v1.2.1
 	github.com/stretchr/testify v1.7.0
-	gopkg.in/tucnak/telebot.v3 v3.0.0-20210913074324-90e7deaa7aa6
+	gopkg.in/tucnak/telebot.v3 v3.0.0-20210923210326-37bf84ddba38
 )
 
 require (
@@ -22,6 +22,7 @@ require (
 	github.com/pkg/errors v0.9.1 // indirect
 	github.com/pmezard/go-difflib v1.0.0 // indirect
 	github.com/spf13/pflag v1.0.5 // indirect
-	golang.org/x/sys v0.0.0-20210917161153-d61c044b1678 // indirect
+	go.uber.org/atomic v1.7.0 // indirect
+	golang.org/x/sys v0.0.0-20210923061019-b8560ed6a9b7 // indirect
 	gopkg.in/yaml.v3 v3.0.0-20210107192922-496545a6307b // indirect
 )

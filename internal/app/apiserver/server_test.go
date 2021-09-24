@@ -13,6 +13,10 @@ import (
 )
 
 func TestServer_BotWebHookHandler(t *testing.T) {
+	if token == "" {
+		t.Skip("Telegram token is not set")
+	}
+
 	srv := newServer(teststore.New())
 
 	bot, err := telebot.NewBot(telebot.Settings{Token: token, Verbose: true})

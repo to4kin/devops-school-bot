@@ -61,7 +61,7 @@ url = "postgres://localhost/devops_school_dev?user=postgres&password=example&ssl
 migrations = "db/migrations"
 
 [telegram_bot]
-token = "1949550059:AAHTvp0Zm5ABVDKL8LVHAYkS-PEEGGZnEJE"
+token = "TEST_TELEGRAM_TOKEN"
 verbose = false
 ```
 
