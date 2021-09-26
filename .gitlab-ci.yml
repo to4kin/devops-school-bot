@@ -1,4 +1,4 @@
-image: artifactory.devops.telekom.de/hub.docker.com/golang:1.17
+image: golang:1.17
 
 services:
   - postgres:13.4-alpine
@@ -13,11 +13,7 @@ variables:
 
 cache:
   paths:
-    - .go/pkg/mod/github.com/
-    - .go/pkg/mod/golang.org/
-    - .go/pkg/mod/google.golang.org/
-    - .go/pkg/mod/gopkg.in/
-    - .go/pkg/mod/gitlab.devops.telekom.de/
+    - .go/pkg/mod/
 
 stages:
   - test
