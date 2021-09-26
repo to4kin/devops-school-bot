@@ -45,13 +45,15 @@ jobs:
   
   release:
     runs-on: ubuntu-latest
-    container: golang:1.17
     needs: test
     env:
       DOCKER_REGISTRY: ${{ secrets.DOCKER_REGISTRY }}
 
     steps:
       - uses: actions/checkout@v2
+      - uses: actions/setup-go@v2
+        with:
+          go-version: '1.17'
       - uses: docker/login-action@v1
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
