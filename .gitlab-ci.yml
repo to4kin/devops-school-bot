@@ -50,7 +50,7 @@ test-coverage:
 build:
   stage: build
   script:
-    - make all
+    - make build
 
 publish:
   image: docker:latest
@@ -64,10 +64,4 @@ publish:
     - mkdir -p /root/.docker
     - echo "$DOCKER_CFG_FILE" > /root/.docker/config.json
   script:
-    - APP_VERSION=${CI_COMMIT_REF_NAME:1}
-    - docker build 
-      --pull 
-      -t ${DOCKER_REGISTRY}/${CI_PROJECT_NAME}:${APP_VERSION}
-      .
-    - docker tag ${DOCKER_REGISTRY}/${CI_PROJECT_NAME}:${APP_VERSION} ${DOCKER_REGISTRY}/${CI_PROJECT_NAME}:latest
-    - docker image push --all-tags ${DOCKER_REGISTRY}/${CI_PROJECT_NAME}
+    - make docker-release

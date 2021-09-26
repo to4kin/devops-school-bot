@@ -1,22 +1,32 @@
-MODULE		 = $(shell env GO111MODULE=on $(GO) list -m)
-DATE		?= $(shell date +%FT%T%z)
-VERSION     ?= $(shell git describe --tags --always --dirty --match=v* 2> /dev/null || cat $(CURDIR)/.version 2> /dev/null || echo v0)
-PKGS         = $(or $(PKG),$(shell env GO111MODULE=on $(GO) list ./...))
-TESTPKGS     = $(shell env GO111MODULE=on $(GO) list -f '{{ if or .TestGoFiles .XTestGoFiles }}{{ .ImportPath }}{{ end }}' $(PKGS))
-BIN      	 = $(CURDIR)/bin
-GO      	 = go
-TIMEOUT 	 = 15
+MODULE		  = $(shell env GO111MODULE=on $(GO) list -m)
+DATE		 ?= $(shell date +%FT%T%z)
+VERSION      ?= $(shell git describe --tags --always --dirty --match=v* 2> /dev/null || cat $(CURDIR)/.version 2> /dev/null || echo v0)
+PKGS          = $(or $(PKG),$(shell env GO111MODULE=on $(GO) list ./...))
+TESTPKGS      = $(shell env GO111MODULE=on $(GO) list -f '{{ if or .TestGoFiles .XTestGoFiles }}{{ .ImportPath }}{{ end }}' $(PKGS))
+BIN      	  = $(CURDIR)/bin
+GO      	  = go
+TIMEOUT 	  = 15
+
+PLATFORMS     = linux
+ARCHITECTURES = amd64
+
+DOCKER        = docker
+PORT		  = 3000
 
 V = 0
 Q = $(if $(filter 1,$V),,@)
 M = $(shell printf "\033[34;1m▶\033[0m")
 
-.PHONY: all
-all: fmt lint | $(BIN) ; $(info $(M) building executable…) @ ## Build program binary
-	$Q $(GO) build \
+.PHONY: build
+build: fmt lint | $(BIN) ; $(info $(M) building executable…) @ ## Build program binary
+	$Q $(foreach GOOS, $(PLATFORMS),\
+	$(foreach GOARCH, $(ARCHITECTURES),\
+	$(info $(M) building executable for $(GOOS) $(GOARCH)...)\
+	$(shell export GOOS=$(GOOS); export GOARCH=$(GOARCH); export CGO_ENABLED=0;\
+	$(GO) build \
 		-tags release \
 		-ldflags '-X $(MODULE)/cmd.version=$(VERSION) -X $(MODULE)/internal/app/apiserver.msgVersion=$(VERSION) -X $(MODULE)/internal/app/apiserver.msgBuildDate=$(DATE) -X $(MODULE)/cmd.buildDate=$(DATE)' \
-		-o $(BIN)/$(shell basename $(MODULE)) main.go
+		-o $(BIN)/$(shell basename $(MODULE)).$(GOOS).$(GOARCH) main.go)))
 
 # Tools
 
@@ -73,6 +83,48 @@ lint: | $(GOLINT) ; $(info $(M) running golint…) @ ## Run golint
 .PHONY: fmt
 fmt: ; $(info $(M) running gofmt…) @ ## Run gofmt on all source files
 	$Q $(GO) fmt $(PKGS)
+
+# Docker
+.PHONY: docker-build
+docker-build: build ; $(info $(M) building docker image...) @ ## Build the container
+	$Q $(DOCKER) build -t $(shell basename $(MODULE)) .
+
+.PHONY: docker-build-nc
+docker-build-nc: build ; $(info $(M) building docker image without caching...) @ ## Build the container without caching
+	$Q $(DOCKER) build --no-cache -t $(shell basename $(MODULE)) .
+
+.PHONY: docker-run
+docker-run: docker-build ; $(info $(M) runnig docker container...) @ ## Run container
+	$Q $(DOCKER) run -d -p=$(PORT):$(PORT) --name="$(shell basename $(MODULE))" $(shell basename $(MODULE))
+
+.PHONY: docker-stop
+docker-stop: ; $(info $(M) stopping docker container...) @ ## Stop and remove a running container
+	$Q $(DOCKER) stop $(shell basename $(MODULE)); docker rm $(shell basename $(MODULE))
+
+.PHONY: docker-release
+docker-release: docker-build-nc docker-publish ; @ ## Make a release by building and publishing the `{version}` ans `latest` tagged images
+
+.PHONY: docker-publish
+docker-publish: docker-publish-latest docker-publish-version ; @ ## Publish the `{version}` ans `latest` tagged images
+
+.PHONY: docker-publish-latest
+docker-publish-latest: docker-tag-latest ; $(info $(M) publishing latest docker image to $(DOCKER_REGISTRY)...) @ ## Publish the `latest` tagged image
+	$Q $(DOCKER) push $(DOCKER_REGISTRY)/$(shell basename $(MODULE)):latest
+
+.PHONY: docker-publish-version
+docker-publish-version: docker-tag-version ; $(info $(M) publishing version docker image to $(DOCKER_REGISTRY)...) @ ## Publish the `{version}` tagged image
+	$Q $(DOCKER) push $(DOCKER_REGISTRY)/$(shell basename $(MODULE)):$(VERSION:v%=%)
+
+.PHONY: docker-tag
+docker-tag: docker-tag-latest docker-tag-version ; @ ## Generate container tags for the `{version}` ans `latest` tags
+
+.PHONY: docker-tag-latest
+docker-tag-latest: ; $(info $(M) tagging docker image as latest...) @ ## Generate container `latest` tag
+	$Q $(DOCKER) tag $(shell basename $(MODULE)) $(DOCKER_REGISTRY)/$(shell basename $(MODULE)):latest
+
+.PHONY: docker-tag-version
+docker-tag-version: ; $(info $(M) tagging docker image as $(VERSION:v%=%)...) @ ## Generate container `{version}` tag
+	$Q $(DOCKER) tag $(shell basename $(MODULE)) $(DOCKER_REGISTRY)/$(shell basename $(MODULE)):$(VERSION:v%=%)
 
 
 # Misc
