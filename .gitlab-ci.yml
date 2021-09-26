@@ -44,7 +44,7 @@ build:
     - make build
 
 publish:
-  image: golang:1.17-alpine
+  image: golang:1.17-alpine3.13
   services:
     - docker:dind
   stage: publish
