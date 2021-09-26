@@ -1,4 +1,4 @@
-image: golang:1.17-alpine
+image: golang:1.17
 
 services:
   - postgres:13.4-alpine
@@ -49,6 +49,7 @@ build:
     - make build
 
 publish:
+  image: golang:1.17-alpine
   services:
     - docker:dind
   stage: publish
@@ -58,6 +59,6 @@ publish:
     ## Create docker config
     - mkdir -p /root/.docker
     - echo "$DOCKER_CFG_FILE" > /root/.docker/config.json
-    - RUN apk update && apk add --no-cache docker-cli
+    - RUN apk update && apk add --no-cache make docker-cli
   script:
     - make docker-release
