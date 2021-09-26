@@ -54,6 +54,6 @@ publish:
     ## Create docker config
     - mkdir -p /root/.docker
     - echo "$DOCKER_CFG_FILE" > /root/.docker/config.json
-    - apk update && apk add --no-cache make docker-cli
+    - apk update && apk add --no-cache git make docker-cli
   script:
     - make docker-release
