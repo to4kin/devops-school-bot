@@ -1,3 +1,8 @@
+[![ci-build](https://github.com/to4kin/devops-school-bot/actions/workflows/ci-build.yml/badge.svg?branch=master)](https://github.com/to4kin/devops-school-bot/actions/workflows/ci-build.yml)
+[![made-with-Go](https://img.shields.io/badge/Made%20with-Go-1f425f.svg)](http://golang.org)
+[![GitHub go.mod Go version of a Go module](https://img.shields.io/github/go-mod/go-version/to4kin/devops-school-bot.svg)](https://github.com/to4kin/devops-school-bot)
+[![GitHub release](https://img.shields.io/github/release/to4kin/devops-school-bot.svg)](https://GitHub.com/to4kin/devops-school-bot/releases/)
+
 # DevOps School Bot
 
 Manage students progress and provide the report if needed
