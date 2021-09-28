@@ -43,6 +43,12 @@ jobs:
       
       - name: Test race
         run: make test-race
+      
+      - uses: codecov/codecov-action@v2
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          files: ./test/coverage.txt
+          fail_ci_if_error: true
   
   build:
     runs-on: ubuntu-latest

@@ -2,6 +2,7 @@
 [![made-with-Go](https://img.shields.io/badge/Made%20with-Go-1f425f.svg)](http://golang.org)
 [![GitHub go.mod Go version of a Go module](https://img.shields.io/github/go-mod/go-version/to4kin/devops-school-bot.svg)](https://github.com/to4kin/devops-school-bot)
 [![GitHub release](https://img.shields.io/github/release/to4kin/devops-school-bot.svg)](https://GitHub.com/to4kin/devops-school-bot/releases/)
+[![codecov](https://codecov.io/gh/to4kin/devops-school-bot/branch/master/graph/badge.svg?token=FHZ0TRMG92)](https://codecov.io/gh/to4kin/devops-school-bot)
 
 # DevOps School Bot
 

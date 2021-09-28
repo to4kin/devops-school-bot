@@ -75,6 +75,7 @@ test-coverage: fmt lint test-coverage-tools ; $(info $(M) running coverage tests
 		-coverprofile="$(COVERAGE_PROFILE)" $(TESTPKGS)
 	$Q $(GO) tool cover -html=$(COVERAGE_PROFILE) -o $(COVERAGE_HTML)
 	$Q $(GO) tool cover -func=$(COVERAGE_PROFILE)
+	$Q cp -r $(COVERAGE_PROFILE) $(CURDIR)/test/coverage.txt
 
 .PHONY: lint
 lint: | $(GOLINT) ; $(info $(M) running golint…) @ ## Run golint
