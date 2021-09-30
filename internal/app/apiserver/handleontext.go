@@ -84,7 +84,7 @@ func (srv *server) handleOnText(c telebot.Context) error {
 					continue
 				}
 
-				reg, err := regexp.Compile("[^a-zA-Z0-9]+")
+				reg, err := regexp.Compile("[^a-zA-Z]+")
 				if err != nil {
 					srv.logger.Error(err)
 					return nil

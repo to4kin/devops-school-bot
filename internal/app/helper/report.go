@@ -147,8 +147,14 @@ func GetLessonsReport(store store.Store, school *model.School) (string, error) {
 	}
 
 	reportMessage := homeworksListReport
-	for i, lesson := range lessons {
-		reportMessage += fmt.Sprintf("%d - %v\n", i+1, lesson.Title)
+	reportMessage += fmt.Sprintf("<b>Module %v\n</b>", lessons[0].Module.Title)
+	reportMessage += fmt.Sprintf("%v\n", lessons[0].Title)
+
+	for i := 1; i < len(lessons); i++ {
+		if lessons[i].Module.ID != lessons[i-1].Module.ID {
+			reportMessage += fmt.Sprintf("<b>Module %v\n</b>", lessons[i].Module.Title)
+		}
+		reportMessage += fmt.Sprintf("%v\n", lessons[i].Title)
 	}
 
 	return reportMessage, nil
