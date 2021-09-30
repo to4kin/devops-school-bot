@@ -10,7 +10,6 @@ import (
 var (
 	report string = "Academic performance\n\n<b><u>Name - Accepted/Not Provided - Type</u></b>\n"
 
-	homeworksListReport string = "<b>Homework list</b>\n\n"
 	homeworkNotProvided string = "you haven't submitted your homework yet\n\n" + sysHomeworkAdd
 	homeworkReport      string = "Hello, @%v!\n\n" + msgStudentInfo
 
@@ -146,13 +145,13 @@ func GetLessonsReport(store store.Store, school *model.School) (string, error) {
 		return "", err
 	}
 
-	reportMessage := homeworksListReport
-	reportMessage += fmt.Sprintf("<b>Module %v\n</b>", lessons[0].Module.Title)
+	reportMessage := "<b>Homework list</b>\n"
+	reportMessage += fmt.Sprintf("\n<b>Module: %v\n</b>", lessons[0].Module.Title)
 	reportMessage += fmt.Sprintf("%v\n", lessons[0].Title)
 
 	for i := 1; i < len(lessons); i++ {
 		if lessons[i].Module.ID != lessons[i-1].Module.ID {
-			reportMessage += fmt.Sprintf("<b>Module %v\n</b>", lessons[i].Module.Title)
+			reportMessage += fmt.Sprintf("\n<b>Module: %v\n</b>", lessons[i].Module.Title)
 		}
 		reportMessage += fmt.Sprintf("%v\n", lessons[i].Title)
 	}
