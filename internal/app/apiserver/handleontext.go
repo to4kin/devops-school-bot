@@ -84,6 +84,10 @@ func (srv *server) handleOnText(c telebot.Context) error {
 					continue
 				}
 
+				srv.logger.WithFields(logrus.Fields{
+					"hashtag": hashtag,
+				}).Debug("hashtag found")
+
 				reg, err := regexp.Compile("[^a-zA-Z]+")
 				if err != nil {
 					srv.logger.Error(err)

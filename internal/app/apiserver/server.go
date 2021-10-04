@@ -2,7 +2,10 @@ package apiserver
 
 import (
 	"encoding/json"
+	"fmt"
 	"net/http"
+	"path"
+	"runtime"
 
 	"github.com/gorilla/mux"
 	"github.com/sirupsen/logrus"
@@ -38,6 +41,14 @@ func (srv *server) configureRouter() {
 }
 
 func (srv *server) configureLogger(logLevel string) {
+	srv.logger.SetReportCaller(true)
+	srv.logger.Formatter = &logrus.TextFormatter{
+		CallerPrettyfier: func(f *runtime.Frame) (string, string) {
+			filename := path.Base(f.File)
+			return "", fmt.Sprintf("%s:%d", filename, f.Line)
+		},
+	}
+
 	if level, err := logrus.ParseLevel(logLevel); err != nil {
 		srv.logger.Error(err)
 		srv.logger.SetLevel(logrus.InfoLevel)
