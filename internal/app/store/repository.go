@@ -55,8 +55,10 @@ type StudentRepository interface {
 // HomeworkRepository ...
 type HomeworkRepository interface {
 	Create(*model.Homework) error
+	Update(*model.Homework) error
 	FindByID(int64) (*model.Homework, error)
 	FindByStudentID(int64) ([]*model.Homework, error)
 	FindBySchoolID(int64) ([]*model.Homework, error)
+	FindByLessonID(int64) ([]*model.Homework, error)
 	FindByStudentIDLessonID(int64, int64) (*model.Homework, error)
 }

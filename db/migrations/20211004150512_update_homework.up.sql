@@ -1,0 +1,3 @@
+ALTER TABLE homework 
+  ADD COLUMN active BOOLEAN DEFAULT true,
+  ALTER COLUMN active SET NOT NULL;

@@ -139,7 +139,7 @@ func (r *LessonRepository) FindBySchoolID(schoolID int64) ([]*model.Lesson, erro
 		JOIN module mod ON mod.id = lesson.module_id
 		JOIN homework ON homework.lesson_id = lesson.id
 		JOIN student ON student.id = homework.student_id
-		WHERE student.school_id = $1
+		WHERE student.school_id = $1 AND homework.active = true
 		GROUP BY lesson.id, lesson.title, mod.id, mod.title
 		ORDER BY lesson.title ASC
 		`,

@@ -156,6 +156,7 @@ func (srv *server) handleOnText(c telebot.Context) error {
 							Lesson:    lesson,
 							MessageID: int64(c.Message().ID),
 							Verify:    false,
+							Active:    true,
 						}
 
 						if err := srv.store.Homework().Create(homework); err != nil {

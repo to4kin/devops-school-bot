@@ -31,6 +31,18 @@ func (r *HomeworkRepository) Create(h *model.Homework) error {
 	return nil
 }
 
+// Update ...
+func (r *HomeworkRepository) Update(h *model.Homework) error {
+	for _, homework := range r.homeworks {
+		if homework.ID == h.ID {
+			homework.Active = h.Active
+			return nil
+		}
+	}
+
+	return store.ErrRecordNotFound
+}
+
 // FindByID ...
 func (r *HomeworkRepository) FindByID(id int64) (*model.Homework, error) {
 	for _, homework := range r.homeworks {
@@ -83,6 +95,23 @@ func (r *HomeworkRepository) FindBySchoolID(schoolID int64) ([]*model.Homework, 
 			if homework.Student.ID == student.ID {
 				result = appendHomework(result, homework)
 			}
+		}
+	}
+
+	if len(result) == 0 {
+		return nil, store.ErrRecordNotFound
+	}
+
+	return result, nil
+}
+
+// FindByLessonID ...
+func (r *HomeworkRepository) FindByLessonID(lessonID int64) ([]*model.Homework, error) {
+	result := []*model.Homework{}
+
+	for _, homework := range r.homeworks {
+		if homework.Lesson.ID == lessonID {
+			result = append(result, homework)
 		}
 	}
 

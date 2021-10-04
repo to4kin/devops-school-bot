@@ -87,7 +87,7 @@ func (r *LessonRepository) FindBySchoolID(schoolID int64) ([]*model.Lesson, erro
 
 	for _, student := range students {
 		for _, homework := range r.store.homeworkRepository.homeworks {
-			if homework.Student.ID == student.ID {
+			if homework.Student.ID == student.ID && homework.Active {
 				l = appendLesson(l, homework.Lesson)
 			}
 		}

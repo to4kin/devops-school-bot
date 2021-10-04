@@ -118,6 +118,7 @@ func TestHomework(t *testing.T) *Homework {
 		Lesson:    TestLesson(t),
 		MessageID: int64(99999),
 		Verify:    true,
+		Active:    true,
 	}
 }
 

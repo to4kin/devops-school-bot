@@ -148,7 +148,9 @@ func (hlpr *Helper) GetSchool(callback *model.Callback) (string, *telebot.ReplyM
 
 	lessons := make(map[string]int)
 	for _, homework := range homeworks {
-		lessons[homework.Lesson.Title]++
+		if homework.Active {
+			lessons[homework.Lesson.Title]++
+		}
 	}
 
 	// TODO: Go runs from a random offset for map iteration. We need a workaround if we need a sorted output for map
@@ -300,7 +302,30 @@ func (hlpr *Helper) GetSchoolHomeworks(callback *model.Callback) (string, *teleb
 	}
 
 	replyMarkup := &telebot.ReplyMarkup{}
-	replyMarkup.Inline(backToSchoolRow(replyMarkup, callback, school.ID))
+
+	hlpr.logger.WithFields(logrus.Fields{
+		"school_id": school.ID,
+	}).Debug("get all homeworks from database by school_id")
+	homeworks, err := hlpr.store.Homework().FindBySchoolID(school.ID)
+	if err != nil && err != store.ErrRecordNotFound {
+		return "", nil, err
+	}
+	hlpr.logger.WithFields(logrus.Fields{
+		"count": len(homeworks),
+	}).Debug("homeworks found")
+
+	var interfaceSlice []model.Interface = make([]model.Interface, len(homeworks))
+	for i, v := range homeworks {
+		interfaceSlice[i] = v
+	}
+	rows := rowsWithButtons(interfaceSlice, &model.Callback{
+		Type:        "homework",
+		Command:     "get",
+		ListCommand: "get",
+	})
+
+	rows = append(rows, backToSchoolRow(replyMarkup, callback, school.ID))
+	replyMarkup.Inline(rows...)
 
 	return fmt.Sprintf("School <b>%v</b>\n\n%v", school.Title, reportMessage), replyMarkup, nil
 }

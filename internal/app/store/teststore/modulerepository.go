@@ -87,7 +87,7 @@ func (r *ModuleRepository) FindBySchoolID(schoolID int64) ([]*model.Module, erro
 
 	for _, student := range students {
 		for _, homework := range r.store.homeworkRepository.homeworks {
-			if homework.Student.ID == student.ID {
+			if homework.Student.ID == student.ID && homework.Active {
 				m = appendModule(m, homework.Lesson.Module)
 			}
 		}

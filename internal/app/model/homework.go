@@ -2,6 +2,7 @@ package model
 
 import (
 	"encoding/json"
+	"fmt"
 	"time"
 
 	validation "github.com/go-ozzo/ozzo-validation/v4"
@@ -16,6 +17,7 @@ type Homework struct {
 	Lesson    *Lesson   `json:"lesson"`
 	MessageID int64     `json:"message_id"`
 	Verify    bool      `json:"verify"`
+	Active    bool      `json:"active"`
 }
 
 // GetID ...
@@ -23,9 +25,18 @@ func (h *Homework) GetID() int64 {
 	return h.ID
 }
 
+// GetStatusText ...
+func (h *Homework) GetStatusText() string {
+	if h.Active {
+		return "🟢"
+	}
+
+	return "🔴"
+}
+
 // GetButtonTitle ...
 func (h *Homework) GetButtonTitle() string {
-	return h.Lesson.Title
+	return fmt.Sprintf("%v %v", h.GetStatusText(), h.Lesson.Title)
 }
 
 // Validate ...
@@ -57,5 +68,6 @@ func (h *Homework) LogrusFields() logrus.Fields {
 		"lesson":     h.Lesson.LogrusFields(),
 		"message_id": h.MessageID,
 		"verify":     h.Verify,
+		"active":     h.Active,
 	}
 }

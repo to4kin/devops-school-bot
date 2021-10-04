@@ -19,15 +19,36 @@ func (r *HomeworkRepository) Create(h *model.Homework) error {
 	}
 
 	return r.store.db.QueryRow(
-		"INSERT INTO homework (created, student_id, lesson_id, message_id, verify) VALUES ($1, $2, $3, $4, $5) RETURNING id",
+		"INSERT INTO homework (created, student_id, lesson_id, message_id, verify, active) VALUES ($1, $2, $3, $4, $5, $6) RETURNING id",
 		h.Created,
 		h.Student.ID,
 		h.Lesson.ID,
 		h.MessageID,
 		h.Verify,
+		h.Active,
 	).Scan(
 		&h.ID,
 	)
+}
+
+// Update ...
+func (r *HomeworkRepository) Update(h *model.Homework) error {
+	if err := r.store.db.QueryRow(
+		"UPDATE homework SET active = $2, verify = $3 WHERE id = $1 RETURNING id",
+		h.ID,
+		h.Active,
+		h.Verify,
+	).Scan(
+		&h.ID,
+	); err != nil {
+		if err == sql.ErrNoRows {
+			return store.ErrRecordNotFound
+		}
+
+		return err
+	}
+
+	return nil
 }
 
 // FindByID ...
@@ -43,7 +64,7 @@ func (r *HomeworkRepository) FindByID(id int64) (*model.Homework, error) {
 	}
 
 	if err := r.store.db.QueryRow(`
-		SELECT hw.id, hw.created, hw.message_id, hw.verify,
+		SELECT hw.id, hw.created, hw.message_id, hw.verify, hw.active,
 			st.id, st.created, st.active, st.full_course,
 			acc.id, acc.created, acc.telegram_id, acc.first_name, acc.last_name, acc.username, acc.superuser,
 			sch.id, sch.created, sch.title, sch.chat_id, sch.active,
@@ -63,6 +84,7 @@ func (r *HomeworkRepository) FindByID(id int64) (*model.Homework, error) {
 		&h.Created,
 		&h.MessageID,
 		&h.Verify,
+		&h.Active,
 		&h.Student.ID,
 		&h.Student.Created,
 		&h.Student.Active,
@@ -100,7 +122,7 @@ func (r *HomeworkRepository) FindByStudentID(studentID int64) ([]*model.Homework
 	hw := []*model.Homework{}
 
 	rows, err := r.store.db.Query(`
-		SELECT hw.id, hw.created, hw.message_id, hw.verify,
+		SELECT hw.id, hw.created, hw.message_id, hw.verify, hw.active,
 			st.id, st.created, st.active, st.full_course,
 			acc.id, acc.created, acc.telegram_id, acc.first_name, acc.last_name, acc.username, acc.superuser,
 			sch.id, sch.created, sch.title, sch.chat_id, sch.active,
@@ -140,6 +162,7 @@ func (r *HomeworkRepository) FindByStudentID(studentID int64) ([]*model.Homework
 			&h.Created,
 			&h.MessageID,
 			&h.Verify,
+			&h.Active,
 			&h.Student.ID,
 			&h.Student.Created,
 			&h.Student.Active,
@@ -184,7 +207,7 @@ func (r *HomeworkRepository) FindBySchoolID(schoolID int64) ([]*model.Homework, 
 	hw := []*model.Homework{}
 
 	rows, err := r.store.db.Query(`
-		SELECT hw.id, hw.created, hw.message_id, hw.verify,
+		SELECT hw.id, hw.created, hw.message_id, hw.verify, hw.active,
 			st.id, st.created, st.active, st.full_course,
 			acc.id, acc.created, acc.telegram_id, acc.first_name, acc.last_name, acc.username, acc.superuser,
 			sch.id, sch.created, sch.title, sch.chat_id, sch.active,
@@ -224,6 +247,92 @@ func (r *HomeworkRepository) FindBySchoolID(schoolID int64) ([]*model.Homework, 
 			&h.Created,
 			&h.MessageID,
 			&h.Verify,
+			&h.Active,
+			&h.Student.ID,
+			&h.Student.Created,
+			&h.Student.Active,
+			&h.Student.FullCourse,
+			&h.Student.Account.ID,
+			&h.Student.Account.Created,
+			&h.Student.Account.TelegramID,
+			&h.Student.Account.FirstName,
+			&h.Student.Account.LastName,
+			&h.Student.Account.Username,
+			&h.Student.Account.Superuser,
+			&h.Student.School.ID,
+			&h.Student.Account.Created,
+			&h.Student.School.Title,
+			&h.Student.School.ChatID,
+			&h.Student.School.Active,
+			&h.Lesson.ID,
+			&h.Lesson.Title,
+			&h.Lesson.Module.ID,
+			&h.Lesson.Module.Title,
+		); err != nil {
+			return nil, err
+		}
+
+		hw = append(hw, h)
+	}
+
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+
+	if rowsCount == 0 {
+		return nil, store.ErrRecordNotFound
+	}
+
+	return hw, nil
+}
+
+// FindByLessonID ...
+func (r *HomeworkRepository) FindByLessonID(lessonID int64) ([]*model.Homework, error) {
+	rowsCount := 0
+	hw := []*model.Homework{}
+
+	rows, err := r.store.db.Query(`
+		SELECT hw.id, hw.created, hw.message_id, hw.verify, hw.active,
+			st.id, st.created, st.active, st.full_course,
+			acc.id, acc.created, acc.telegram_id, acc.first_name, acc.last_name, acc.username, acc.superuser,
+			sch.id, sch.created, sch.title, sch.chat_id, sch.active,
+			les.id, les.title,
+			mod.id, mod.title
+		FROM homework hw
+		JOIN student st ON st.id = hw.student_id
+		JOIN account acc ON acc.id = st.account_id
+		JOIN school sch ON sch.id = st.school_id
+		JOIN lesson les ON les.id = hw.lesson_id
+		JOIN module mod ON mod.id = les.module_id
+		WHERE les.id = $1
+		ORDER BY les.title ASC
+		`,
+		lessonID,
+	)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		rowsCount++
+
+		h := &model.Homework{
+			Student: &model.Student{
+				Account: &model.Account{},
+				School:  &model.School{},
+			},
+			Lesson: &model.Lesson{
+				Module: &model.Module{},
+			},
+		}
+
+		if err := rows.Scan(
+			&h.ID,
+			&h.Created,
+			&h.MessageID,
+			&h.Verify,
+			&h.Active,
 			&h.Student.ID,
 			&h.Student.Created,
 			&h.Student.Active,
@@ -275,7 +384,7 @@ func (r *HomeworkRepository) FindByStudentIDLessonID(studentID int64, lessonID i
 	}
 
 	if err := r.store.db.QueryRow(`
-		SELECT hw.id, hw.created, hw.message_id, hw.verify,
+		SELECT hw.id, hw.created, hw.message_id, hw.verify, hw.active,
 			st.id, st.created, st.active, st.full_course,
 			acc.id, acc.created, acc.telegram_id, acc.first_name, acc.last_name, acc.username, acc.superuser,
 			sch.id, sch.created, sch.title, sch.chat_id, sch.active,
@@ -296,6 +405,7 @@ func (r *HomeworkRepository) FindByStudentIDLessonID(studentID int64, lessonID i
 		&h.Created,
 		&h.MessageID,
 		&h.Verify,
+		&h.Active,
 		&h.Student.ID,
 		&h.Student.Created,
 		&h.Student.Active,
