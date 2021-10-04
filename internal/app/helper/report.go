@@ -2,6 +2,7 @@ package helper
 
 import (
 	"fmt"
+	"strconv"
 
 	"github.com/sirupsen/logrus"
 	"gitlab.devops.telekom.de/tvpp/prototypes/devops-school-bot/internal/app/model"
@@ -71,7 +72,16 @@ func (hlpr *Helper) GetUserReport(account *model.Account, school *model.School) 
 			for _, homework := range studentHomeworks {
 				if homework.Lesson.ID == lesson.ID {
 					counted = true
-					reportMessage += fmt.Sprintf("%v - %v\n", iconGreenCircle, lesson.Title)
+					reportMessage += fmt.Sprintf(
+						"%v - %v [%v]\n",
+						iconGreenCircle,
+						lesson.Title,
+						fmt.Sprintf(
+							"<a href='https://t.me/c/%v/%d'>Go To Message</a>",
+							strconv.FormatInt(homework.Student.School.ChatID, 10)[4:],
+							homework.MessageID,
+						),
+					)
 				}
 			}
 
@@ -81,12 +91,18 @@ func (hlpr *Helper) GetUserReport(account *model.Account, school *model.School) 
 		}
 	} else {
 		reportMessage += "\n\n" + SysListenerGuide
-		reportMessage += fmt.Sprintf("\n\nYour progress in <b>%v</b>:\n", school.Title)
+		reportMessage += "\n\nYou have joined the following modules:\n"
 		studentModules := []*model.Module{}
 
 		for _, homework := range studentHomeworks {
 			studentModules = appendModule(studentModules, homework.Lesson.Module)
 		}
+
+		for _, module := range studentModules {
+			reportMessage += fmt.Sprintf("- <b>%v</b>\n", module.Title)
+		}
+
+		reportMessage += fmt.Sprintf("\nYour progress in <b>%v</b>:\n", school.Title)
 
 		for _, module := range studentModules {
 			for _, lesson := range allLessons {
@@ -95,7 +111,16 @@ func (hlpr *Helper) GetUserReport(account *model.Account, school *model.School) 
 					for _, homework := range studentHomeworks {
 						if homework.Lesson.ID == lesson.ID {
 							counted = true
-							reportMessage += fmt.Sprintf("%v - %v\n", iconGreenCircle, lesson.Title)
+							reportMessage += fmt.Sprintf(
+								"%v - %v [%v]\n",
+								iconGreenCircle,
+								lesson.Title,
+								fmt.Sprintf(
+									"<a href='https://t.me/c/%v/%d'>Go To Message</a>",
+									strconv.FormatInt(homework.Student.School.ChatID, 10)[4:],
+									homework.MessageID,
+								),
+							)
 						}
 					}
 
