@@ -109,7 +109,7 @@ func (srv *server) handleCallback(c telebot.Context) error {
 	case "homework":
 		switch callback.Command {
 		case "homeworks_list", "next", "previous":
-			replyMessage, replyMarkup, err = hlpr.GetSchoolHomeworks(callback)
+			replyMessage, replyMarkup, err = hlpr.GetHomeworksList(callback)
 
 		case "get":
 			replyMessage, replyMarkup, err = hlpr.GetHomework(callback)
