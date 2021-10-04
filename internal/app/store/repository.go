@@ -59,6 +59,6 @@ type HomeworkRepository interface {
 	FindByID(int64) (*model.Homework, error)
 	FindByStudentID(int64) ([]*model.Homework, error)
 	FindBySchoolID(int64) ([]*model.Homework, error)
-	FindByLessonID(int64) ([]*model.Homework, error)
+	FindBySchoolIDLessonID(int64, int64) ([]*model.Homework, error)
 	FindByStudentIDLessonID(int64, int64) (*model.Homework, error)
 }

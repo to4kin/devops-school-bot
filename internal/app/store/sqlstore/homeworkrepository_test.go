@@ -115,6 +115,28 @@ func TestHomeworkRepository_FindBySchoolID(t *testing.T) {
 	assert.NotNil(t, homeworks)
 }
 
+func TestHomeworkRepository_FindBySchoolIDLessonID(t *testing.T) {
+	db, teardown := sqlstore.TestDb(t, databaseURL, migrations)
+	defer teardown("homework", "lesson", "module", "student", "school", "account")
+
+	s := sqlstore.New(db)
+	h := model.TestHomework(t)
+
+	_, err := s.Homework().FindBySchoolID(h.Student.School.ID)
+	assert.EqualError(t, err, store.ErrRecordNotFound.Error())
+
+	assert.NoError(t, s.Account().Create(h.Student.Account))
+	assert.NoError(t, s.School().Create(h.Student.School))
+	assert.NoError(t, s.Student().Create(h.Student))
+	assert.NoError(t, s.Module().Create(h.Lesson.Module))
+	assert.NoError(t, s.Lesson().Create(h.Lesson))
+	assert.NoError(t, s.Homework().Create(h))
+
+	homeworks, err := s.Homework().FindBySchoolIDLessonID(h.Student.School.ID, h.Lesson.ID)
+	assert.NoError(t, err)
+	assert.NotNil(t, homeworks)
+}
+
 func TestHomeworkRepository_FindByStudentIDLessonID(t *testing.T) {
 	db, teardown := sqlstore.TestDb(t, databaseURL, migrations)
 	defer teardown("homework", "lesson", "module", "student", "school", "account")

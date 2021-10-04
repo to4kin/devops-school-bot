@@ -286,8 +286,8 @@ func (r *HomeworkRepository) FindBySchoolID(schoolID int64) ([]*model.Homework, 
 	return hw, nil
 }
 
-// FindByLessonID ...
-func (r *HomeworkRepository) FindByLessonID(lessonID int64) ([]*model.Homework, error) {
+// FindBySchoolIDLessonID ...
+func (r *HomeworkRepository) FindBySchoolIDLessonID(schoolID int64, lessonID int64) ([]*model.Homework, error) {
 	rowsCount := 0
 	hw := []*model.Homework{}
 
@@ -304,10 +304,11 @@ func (r *HomeworkRepository) FindByLessonID(lessonID int64) ([]*model.Homework, 
 		JOIN school sch ON sch.id = st.school_id
 		JOIN lesson les ON les.id = hw.lesson_id
 		JOIN module mod ON mod.id = les.module_id
-		WHERE les.id = $1
+		WHERE les.id = $1 AND sch.id = $2
 		ORDER BY les.title ASC
 		`,
 		lessonID,
+		schoolID,
 	)
 	if err != nil {
 		return nil, err

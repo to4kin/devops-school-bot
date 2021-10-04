@@ -105,12 +105,12 @@ func (r *HomeworkRepository) FindBySchoolID(schoolID int64) ([]*model.Homework, 
 	return result, nil
 }
 
-// FindByLessonID ...
-func (r *HomeworkRepository) FindByLessonID(lessonID int64) ([]*model.Homework, error) {
+// FindBySchoolIDLessonID ...
+func (r *HomeworkRepository) FindBySchoolIDLessonID(schoolID int64, lessonID int64) ([]*model.Homework, error) {
 	result := []*model.Homework{}
 
 	for _, homework := range r.homeworks {
-		if homework.Lesson.ID == lessonID {
+		if homework.Lesson.ID == lessonID && homework.Student.School.ID == schoolID {
 			result = append(result, homework)
 		}
 	}
