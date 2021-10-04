@@ -45,6 +45,7 @@ func (srv *server) handleMyReport(c telebot.Context) error {
 	hlpr := helper.NewHelper(srv.store, srv.logger)
 	reportMessage, err := hlpr.GetUserReport(account, school)
 	if err != nil {
+		srv.logger.Error(err)
 		return c.EditOrReply(helper.ErrInternal, &telebot.SendOptions{ParseMode: "HTML"})
 	}
 
