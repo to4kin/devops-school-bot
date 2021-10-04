@@ -8,16 +8,6 @@ import (
 	"gopkg.in/tucnak/telebot.v3"
 )
 
-var (
-	studentsListText   string = "School: %v\n\nChoose a student from the list below:"
-	blockStudentText   string = "Success! Student <b>%v</b> blocked"
-	unblockStudentText string = "Success! Student <b>%v</b> unblocked"
-	updateStudentText  string = "Success! Student <b>%v</b> updated. New type is %v"
-
-	backToStudentText      string = "<< Back to Student"
-	backToStudentsListText string = "<< Back to Students List"
-)
-
 // GetStudent ...
 func GetStudent(store store.Store, callback *model.Callback) (string, *telebot.ReplyMarkup, error) {
 	student, err := store.Student().FindByID(callback.ID)
@@ -79,7 +69,7 @@ func GetStudent(store store.Store, callback *model.Callback) (string, *telebot.R
 		Command:     "students_list",
 		ListCommand: callback.ListCommand,
 	}
-	rows = append(rows, replyMarkup.Row(replyMarkup.Data(backToStudentsListText, backToStudentsListCallback.ToString())))
+	rows = append(rows, replyMarkup.Row(replyMarkup.Data("<< Back to Students List", backToStudentsListCallback.ToString())))
 	rows = append(rows, backToSchoolRow(replyMarkup, callback, student.School.ID))
 	replyMarkup.Inline(rows...)
 
@@ -113,7 +103,7 @@ func GetStudentsList(store store.Store, callback *model.Callback) (string, *tele
 	rows = append(rows, backToSchoolRow(replyMarkup, callback, student.School.ID))
 	replyMarkup.Inline(rows...)
 
-	return fmt.Sprintf(studentsListText, student.School.Title), replyMarkup, nil
+	return fmt.Sprintf("School: %v\n\nChoose a student from the list below:", student.School.Title), replyMarkup, nil
 }
 
 // BlockStudent ...
@@ -132,7 +122,7 @@ func BlockStudent(store store.Store, callback *model.Callback) (string, *telebot
 	replyMarkup := &telebot.ReplyMarkup{}
 	replyMarkup.Inline(backToStudentRow(replyMarkup, callback, student.ID))
 
-	return fmt.Sprintf(blockStudentText, student.Account.Username), replyMarkup, nil
+	return fmt.Sprintf("Success! Student <b>%v</b> blocked", student.Account.Username), replyMarkup, nil
 }
 
 // UnblockStudent ...
@@ -151,7 +141,7 @@ func UnblockStudent(store store.Store, callback *model.Callback) (string, *teleb
 	replyMarkup := &telebot.ReplyMarkup{}
 	replyMarkup.Inline(backToStudentRow(replyMarkup, callback, student.ID))
 
-	return fmt.Sprintf(unblockStudentText, student.Account.Username), replyMarkup, nil
+	return fmt.Sprintf("Success! Student <b>%v</b> unblocked", student.Account.Username), replyMarkup, nil
 }
 
 // SetStudent ...
@@ -170,7 +160,7 @@ func SetStudent(store store.Store, callback *model.Callback) (string, *telebot.R
 	replyMarkup := &telebot.ReplyMarkup{}
 	replyMarkup.Inline(backToStudentRow(replyMarkup, callback, student.ID))
 
-	return fmt.Sprintf(updateStudentText, student.Account.Username, student.GetType()), replyMarkup, nil
+	return fmt.Sprintf("Success! Student <b>%v</b> updated. New type is %v", student.Account.Username, student.GetType()), replyMarkup, nil
 }
 
 // SetListener ...
@@ -189,7 +179,7 @@ func SetListener(store store.Store, callback *model.Callback) (string, *telebot.
 	replyMarkup := &telebot.ReplyMarkup{}
 	replyMarkup.Inline(backToStudentRow(replyMarkup, callback, student.ID))
 
-	return fmt.Sprintf(updateStudentText, student.Account.Username, student.GetType()), replyMarkup, nil
+	return fmt.Sprintf("Success! Student <b>%v</b> updated. New type is %v", student.Account.Username, student.GetType()), replyMarkup, nil
 }
 
 func backToStudentRow(replyMarkup *telebot.ReplyMarkup, callback *model.Callback, studentID int64) telebot.Row {
@@ -209,10 +199,10 @@ func backToStudentRow(replyMarkup *telebot.ReplyMarkup, callback *model.Callback
 
 	if callback.ListCommand == "get" {
 		return replyMarkup.Row(
-			replyMarkup.Data(backToStudentText, backToStudentCallback.ToString()),
-			replyMarkup.Data(backToStudentsListText, backToStudentsListCallback.ToString()),
+			replyMarkup.Data("<< Back to Student", backToStudentCallback.ToString()),
+			replyMarkup.Data("<< Back to Students List", backToStudentsListCallback.ToString()),
 		)
 	}
 
-	return replyMarkup.Row(replyMarkup.Data(backToStudentsListText, backToStudentsListCallback.ToString()))
+	return replyMarkup.Row(replyMarkup.Data("<< Back to Students List", backToStudentsListCallback.ToString()))
 }

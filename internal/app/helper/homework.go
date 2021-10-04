@@ -8,14 +8,6 @@ import (
 	"gopkg.in/tucnak/telebot.v3"
 )
 
-var (
-	homeworkText      string = "School: <b>%v</b>\n\nHomework info:\n\nTitle: %v"
-	homeworksListText string = "School: <b>%v</b>\n\nChoose a homework from the list below:"
-
-	//backToHomeworkText      string = "<< Back to Homework"
-	backToHomeworksListText string = "<< Back to Homeworks List"
-)
-
 // GetHomework ...
 func GetHomework(store store.Store, callback *model.Callback) (string, *telebot.ReplyMarkup, error) {
 	homework, err := store.Homework().FindByID(callback.ID)
@@ -32,14 +24,15 @@ func GetHomework(store store.Store, callback *model.Callback) (string, *telebot.
 		Command:     "homeworks_list",
 		ListCommand: callback.ListCommand,
 	}
-	rows = append(rows, replyMarkup.Row(replyMarkup.Data(backToHomeworksListText, homeworksListCallback.ToString())))
+	rows = append(rows, replyMarkup.Row(replyMarkup.Data("<< Back to Homeworks List", homeworksListCallback.ToString())))
 	rows = append(rows, backToSchoolRow(replyMarkup, callback, homework.Student.School.ID))
 	replyMarkup.Inline(rows...)
 
 	return fmt.Sprintf(
-			homeworkText,
+			"School: <b>%v</b>\n\nHomework info:\n\nTitle: %v\nModule: %v",
 			homework.Student.School.Title,
 			homework.Lesson.Title,
+			homework.Lesson.Module.Title,
 		),
 		replyMarkup,
 		nil
@@ -69,7 +62,12 @@ func GetHomeworksList(store store.Store, callback *model.Callback) (string, *tel
 	rows = append(rows, backToSchoolRow(replyMarkup, callback, homework.Student.School.ID))
 	replyMarkup.Inline(rows...)
 
-	return fmt.Sprintf(homeworksListText, homework.Student.School.Title), replyMarkup, nil
+	return fmt.Sprintf(
+			"School: <b>%v</b>\n\nChoose a homework from the list below:",
+			homework.Student.School.Title,
+		),
+		replyMarkup,
+		nil
 }
 
 func removeDuplicate(slice []model.Interface) []model.Interface {
@@ -83,28 +81,3 @@ func removeDuplicate(slice []model.Interface) []model.Interface {
 	}
 	return list
 }
-
-// func backToHomeworkRow(replyMarkup *telebot.ReplyMarkup, callback *model.Callback, homeworkID int64) telebot.Row {
-// 	backToHomeworkCallback := &model.Callback{
-// 		ID:          homeworkID,
-// 		Type:        "homework",
-// 		Command:     "get",
-// 		ListCommand: callback.ListCommand,
-// 	}
-
-// 	backToHomeworksListCallback := &model.Callback{
-// 		ID:          homeworkID,
-// 		Type:        "homework",
-// 		Command:     "homeworks_list",
-// 		ListCommand: callback.ListCommand,
-// 	}
-
-// 	if callback.ListCommand == "get" || callback.ListCommand == "merge" {
-// 		return replyMarkup.Row(
-// 			replyMarkup.Data(backToHomeworkText, backToHomeworkCallback.ToString()),
-// 			replyMarkup.Data(backToHomeworksListText, backToHomeworksListCallback.ToString()),
-// 		)
-// 	}
-
-// 	return replyMarkup.Row(replyMarkup.Data(backToHomeworksListText, backToHomeworksListCallback.ToString()))
-// }

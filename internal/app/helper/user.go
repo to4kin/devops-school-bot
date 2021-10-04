@@ -8,18 +8,6 @@ import (
 	"gopkg.in/tucnak/telebot.v3"
 )
 
-var (
-	userText           string = "Account info:\n\nFirst name: %v\nLast name: %v\nUsername: @%v\nSuperuser: %v"
-	usersListText      string = "Choose a user from the list below:"
-	noUsersListText    string = "There are no users in the database. Please add first"
-	updateUserText     string = "Success! Account <b>%v</b> updated"
-	setSuperuserText   string = "Success! Superuser access <b>ENABLED</b> for user <b>%v</b>"
-	unsetSuperuserText string = "Success! Superuser access <b>DISABLED</b> for user <b>%v</b>"
-
-	backToUserText      string = "<< Back to User"
-	backToUsersListText string = "<< Back to Users List"
-)
-
 // GetUsersList ...
 func GetUsersList(str store.Store, callback *model.Callback) (string, *telebot.ReplyMarkup, error) {
 	var err error
@@ -38,7 +26,7 @@ func GetUsersList(str store.Store, callback *model.Callback) (string, *telebot.R
 	}
 
 	if err == store.ErrRecordNotFound {
-		return noUsersListText, nil, nil
+		return "There are no users in the database. Please add first", nil, nil
 	}
 
 	var interfaceSlice []model.Interface = make([]model.Interface, len(accounts))
@@ -49,7 +37,7 @@ func GetUsersList(str store.Store, callback *model.Callback) (string, *telebot.R
 
 	replyMarkup := &telebot.ReplyMarkup{}
 	replyMarkup.Inline(rows...)
-	return usersListText, replyMarkup, nil
+	return "Choose a user from the list below:", replyMarkup, nil
 }
 
 // GetUser ...
@@ -81,10 +69,16 @@ func GetUser(store store.Store, callback *model.Callback, sender *telebot.User) 
 
 	backToUsersListCallback := *callback
 	backToUsersListCallback.Command = "accounts_list"
-	rows = append(rows, replyMarkup.Row(replyMarkup.Data(backToUsersListText, backToUsersListCallback.ToString())))
+	rows = append(rows, replyMarkup.Row(replyMarkup.Data("<< Back to Users List", backToUsersListCallback.ToString())))
 	replyMarkup.Inline(rows...)
 
-	return fmt.Sprintf(userText, account.FirstName, account.LastName, account.Username, account.Superuser), replyMarkup, nil
+	return fmt.Sprintf(
+		"Account info:\n\nFirst name: %v\nLast name: %v\nUsername: @%v\nSuperuser: %v",
+		account.FirstName,
+		account.LastName,
+		account.Username,
+		account.Superuser,
+	), replyMarkup, nil
 }
 
 // UpdateUser ...
@@ -105,7 +99,7 @@ func UpdateUser(store store.Store, callback *model.Callback, sender *telebot.Use
 	replyMarkup := &telebot.ReplyMarkup{}
 	replyMarkup.Inline(backToUserRow(replyMarkup, callback, account.ID))
 
-	return fmt.Sprintf(updateUserText, account.Username), replyMarkup, nil
+	return fmt.Sprintf("Success! Account <b>%v</b> updated", account.Username), replyMarkup, nil
 }
 
 // SetSuperuser ...
@@ -124,7 +118,7 @@ func SetSuperuser(store store.Store, callback *model.Callback) (string, *telebot
 	replyMarkup := &telebot.ReplyMarkup{}
 	replyMarkup.Inline(backToUserRow(replyMarkup, callback, account.ID))
 
-	return fmt.Sprintf(setSuperuserText, account.Username), replyMarkup, nil
+	return fmt.Sprintf("Success! Superuser access <b>ENABLED</b> for user <b>%v</b>", account.Username), replyMarkup, nil
 }
 
 // UnsetSuperuser ...
@@ -143,7 +137,7 @@ func UnsetSuperuser(store store.Store, callback *model.Callback) (string, *teleb
 	replyMarkup := &telebot.ReplyMarkup{}
 	replyMarkup.Inline(backToUserRow(replyMarkup, callback, account.ID))
 
-	return fmt.Sprintf(unsetSuperuserText, account.Username), replyMarkup, nil
+	return fmt.Sprintf("Success! Superuser access <b>DISABLED</b> for user <b>%v</b>", account.Username), replyMarkup, nil
 }
 
 func backToUserRow(replyMarkup *telebot.ReplyMarkup, callback *model.Callback, accountID int64) telebot.Row {
@@ -163,10 +157,10 @@ func backToUserRow(replyMarkup *telebot.ReplyMarkup, callback *model.Callback, a
 
 	if callback.ListCommand == "get" {
 		return replyMarkup.Row(
-			replyMarkup.Data(backToUserText, backToUser.ToString()),
-			replyMarkup.Data(backToUsersListText, backToUsersList.ToString()),
+			replyMarkup.Data("<< Back to User", backToUser.ToString()),
+			replyMarkup.Data("<< Back to Users List", backToUsersList.ToString()),
 		)
 	}
 
-	return replyMarkup.Row(replyMarkup.Data(backToUsersListText, backToUsersList.ToString()))
+	return replyMarkup.Row(replyMarkup.Data("<< Back to Users List", backToUsersList.ToString()))
 }

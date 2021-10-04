@@ -7,15 +7,6 @@ import (
 	"gitlab.devops.telekom.de/tvpp/prototypes/devops-school-bot/internal/app/store"
 )
 
-var (
-	report string = "Academic performance\n\n<b><u>Name - Accepted/Not Provided - Type</u></b>\n"
-
-	homeworkNotProvided string = "you haven't submitted your homework yet\n\n" + sysHomeworkAdd
-	homeworkReport      string = "Hello, @%v!\n\n" + msgStudentInfo
-
-	studentIsBlocked string = "Your student account is blocked!\n\nPlease contact mentors or teachers"
-)
-
 // GetUserReport ...
 func GetUserReport(str store.Store, account *model.Account, school *model.School) (string, error) {
 	student, err := str.Student().FindByAccountIDSchoolID(account.ID, school.ID)
@@ -28,13 +19,13 @@ func GetUserReport(str store.Store, account *model.Account, school *model.School
 	}
 
 	if !student.Active {
-		return studentIsBlocked, nil
+		return "Your student account is blocked!\n\nPlease contact mentors or teachers", nil
 	}
 
 	studentHomeworks, err := str.Homework().FindByStudentID(student.ID)
 	if err != nil {
 		if err == store.ErrRecordNotFound {
-			return homeworkNotProvided, nil
+			return fmt.Sprintf("you haven't submitted your homework yet\n\n%v", sysHomeworkAdd), nil
 		}
 		return "", err
 	}
@@ -45,7 +36,7 @@ func GetUserReport(str store.Store, account *model.Account, school *model.School
 	}
 
 	reportMessage := fmt.Sprintf(
-		homeworkReport,
+		"Hello, @%v!\n\n"+msgStudentInfo,
 		account.Username,
 		student.Account.FirstName,
 		student.Account.LastName,
@@ -160,7 +151,7 @@ func GetLessonsReport(store store.Store, school *model.School) (string, error) {
 }
 
 func prepareReportMsg(str store.Store, students []*model.Student, lessons []*model.Lesson) (string, error) {
-	reportMessage := report + "<pre>"
+	reportMessage := "Academic performance\n\n<b><u>Name - Accepted/Not Provided - Type</u></b>\n<pre>"
 	for _, student := range students {
 		acceptedHomework := 0
 		notProvidedHomework := 0

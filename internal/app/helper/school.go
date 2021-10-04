@@ -9,17 +9,6 @@ import (
 	"gopkg.in/tucnak/telebot.v3"
 )
 
-var (
-	schoolText          string = "<b>%v</b>\n\nCreated: %v\nStudents: %d\nListeners: %d\nHomeworks: %d\nStatus: %v\n\nAccepted homeworks:\n%v"
-	schoolsListText     string = "Choose a school from the list below:"
-	schoolsNotFoundText string = "There are no schools in the database. Please add first"
-	startSchoolText     string = "Success! School <b>%v</b> started"
-	stopSchoolText      string = "Success! School <b>%v</b> finished"
-
-	backToSchoolText      string = "<< Back to School"
-	backToSchoolsListText string = "<< Back to Schools List"
-)
-
 // GetSchoolsList ...
 func GetSchoolsList(str store.Store, callback *model.Callback) (string, *telebot.ReplyMarkup, error) {
 	var err error
@@ -38,7 +27,7 @@ func GetSchoolsList(str store.Store, callback *model.Callback) (string, *telebot
 	}
 
 	if err == store.ErrRecordNotFound {
-		return schoolsNotFoundText, nil, nil
+		return "There are no schools in the database. Please add first", nil, nil
 	}
 
 	var interfaceSlice []model.Interface = make([]model.Interface, len(schools))
@@ -49,7 +38,7 @@ func GetSchoolsList(str store.Store, callback *model.Callback) (string, *telebot
 
 	replyMarkup := &telebot.ReplyMarkup{}
 	replyMarkup.Inline(rows...)
-	return schoolsListText, replyMarkup, nil
+	return "Choose a school from the list below:", replyMarkup, nil
 }
 
 // GetSchool ...
@@ -132,7 +121,7 @@ func GetSchool(str store.Store, callback *model.Callback) (string, *telebot.Repl
 
 	backToSchoolsListCallback := *callback
 	backToSchoolsListCallback.Command = "schools_list"
-	rows = append(rows, replyMarkup.Row(replyMarkup.Data(backToSchoolsListText, backToSchoolsListCallback.ToString())))
+	rows = append(rows, replyMarkup.Row(replyMarkup.Data("<< Back to Schools List", backToSchoolsListCallback.ToString())))
 	replyMarkup.Inline(rows...)
 
 	lessons := make(map[string]int)
@@ -153,7 +142,7 @@ func GetSchool(str store.Store, callback *model.Callback) (string, *telebot.Repl
 	}
 
 	return fmt.Sprintf(
-		schoolText,
+		"<b>%v</b>\n\nCreated: %v\nStudents: %d\nListeners: %d\nHomeworks: %d\nStatus: %v\n\nAccepted homeworks:\n%v",
 		school.Title,
 		fmt.Sprintf("%02d-%02d-%d %02d:%02d:%02d",
 			school.Created.Day(), school.Created.Month(), school.Created.Year(),
@@ -182,7 +171,7 @@ func StartSchool(store store.Store, callback *model.Callback) (string, *telebot.
 	replyMarkup := &telebot.ReplyMarkup{}
 	replyMarkup.Inline(backToSchoolRow(replyMarkup, callback, school.ID))
 
-	return fmt.Sprintf(startSchoolText, school.Title), replyMarkup, nil
+	return fmt.Sprintf("Success! School <b>%v</b> started", school.Title), replyMarkup, nil
 }
 
 // StopSchool ...
@@ -201,7 +190,7 @@ func StopSchool(store store.Store, callback *model.Callback) (string, *telebot.R
 	replyMarkup := &telebot.ReplyMarkup{}
 	replyMarkup.Inline(backToSchoolRow(replyMarkup, callback, school.ID))
 
-	return fmt.Sprintf(stopSchoolText, school.Title), replyMarkup, nil
+	return fmt.Sprintf("Success! School <b>%v</b> finished", school.Title), replyMarkup, nil
 }
 
 // ReportSchool ...
@@ -287,10 +276,10 @@ func backToSchoolRow(replyMarkup *telebot.ReplyMarkup, callback *model.Callback,
 
 	if callback.ListCommand == "get" {
 		return replyMarkup.Row(
-			replyMarkup.Data(backToSchoolText, backToSchoolCallback.ToString()),
-			replyMarkup.Data(backToSchoolsListText, backToSchoolsListCallback.ToString()),
+			replyMarkup.Data("<< Back to School", backToSchoolCallback.ToString()),
+			replyMarkup.Data("<< Back to Schools List", backToSchoolsListCallback.ToString()),
 		)
 	}
 
-	return replyMarkup.Row(replyMarkup.Data(backToSchoolsListText, backToSchoolsListCallback.ToString()))
+	return replyMarkup.Row(replyMarkup.Data("<< Back to Schools List", backToSchoolsListCallback.ToString()))
 }
