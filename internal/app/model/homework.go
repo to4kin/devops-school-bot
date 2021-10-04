@@ -39,6 +39,11 @@ func (h *Homework) GetButtonTitle() string {
 	return fmt.Sprintf("%v %v", h.GetStatusText(), h.Lesson.Title)
 }
 
+// GetURL ...
+func (h *Homework) GetURL() string {
+	return fmt.Sprintf("%v/%v", h.Student.School.GetURL(), h.MessageID)
+}
+
 // Validate ...
 func (h *Homework) Validate() error {
 	return validation.ValidateStruct(

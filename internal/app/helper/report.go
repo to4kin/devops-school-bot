@@ -2,7 +2,6 @@ package helper
 
 import (
 	"fmt"
-	"strconv"
 
 	"github.com/sirupsen/logrus"
 	"gitlab.devops.telekom.de/tvpp/prototypes/devops-school-bot/internal/app/model"
@@ -77,9 +76,8 @@ func (hlpr *Helper) GetUserReport(account *model.Account, school *model.School) 
 						iconGreenCircle,
 						lesson.Title,
 						fmt.Sprintf(
-							"<a href='https://t.me/c/%v/%d'>Go To Message</a>",
-							strconv.FormatInt(homework.Student.School.ChatID, 10)[4:],
-							homework.MessageID,
+							"<a href='%v'>Go To Message</a>",
+							homework.GetURL(),
 						),
 					)
 				}
@@ -116,9 +114,8 @@ func (hlpr *Helper) GetUserReport(account *model.Account, school *model.School) 
 								iconGreenCircle,
 								lesson.Title,
 								fmt.Sprintf(
-									"<a href='https://t.me/c/%v/%d'>Go To Message</a>",
-									strconv.FormatInt(homework.Student.School.ChatID, 10)[4:],
-									homework.MessageID,
+									"<a href='%v'>Go To Message</a>",
+									homework.GetURL(),
 								),
 							)
 						}

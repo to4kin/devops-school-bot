@@ -3,6 +3,7 @@ package model
 import (
 	"encoding/json"
 	"fmt"
+	"strconv"
 	"time"
 
 	validation "github.com/go-ozzo/ozzo-validation/v4"
@@ -35,6 +36,11 @@ func (s *School) GetStatusText() string {
 // GetButtonTitle ...
 func (s *School) GetButtonTitle() string {
 	return fmt.Sprintf("%v %v", s.GetStatusText(), s.Title)
+}
+
+// GetURL ...
+func (s *School) GetURL() string {
+	return fmt.Sprintf("%v/%v", "https://t.me/c", strconv.FormatInt(s.ChatID, 10)[4:])
 }
 
 // Validate ...
