@@ -189,6 +189,10 @@ func (hlpr *Helper) GetLessonsReport(school *model.School) (string, error) {
 func (hlpr *Helper) prepareReportMsg(students []*model.Student, lessons []*model.Lesson) (string, error) {
 	reportMessage := "Academic performance\n\n<b><u>Name - Accepted/Not Provided - Type</u></b>\n<pre>"
 	for _, student := range students {
+		if !student.Active {
+			continue
+		}
+
 		acceptedHomework := 0
 		notProvidedHomework := 0
 
