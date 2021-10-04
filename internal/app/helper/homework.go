@@ -29,6 +29,7 @@ func (hlpr *Helper) GetHomework(callback *model.Callback) (string, *telebot.Repl
 		ListCommand: callback.ListCommand,
 	}
 	rows = append(rows, replyMarkup.Row(replyMarkup.Data("<< Back to Homeworks List", homeworksListCallback.ToString())))
+	rows = append(rows, backToStudentRow(replyMarkup, callback, homework.Student.ID))
 	rows = append(rows, backToSchoolRow(replyMarkup, callback, homework.Student.School.ID))
 	replyMarkup.Inline(rows...)
 
@@ -54,9 +55,9 @@ func (hlpr *Helper) GetHomeworksList(callback *model.Callback) (string, *telebot
 	hlpr.logger.WithFields(homework.LogrusFields()).Debug("homework found")
 
 	hlpr.logger.WithFields(logrus.Fields{
-		"school_id": homework.Student.School.ID,
-	}).Debug("get homeworks from database by school_id")
-	homeworks, err := hlpr.store.Homework().FindBySchoolID(homework.Student.School.ID)
+		"student_id": homework.Student.ID,
+	}).Debug("get homeworks from database by student_id")
+	homeworks, err := hlpr.store.Homework().FindByStudentID(homework.Student.ID)
 	if err != nil {
 		return "", nil, err
 	}
@@ -70,28 +71,16 @@ func (hlpr *Helper) GetHomeworksList(callback *model.Callback) (string, *telebot
 		interfaceSlice[i] = v
 	}
 
-	interfaceSlice = removeDuplicate(interfaceSlice)
-
 	rows := rowsWithButtons(interfaceSlice, callback)
+	rows = append(rows, backToStudentRow(replyMarkup, callback, homework.Student.ID))
 	rows = append(rows, backToSchoolRow(replyMarkup, callback, homework.Student.School.ID))
 	replyMarkup.Inline(rows...)
 
 	return fmt.Sprintf(
-			"School: <b>%v</b>\n\nChoose a homework from the list below:",
+			"School: <b>%v</b>\nStudent: <b>%v</b>\n\nChoose a homework from the list below:",
 			homework.Student.School.Title,
+			homework.Student.Account.Username,
 		),
 		replyMarkup,
 		nil
-}
-
-func removeDuplicate(slice []model.Interface) []model.Interface {
-	allKeys := make(map[string]bool)
-	list := []model.Interface{}
-	for _, item := range slice {
-		if _, value := allKeys[item.GetButtonTitle()]; !value {
-			allKeys[item.GetButtonTitle()] = true
-			list = append(list, item)
-		}
-	}
-	return list
 }

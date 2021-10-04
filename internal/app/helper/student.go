@@ -5,6 +5,7 @@ import (
 
 	"github.com/sirupsen/logrus"
 	"gitlab.devops.telekom.de/tvpp/prototypes/devops-school-bot/internal/app/model"
+	"gitlab.devops.telekom.de/tvpp/prototypes/devops-school-bot/internal/app/store"
 	"gopkg.in/tucnak/telebot.v3"
 )
 
@@ -56,6 +57,27 @@ func (hlpr *Helper) GetStudent(callback *model.Callback) (string, *telebot.Reply
 			ListCommand: callback.ListCommand,
 		}
 		buttons = append(buttons, replyMarkup.Data("Change to student", listenerCallback.ToString()))
+	}
+
+	hlpr.logger.WithFields(logrus.Fields{
+		"student_id": student.ID,
+	}).Debug("get all homeworks from database by student_id")
+	homeworks, err := hlpr.store.Homework().FindByStudentID(student.ID)
+	if err != nil && err != store.ErrRecordNotFound {
+		return "", nil, err
+	}
+	hlpr.logger.WithFields(logrus.Fields{
+		"count": len(homeworks),
+	}).Debug("homeworks found")
+
+	if len(homeworks) > 0 {
+		homeworksListCallback := &model.Callback{
+			ID:          homeworks[0].ID,
+			Type:        "homework",
+			Command:     "homeworks_list",
+			ListCommand: callback.ListCommand,
+		}
+		buttons = append(buttons, replyMarkup.Data("Homeworks", homeworksListCallback.ToString()))
 	}
 
 	var rows []telebot.Row

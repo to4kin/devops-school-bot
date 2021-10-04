@@ -123,14 +123,6 @@ func (hlpr *Helper) GetSchool(callback *model.Callback) (string, *telebot.ReplyM
 		buttons = append(buttons, replyMarkup.Data("Listeners", listenersListCallback.ToString()))
 	}
 	if len(homeworks) > 0 {
-		homeworksListCallback := &model.Callback{
-			ID:          homeworks[0].ID,
-			Type:        "homework",
-			Command:     "homeworks_list",
-			ListCommand: callback.ListCommand,
-		}
-		buttons = append(buttons, replyMarkup.Data("Homeworks", homeworksListCallback.ToString()))
-
 		reportCallback := *callback
 		reportCallback.Command = "report"
 		buttons = append(buttons, replyMarkup.Data("Report", reportCallback.ToString()))
