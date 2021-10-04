@@ -3,6 +3,7 @@ package helper_test
 import (
 	"testing"
 
+	"github.com/sirupsen/logrus"
 	"github.com/stretchr/testify/assert"
 	"gitlab.devops.telekom.de/tvpp/prototypes/devops-school-bot/internal/app/helper"
 	"gitlab.devops.telekom.de/tvpp/prototypes/devops-school-bot/internal/app/model"
@@ -11,6 +12,8 @@ import (
 
 func TestHomeworkHelper_GetHomework(t *testing.T) {
 	store := teststore.New()
+	hlpr := helper.NewHelper(store, logrus.New())
+
 	homework := model.TestHomework(t)
 	callback := model.TestHomeworkCallback(t)
 
@@ -20,7 +23,7 @@ func TestHomeworkHelper_GetHomework(t *testing.T) {
 	assert.NoError(t, store.Lesson().Create(homework.Lesson))
 	assert.NoError(t, store.Homework().Create(homework))
 
-	replyMessage, replyMarkup, err := helper.GetHomework(store, callback)
+	replyMessage, replyMarkup, err := hlpr.GetHomework(callback)
 	assert.NoError(t, err)
 	assert.NotEmpty(t, replyMessage)
 	assert.NotNil(t, replyMarkup)
@@ -28,6 +31,8 @@ func TestHomeworkHelper_GetHomework(t *testing.T) {
 
 func TestHomeworkHelper_GetHomeworksList(t *testing.T) {
 	store := teststore.New()
+	hlpr := helper.NewHelper(store, logrus.New())
+
 	homework := model.TestHomework(t)
 	callback := model.TestHomeworkCallback(t)
 
@@ -37,7 +42,7 @@ func TestHomeworkHelper_GetHomeworksList(t *testing.T) {
 	assert.NoError(t, store.Lesson().Create(homework.Lesson))
 	assert.NoError(t, store.Homework().Create(homework))
 
-	replyMessage, replyMarkup, err := helper.GetHomeworksList(store, callback)
+	replyMessage, replyMarkup, err := hlpr.GetHomeworksList(callback)
 	assert.NoError(t, err)
 	assert.NotEmpty(t, replyMessage)
 	assert.NotNil(t, replyMarkup)

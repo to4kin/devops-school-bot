@@ -34,7 +34,8 @@ func (srv *server) handleSchools(c telebot.Context) error {
 		ListCommand: "get",
 	}
 
-	replyMessage, replyMarkup, err := helper.GetSchoolsList(srv.store, callback)
+	hlpr := helper.NewHelper(srv.store, srv.logger)
+	replyMessage, replyMarkup, err := hlpr.GetSchoolsList(callback)
 	if err != nil {
 		srv.logger.Error(err)
 		return c.EditOrReply(helper.ErrInternal, &telebot.SendOptions{ParseMode: "HTML"})

@@ -42,7 +42,8 @@ func (srv *server) handleMyReport(c telebot.Context) error {
 	}
 	srv.logger.WithFields(school.LogrusFields()).Debug("school found")
 
-	reportMessage, err := helper.GetUserReport(srv.store, account, school)
+	hlpr := helper.NewHelper(srv.store, srv.logger)
+	reportMessage, err := hlpr.GetUserReport(account, school)
 	if err != nil {
 		return c.EditOrReply(helper.ErrInternal, &telebot.SendOptions{ParseMode: "HTML"})
 	}

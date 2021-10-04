@@ -3,17 +3,21 @@ package helper
 import (
 	"fmt"
 
+	"github.com/sirupsen/logrus"
 	"gitlab.devops.telekom.de/tvpp/prototypes/devops-school-bot/internal/app/model"
-	"gitlab.devops.telekom.de/tvpp/prototypes/devops-school-bot/internal/app/store"
 	"gopkg.in/tucnak/telebot.v3"
 )
 
 // GetHomework ...
-func GetHomework(store store.Store, callback *model.Callback) (string, *telebot.ReplyMarkup, error) {
-	homework, err := store.Homework().FindByID(callback.ID)
+func (hlpr *Helper) GetHomework(callback *model.Callback) (string, *telebot.ReplyMarkup, error) {
+	hlpr.logger.WithFields(logrus.Fields{
+		"id": callback.ID,
+	}).Debug("get homework from database by id")
+	homework, err := hlpr.store.Homework().FindByID(callback.ID)
 	if err != nil {
 		return "", nil, err
 	}
+	hlpr.logger.WithFields(homework.LogrusFields()).Debug("homework found")
 
 	var rows []telebot.Row
 	replyMarkup := &telebot.ReplyMarkup{}
@@ -39,16 +43,26 @@ func GetHomework(store store.Store, callback *model.Callback) (string, *telebot.
 }
 
 // GetHomeworksList ...
-func GetHomeworksList(store store.Store, callback *model.Callback) (string, *telebot.ReplyMarkup, error) {
-	homework, err := store.Homework().FindByID(callback.ID)
+func (hlpr *Helper) GetHomeworksList(callback *model.Callback) (string, *telebot.ReplyMarkup, error) {
+	hlpr.logger.WithFields(logrus.Fields{
+		"id": callback.ID,
+	}).Debug("get homework from database by id")
+	homework, err := hlpr.store.Homework().FindByID(callback.ID)
 	if err != nil {
 		return "", nil, err
 	}
+	hlpr.logger.WithFields(homework.LogrusFields()).Debug("homework found")
 
-	homeworks, err := store.Homework().FindBySchoolID(homework.Student.School.ID)
+	hlpr.logger.WithFields(logrus.Fields{
+		"school_id": homework.Student.School.ID,
+	}).Debug("get homeworks from database by school_id")
+	homeworks, err := hlpr.store.Homework().FindBySchoolID(homework.Student.School.ID)
 	if err != nil {
 		return "", nil, err
 	}
+	hlpr.logger.WithFields(logrus.Fields{
+		"count": len(homeworks),
+	}).Debug("homeworks found")
 
 	replyMarkup := &telebot.ReplyMarkup{}
 	var interfaceSlice []model.Interface = make([]model.Interface, len(homeworks))

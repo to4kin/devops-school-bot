@@ -3,22 +3,26 @@ package helper
 import (
 	"fmt"
 
+	"github.com/sirupsen/logrus"
 	"gitlab.devops.telekom.de/tvpp/prototypes/devops-school-bot/internal/app/model"
 	"gitlab.devops.telekom.de/tvpp/prototypes/devops-school-bot/internal/app/store"
 	"gopkg.in/tucnak/telebot.v3"
 )
 
 // GetUsersList ...
-func GetUsersList(str store.Store, callback *model.Callback) (string, *telebot.ReplyMarkup, error) {
+func (hlpr *Helper) GetUsersList(callback *model.Callback) (string, *telebot.ReplyMarkup, error) {
 	var err error
 	var accounts []*model.Account
 	switch callback.ListCommand {
 	case "set_superuser":
-		accounts, err = str.Account().FindBySuperuser(false)
+		hlpr.logger.Debug("get all users from database")
+		accounts, err = hlpr.store.Account().FindBySuperuser(false)
 	case "unset_superuser":
-		accounts, err = str.Account().FindBySuperuser(true)
+		hlpr.logger.Debug("get all superusers from database")
+		accounts, err = hlpr.store.Account().FindBySuperuser(true)
 	default:
-		accounts, err = str.Account().FindAll()
+		hlpr.logger.Debug("get all accounts from database")
+		accounts, err = hlpr.store.Account().FindAll()
 	}
 
 	if err != nil && err != store.ErrRecordNotFound {
@@ -28,6 +32,10 @@ func GetUsersList(str store.Store, callback *model.Callback) (string, *telebot.R
 	if err == store.ErrRecordNotFound {
 		return "There are no users in the database. Please add first", nil, nil
 	}
+
+	hlpr.logger.WithFields(logrus.Fields{
+		"count": len(accounts),
+	}).Debug("accounts found")
 
 	var interfaceSlice []model.Interface = make([]model.Interface, len(accounts))
 	for i, v := range accounts {
@@ -41,11 +49,15 @@ func GetUsersList(str store.Store, callback *model.Callback) (string, *telebot.R
 }
 
 // GetUser ...
-func GetUser(store store.Store, callback *model.Callback, sender *telebot.User) (string, *telebot.ReplyMarkup, error) {
-	account, err := store.Account().FindByID(callback.ID)
+func (hlpr *Helper) GetUser(callback *model.Callback, sender *telebot.User) (string, *telebot.ReplyMarkup, error) {
+	hlpr.logger.WithFields(logrus.Fields{
+		"id": callback.ID,
+	}).Debug("get account from database by id")
+	account, err := hlpr.store.Account().FindByID(callback.ID)
 	if err != nil {
 		return "", nil, err
 	}
+	hlpr.logger.WithFields(account.LogrusFields()).Debug("account found")
 
 	var rows []telebot.Row
 	replyMarkup := &telebot.ReplyMarkup{}
@@ -82,19 +94,25 @@ func GetUser(store store.Store, callback *model.Callback, sender *telebot.User) 
 }
 
 // UpdateUser ...
-func UpdateUser(store store.Store, callback *model.Callback, sender *telebot.User) (string, *telebot.ReplyMarkup, error) {
-	account, err := store.Account().FindByID(callback.ID)
+func (hlpr *Helper) UpdateUser(callback *model.Callback, sender *telebot.User) (string, *telebot.ReplyMarkup, error) {
+	hlpr.logger.WithFields(logrus.Fields{
+		"id": callback.ID,
+	}).Debug("get account from database by id")
+	account, err := hlpr.store.Account().FindByID(callback.ID)
 	if err != nil {
 		return "", nil, err
 	}
+	hlpr.logger.WithFields(account.LogrusFields()).Debug("account found")
 
 	account.FirstName = sender.FirstName
 	account.LastName = sender.LastName
 	account.Username = sender.Username
 
-	if err := store.Account().Update(account); err != nil {
+	hlpr.logger.Debug("update account")
+	if err := hlpr.store.Account().Update(account); err != nil {
 		return "", nil, err
 	}
+	hlpr.logger.WithFields(account.LogrusFields()).Debug("account updated")
 
 	replyMarkup := &telebot.ReplyMarkup{}
 	replyMarkup.Inline(backToUserRow(replyMarkup, callback, account.ID))
@@ -103,17 +121,23 @@ func UpdateUser(store store.Store, callback *model.Callback, sender *telebot.Use
 }
 
 // SetSuperuser ...
-func SetSuperuser(store store.Store, callback *model.Callback) (string, *telebot.ReplyMarkup, error) {
-	account, err := store.Account().FindByID(callback.ID)
+func (hlpr *Helper) SetSuperuser(callback *model.Callback) (string, *telebot.ReplyMarkup, error) {
+	hlpr.logger.WithFields(logrus.Fields{
+		"id": callback.ID,
+	}).Debug("get account from database by id")
+	account, err := hlpr.store.Account().FindByID(callback.ID)
 	if err != nil {
 		return "", nil, err
 	}
+	hlpr.logger.WithFields(account.LogrusFields()).Debug("account found")
 
 	account.Superuser = true
 
-	if err := store.Account().Update(account); err != nil {
+	hlpr.logger.Debug("set superuser")
+	if err := hlpr.store.Account().Update(account); err != nil {
 		return "", nil, err
 	}
+	hlpr.logger.WithFields(account.LogrusFields()).Debug("account updated")
 
 	replyMarkup := &telebot.ReplyMarkup{}
 	replyMarkup.Inline(backToUserRow(replyMarkup, callback, account.ID))
@@ -122,17 +146,23 @@ func SetSuperuser(store store.Store, callback *model.Callback) (string, *telebot
 }
 
 // UnsetSuperuser ...
-func UnsetSuperuser(store store.Store, callback *model.Callback) (string, *telebot.ReplyMarkup, error) {
-	account, err := store.Account().FindByID(callback.ID)
+func (hlpr *Helper) UnsetSuperuser(callback *model.Callback) (string, *telebot.ReplyMarkup, error) {
+	hlpr.logger.WithFields(logrus.Fields{
+		"id": callback.ID,
+	}).Debug("get account from database by id")
+	account, err := hlpr.store.Account().FindByID(callback.ID)
 	if err != nil {
 		return "", nil, err
 	}
+	hlpr.logger.WithFields(account.LogrusFields()).Debug("account found")
 
 	account.Superuser = false
 
-	if err := store.Account().Update(account); err != nil {
+	hlpr.logger.Debug("unset superuser")
+	if err := hlpr.store.Account().Update(account); err != nil {
 		return "", nil, err
 	}
+	hlpr.logger.WithFields(account.LogrusFields()).Debug("account updated")
 
 	replyMarkup := &telebot.ReplyMarkup{}
 	replyMarkup.Inline(backToUserRow(replyMarkup, callback, account.ID))

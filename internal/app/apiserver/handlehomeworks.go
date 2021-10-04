@@ -9,6 +9,8 @@ import (
 )
 
 func (srv *server) handleHomework(c telebot.Context) error {
+	hlpr := helper.NewHelper(srv.store, srv.logger)
+
 	if c.Message().Private() {
 		callback := &model.Callback{
 			ID:          0,
@@ -17,7 +19,7 @@ func (srv *server) handleHomework(c telebot.Context) error {
 			ListCommand: "homeworks",
 		}
 
-		replyMessage, replyMarkup, err := helper.GetSchoolsList(srv.store, callback)
+		replyMessage, replyMarkup, err := hlpr.GetSchoolsList(callback)
 		if err != nil {
 			srv.logger.Error(err)
 			return c.EditOrReply(helper.ErrInternal, &telebot.SendOptions{ParseMode: "HTML"})
@@ -41,7 +43,7 @@ func (srv *server) handleHomework(c telebot.Context) error {
 	}
 	srv.logger.WithFields(school.LogrusFields()).Debug("school found")
 
-	reportMessage, err := helper.GetLessonsReport(srv.store, school)
+	reportMessage, err := hlpr.GetLessonsReport(school)
 	if err != nil && err != store.ErrRecordNotFound {
 		srv.logger.Error(err)
 		return c.EditOrReply(helper.ErrInternal, &telebot.SendOptions{ParseMode: "HTML"})

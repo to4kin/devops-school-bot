@@ -26,6 +26,8 @@ func (srv *server) handleFullReport(c telebot.Context) error {
 		return c.EditOrReply(helper.ErrInsufficientPermissions, &telebot.SendOptions{ParseMode: "HTML"})
 	}
 
+	hlpr := helper.NewHelper(srv.store, srv.logger)
+
 	if c.Message().Private() {
 		callback := &model.Callback{
 			ID:          0,
@@ -34,7 +36,7 @@ func (srv *server) handleFullReport(c telebot.Context) error {
 			ListCommand: "full_report",
 		}
 
-		replyMessage, replyMarkup, err := helper.GetSchoolsList(srv.store, callback)
+		replyMessage, replyMarkup, err := hlpr.GetSchoolsList(callback)
 		if err != nil {
 			srv.logger.Error(err)
 			return c.EditOrReply(helper.ErrInternal, &telebot.SendOptions{ParseMode: "HTML"})
@@ -58,7 +60,7 @@ func (srv *server) handleFullReport(c telebot.Context) error {
 	}
 	srv.logger.WithFields(school.LogrusFields()).Debug("school found")
 
-	reportMessage, err := helper.GetFullReport(srv.store, school)
+	reportMessage, err := hlpr.GetFullReport(school)
 	if err != nil && err != store.ErrRecordNotFound {
 		srv.logger.Error(err)
 		return c.EditOrReply(helper.ErrInternal, &telebot.SendOptions{ParseMode: "HTML"})

@@ -4,22 +4,26 @@ import (
 	"fmt"
 	"sort"
 
+	"github.com/sirupsen/logrus"
 	"gitlab.devops.telekom.de/tvpp/prototypes/devops-school-bot/internal/app/model"
 	"gitlab.devops.telekom.de/tvpp/prototypes/devops-school-bot/internal/app/store"
 	"gopkg.in/tucnak/telebot.v3"
 )
 
 // GetSchoolsList ...
-func GetSchoolsList(str store.Store, callback *model.Callback) (string, *telebot.ReplyMarkup, error) {
+func (hlpr *Helper) GetSchoolsList(callback *model.Callback) (string, *telebot.ReplyMarkup, error) {
 	var err error
 	var schools []*model.School
 	switch callback.ListCommand {
 	case "start":
-		schools, err = str.School().FindByActive(false)
+		hlpr.logger.Debug("get all inactive schools from database")
+		schools, err = hlpr.store.School().FindByActive(false)
 	case "stop":
-		schools, err = str.School().FindByActive(true)
+		hlpr.logger.Debug("get all active schools from database")
+		schools, err = hlpr.store.School().FindByActive(true)
 	default:
-		schools, err = str.School().FindAll()
+		hlpr.logger.Debug("get all schools from database")
+		schools, err = hlpr.store.School().FindAll()
 	}
 
 	if err != nil && err != store.ErrRecordNotFound {
@@ -29,6 +33,10 @@ func GetSchoolsList(str store.Store, callback *model.Callback) (string, *telebot
 	if err == store.ErrRecordNotFound {
 		return "There are no schools in the database. Please add first", nil, nil
 	}
+
+	hlpr.logger.WithFields(logrus.Fields{
+		"count": len(schools),
+	}).Debug("schools found")
 
 	var interfaceSlice []model.Interface = make([]model.Interface, len(schools))
 	for i, v := range schools {
@@ -42,26 +50,48 @@ func GetSchoolsList(str store.Store, callback *model.Callback) (string, *telebot
 }
 
 // GetSchool ...
-func GetSchool(str store.Store, callback *model.Callback) (string, *telebot.ReplyMarkup, error) {
-	school, err := str.School().FindByID(callback.ID)
+func (hlpr *Helper) GetSchool(callback *model.Callback) (string, *telebot.ReplyMarkup, error) {
+	hlpr.logger.WithFields(logrus.Fields{
+		"id": callback.ID,
+	}).Debug("get school from database by id")
+	school, err := hlpr.store.School().FindByID(callback.ID)
 	if err != nil {
 		return "", nil, err
 	}
+	hlpr.logger.WithFields(school.LogrusFields()).Debug("school found")
 
-	students, err := str.Student().FindByFullCourseSchoolID(true, school.ID)
+	hlpr.logger.WithFields(logrus.Fields{
+		"school_id": school.ID,
+	}).Debug("get all students from database by school_id")
+	students, err := hlpr.store.Student().FindByFullCourseSchoolID(true, school.ID)
 	if err != nil && err != store.ErrRecordNotFound {
 		return "", nil, err
 	}
+	hlpr.logger.WithFields(logrus.Fields{
+		"count": len(students),
+	}).Debug("students found")
 
-	listeners, err := str.Student().FindByFullCourseSchoolID(false, school.ID)
+	hlpr.logger.WithFields(logrus.Fields{
+		"school_id": school.ID,
+	}).Debug("get all listeners from database by school_id")
+	listeners, err := hlpr.store.Student().FindByFullCourseSchoolID(false, school.ID)
 	if err != nil && err != store.ErrRecordNotFound {
 		return "", nil, err
 	}
+	hlpr.logger.WithFields(logrus.Fields{
+		"count": len(listeners),
+	}).Debug("listeners found")
 
-	homeworks, err := str.Homework().FindBySchoolID(school.ID)
+	hlpr.logger.WithFields(logrus.Fields{
+		"school_id": school.ID,
+	}).Debug("get all homeworks from database by school_id")
+	homeworks, err := hlpr.store.Homework().FindBySchoolID(school.ID)
 	if err != nil && err != store.ErrRecordNotFound {
 		return "", nil, err
 	}
+	hlpr.logger.WithFields(logrus.Fields{
+		"count": len(homeworks),
+	}).Debug("homeworks found")
 
 	var buttons []telebot.Btn
 	replyMarkup := &telebot.ReplyMarkup{}
@@ -156,17 +186,23 @@ func GetSchool(str store.Store, callback *model.Callback) (string, *telebot.Repl
 }
 
 // StartSchool ...
-func StartSchool(store store.Store, callback *model.Callback) (string, *telebot.ReplyMarkup, error) {
-	school, err := store.School().FindByID(callback.ID)
+func (hlpr *Helper) StartSchool(callback *model.Callback) (string, *telebot.ReplyMarkup, error) {
+	hlpr.logger.WithFields(logrus.Fields{
+		"id": callback.ID,
+	}).Debug("get school from database by id")
+	school, err := hlpr.store.School().FindByID(callback.ID)
 	if err != nil {
 		return "", nil, err
 	}
+	hlpr.logger.WithFields(school.LogrusFields()).Debug("school found")
 
 	school.Active = true
 
-	if err := store.School().Update(school); err != nil {
+	hlpr.logger.Debug("start school")
+	if err := hlpr.store.School().Update(school); err != nil {
 		return "", nil, err
 	}
+	hlpr.logger.WithFields(school.LogrusFields()).Debug("school started")
 
 	replyMarkup := &telebot.ReplyMarkup{}
 	replyMarkup.Inline(backToSchoolRow(replyMarkup, callback, school.ID))
@@ -175,17 +211,23 @@ func StartSchool(store store.Store, callback *model.Callback) (string, *telebot.
 }
 
 // StopSchool ...
-func StopSchool(store store.Store, callback *model.Callback) (string, *telebot.ReplyMarkup, error) {
-	school, err := store.School().FindByID(callback.ID)
+func (hlpr *Helper) StopSchool(callback *model.Callback) (string, *telebot.ReplyMarkup, error) {
+	hlpr.logger.WithFields(logrus.Fields{
+		"id": callback.ID,
+	}).Debug("get school from database by id")
+	school, err := hlpr.store.School().FindByID(callback.ID)
 	if err != nil {
 		return "", nil, err
 	}
+	hlpr.logger.WithFields(school.LogrusFields()).Debug("school found")
 
 	school.Active = false
 
-	if err := store.School().Update(school); err != nil {
+	hlpr.logger.Debug("stop school")
+	if err := hlpr.store.School().Update(school); err != nil {
 		return "", nil, err
 	}
+	hlpr.logger.WithFields(school.LogrusFields()).Debug("school stopped")
 
 	replyMarkup := &telebot.ReplyMarkup{}
 	replyMarkup.Inline(backToSchoolRow(replyMarkup, callback, school.ID))
@@ -194,13 +236,17 @@ func StopSchool(store store.Store, callback *model.Callback) (string, *telebot.R
 }
 
 // ReportSchool ...
-func ReportSchool(str store.Store, callback *model.Callback) (string, *telebot.ReplyMarkup, error) {
-	school, err := str.School().FindByID(callback.ID)
+func (hlpr *Helper) ReportSchool(callback *model.Callback) (string, *telebot.ReplyMarkup, error) {
+	hlpr.logger.WithFields(logrus.Fields{
+		"id": callback.ID,
+	}).Debug("get school from database by id")
+	school, err := hlpr.store.School().FindByID(callback.ID)
 	if err != nil {
 		return "", nil, err
 	}
+	hlpr.logger.WithFields(school.LogrusFields()).Debug("school found")
 
-	reportMessage, err := GetReport(str, school)
+	reportMessage, err := hlpr.GetReport(school)
 	if err != nil && err != store.ErrRecordNotFound {
 		return "", nil, err
 	}
@@ -216,13 +262,17 @@ func ReportSchool(str store.Store, callback *model.Callback) (string, *telebot.R
 }
 
 // FullReportSchool ...
-func FullReportSchool(str store.Store, callback *model.Callback) (string, *telebot.ReplyMarkup, error) {
-	school, err := str.School().FindByID(callback.ID)
+func (hlpr *Helper) FullReportSchool(callback *model.Callback) (string, *telebot.ReplyMarkup, error) {
+	hlpr.logger.WithFields(logrus.Fields{
+		"id": callback.ID,
+	}).Debug("get school from database by id")
+	school, err := hlpr.store.School().FindByID(callback.ID)
 	if err != nil {
 		return "", nil, err
 	}
+	hlpr.logger.WithFields(school.LogrusFields()).Debug("school found")
 
-	reportMessage, err := GetFullReport(str, school)
+	reportMessage, err := hlpr.GetFullReport(school)
 	if err != nil && err != store.ErrRecordNotFound {
 		return "", nil, err
 	}
@@ -238,13 +288,17 @@ func FullReportSchool(str store.Store, callback *model.Callback) (string, *teleb
 }
 
 // GetSchoolHomeworks ...
-func GetSchoolHomeworks(str store.Store, callback *model.Callback) (string, *telebot.ReplyMarkup, error) {
-	school, err := str.School().FindByID(callback.ID)
+func (hlpr *Helper) GetSchoolHomeworks(callback *model.Callback) (string, *telebot.ReplyMarkup, error) {
+	hlpr.logger.WithFields(logrus.Fields{
+		"id": callback.ID,
+	}).Debug("get school from database by id")
+	school, err := hlpr.store.School().FindByID(callback.ID)
 	if err != nil {
 		return "", nil, err
 	}
+	hlpr.logger.WithFields(school.LogrusFields()).Debug("school found")
 
-	reportMessage, err := GetLessonsReport(str, school)
+	reportMessage, err := hlpr.GetLessonsReport(school)
 	if err != nil && err != store.ErrRecordNotFound {
 		return "", nil, err
 	}

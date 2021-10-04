@@ -1,13 +1,31 @@
 package helper
 
 import (
+	"github.com/sirupsen/logrus"
 	"gitlab.devops.telekom.de/tvpp/prototypes/devops-school-bot/internal/app/model"
+	"gitlab.devops.telekom.de/tvpp/prototypes/devops-school-bot/internal/app/store"
 	"gopkg.in/tucnak/telebot.v3"
 )
 
 var (
 	maxRows = 3
 )
+
+// Helper ...
+type Helper struct {
+	logger *logrus.Logger
+	store  store.Store
+}
+
+// NewHelper ...
+func NewHelper(store store.Store, logger *logrus.Logger) *Helper {
+	hlpr := &Helper{
+		logger: logger,
+		store:  store,
+	}
+
+	return hlpr
+}
 
 func rowsWithButtons(values []model.Interface, callback *model.Callback) []telebot.Row {
 	page := 0

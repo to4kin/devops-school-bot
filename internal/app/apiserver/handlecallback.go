@@ -40,77 +40,79 @@ func (srv *server) handleCallback(c telebot.Context) error {
 	replyMessage := ""
 	replyMarkup := &telebot.ReplyMarkup{}
 
+	hlpr := helper.NewHelper(srv.store, srv.logger)
+
 	switch callback.Type {
 	case "school":
 		switch callback.Command {
 		case "schools_list", "next", "previous":
-			replyMessage, replyMarkup, err = helper.GetSchoolsList(srv.store, callback)
+			replyMessage, replyMarkup, err = hlpr.GetSchoolsList(callback)
 
 		case "get":
-			replyMessage, replyMarkup, err = helper.GetSchool(srv.store, callback)
+			replyMessage, replyMarkup, err = hlpr.GetSchool(callback)
 
 		case "start":
-			replyMessage, replyMarkup, err = helper.StartSchool(srv.store, callback)
+			replyMessage, replyMarkup, err = hlpr.StartSchool(callback)
 
 		case "stop":
-			replyMessage, replyMarkup, err = helper.StopSchool(srv.store, callback)
+			replyMessage, replyMarkup, err = hlpr.StopSchool(callback)
 
 		case "report":
-			replyMessage, replyMarkup, err = helper.ReportSchool(srv.store, callback)
+			replyMessage, replyMarkup, err = hlpr.ReportSchool(callback)
 
 		case "full_report":
-			replyMessage, replyMarkup, err = helper.FullReportSchool(srv.store, callback)
+			replyMessage, replyMarkup, err = hlpr.FullReportSchool(callback)
 
 		case "homeworks":
-			replyMessage, replyMarkup, err = helper.GetSchoolHomeworks(srv.store, callback)
+			replyMessage, replyMarkup, err = hlpr.GetSchoolHomeworks(callback)
 
 		}
 	case "account":
 		switch callback.Command {
 		case "accounts_list", "next", "previous":
-			replyMessage, replyMarkup, err = helper.GetUsersList(srv.store, callback)
+			replyMessage, replyMarkup, err = hlpr.GetUsersList(callback)
 
 		case "get":
-			replyMessage, replyMarkup, err = helper.GetUser(srv.store, callback, c.Sender())
+			replyMessage, replyMarkup, err = hlpr.GetUser(callback, c.Sender())
 
 		case "update":
-			replyMessage, replyMarkup, err = helper.UpdateUser(srv.store, callback, c.Sender())
+			replyMessage, replyMarkup, err = hlpr.UpdateUser(callback, c.Sender())
 
 		case "set_superuser":
-			replyMessage, replyMarkup, err = helper.SetSuperuser(srv.store, callback)
+			replyMessage, replyMarkup, err = hlpr.SetSuperuser(callback)
 
 		case "unset_superuser":
-			replyMessage, replyMarkup, err = helper.UnsetSuperuser(srv.store, callback)
+			replyMessage, replyMarkup, err = hlpr.UnsetSuperuser(callback)
 
 		}
 	case "student":
 		switch callback.Command {
 		case "students_list", "next", "previous":
-			replyMessage, replyMarkup, err = helper.GetStudentsList(srv.store, callback)
+			replyMessage, replyMarkup, err = hlpr.GetStudentsList(callback)
 
 		case "get":
-			replyMessage, replyMarkup, err = helper.GetStudent(srv.store, callback)
+			replyMessage, replyMarkup, err = hlpr.GetStudent(callback)
 
 		case "block":
-			replyMessage, replyMarkup, err = helper.BlockStudent(srv.store, callback)
+			replyMessage, replyMarkup, err = hlpr.BlockStudent(callback)
 
 		case "unblock":
-			replyMessage, replyMarkup, err = helper.UnblockStudent(srv.store, callback)
+			replyMessage, replyMarkup, err = hlpr.UnblockStudent(callback)
 
 		case "set_student":
-			replyMessage, replyMarkup, err = helper.SetStudent(srv.store, callback)
+			replyMessage, replyMarkup, err = hlpr.SetStudent(callback)
 
 		case "set_listener":
-			replyMessage, replyMarkup, err = helper.SetListener(srv.store, callback)
+			replyMessage, replyMarkup, err = hlpr.SetListener(callback)
 
 		}
 	case "homework":
 		switch callback.Command {
 		case "homeworks_list", "next", "previous":
-			replyMessage, replyMarkup, err = helper.GetHomeworksList(srv.store, callback)
+			replyMessage, replyMarkup, err = hlpr.GetHomeworksList(callback)
 
 		case "get":
-			replyMessage, replyMarkup, err = helper.GetHomework(srv.store, callback)
+			replyMessage, replyMarkup, err = hlpr.GetHomework(callback)
 
 		}
 	}
