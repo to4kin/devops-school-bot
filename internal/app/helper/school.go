@@ -153,7 +153,7 @@ func (hlpr *Helper) GetSchool(callback *model.Callback) (string, *telebot.ReplyM
 		}
 	}
 
-	// TODO: Go runs from a random offset for map iteration. We need a workaround if we need a sorted output for map
+	// NOTE: Go runs from a random offset for map iteration. We need a workaround if we need a sorted output for map
 	var keys []string
 	for k := range lessons {
 		keys = append(keys, k)

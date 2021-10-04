@@ -4,6 +4,7 @@ import (
 	"regexp"
 	"strings"
 	"time"
+	"unicode/utf16"
 
 	"github.com/sirupsen/logrus"
 	"gitlab.devops.telekom.de/tvpp/prototypes/devops-school-bot/internal/app/model"
@@ -30,6 +31,11 @@ func (srv *server) handleOnText(c telebot.Context) error {
 		text = strings.ToLower(c.Message().Caption)
 		entities = c.Message().CaptionEntities
 	}
+
+	// NOTE: Telegram uses UTF16 encoding for calculating Length and Offset
+	// so when just ASCII text is used there are no problems at all, since ASCII always uses 1 byte for each character.
+	//
+	utfEncodedString := utf16.Encode([]rune(text))
 
 	if strings.Contains(text, homeworkHashtag) {
 		srv.logger.WithFields(logrus.Fields{
@@ -76,7 +82,12 @@ func (srv *server) handleOnText(c telebot.Context) error {
 		for _, entity := range entities {
 			switch entity.Type {
 			case "hashtag":
-				hashtag := text[entity.Offset : entity.Offset+entity.Length]
+				// NOTE: Telegram uses UTF16 encoding for calculating Length and Offset
+				// so when just ASCII text is used there are no problems at all, since ASCII always uses 1 byte for each character.
+				//
+				//hashtag := text[entity.Offset : entity.Offset+entity.Length]
+				runeString := utf16.Decode(utfEncodedString[entity.Offset : entity.Offset+entity.Length])
+				hashtag := string(runeString)
 				if hashtag == homeworkHashtag {
 					srv.logger.WithFields(logrus.Fields{
 						"hashtag": homeworkHashtag,
