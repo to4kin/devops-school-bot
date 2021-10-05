@@ -79,6 +79,24 @@ func (srv *server) handleOnText(c telebot.Context) error {
 			return nil
 		}
 
+		if c.Update().EditedMessage != nil {
+			srv.logger.WithFields(logrus.Fields{
+				"message_id": c.Update().EditedMessage.ID,
+			}).Debug("message was edited, need to delete old homeworks first")
+			if err := srv.store.Homework().DeleteByMessageID(int64(c.Update().EditedMessage.ID)); err != nil {
+				if err == store.ErrRecordNotFound {
+					srv.logger.Debug(err)
+				} else {
+					srv.logger.Error(err)
+					return nil
+				}
+			} else {
+				srv.logger.WithFields(logrus.Fields{
+					"message_id": c.Update().EditedMessage.ID,
+				}).Debug("all messages were deleted")
+			}
+		}
+
 		for _, entity := range entities {
 			switch entity.Type {
 			case "hashtag":

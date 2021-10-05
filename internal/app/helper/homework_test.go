@@ -14,7 +14,7 @@ func TestHomeworkHelper_GetHomework(t *testing.T) {
 	store := teststore.New()
 	hlpr := helper.NewHelper(store, logrus.New())
 
-	homework := model.TestHomework(t)
+	homework := model.TestHomeworkOne(t)
 	callback := model.TestHomeworkCallback(t)
 
 	assert.NoError(t, store.Account().Create(homework.Student.Account))
@@ -33,7 +33,7 @@ func TestHomeworkHelper_GetHomeworksList(t *testing.T) {
 	store := teststore.New()
 	hlpr := helper.NewHelper(store, logrus.New())
 
-	homework := model.TestHomework(t)
+	homework := model.TestHomeworkOne(t)
 	callback := model.TestHomeworkCallback(t)
 
 	assert.NoError(t, store.Account().Create(homework.Student.Account))
@@ -52,7 +52,7 @@ func TestHomeworkHelper_DisableHomework(t *testing.T) {
 	store := teststore.New()
 	hlpr := helper.NewHelper(store, logrus.New())
 
-	homework := model.TestHomework(t)
+	homework := model.TestHomeworkOne(t)
 	callback := model.TestHomeworkCallback(t)
 
 	assert.NoError(t, store.Account().Create(homework.Student.Account))
@@ -71,7 +71,7 @@ func TestHomeworkHelper_EnableHomework(t *testing.T) {
 	store := teststore.New()
 	hlpr := helper.NewHelper(store, logrus.New())
 
-	homework := model.TestHomework(t)
+	homework := model.TestHomeworkOne(t)
 	callback := model.TestHomeworkCallback(t)
 
 	assert.NoError(t, store.Account().Create(homework.Student.Account))

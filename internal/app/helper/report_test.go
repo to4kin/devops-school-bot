@@ -13,7 +13,7 @@ import (
 func TestReportHelper_GetUserReport(t *testing.T) {
 	store := teststore.New()
 	hlpr := helper.NewHelper(store, logrus.New())
-	homework := model.TestHomework(t)
+	homework := model.TestHomeworkOne(t)
 
 	assert.NoError(t, store.Account().Create(homework.Student.Account))
 	assert.NoError(t, store.School().Create(homework.Student.School))
@@ -29,7 +29,7 @@ func TestReportHelper_GetUserReport(t *testing.T) {
 func TestReportHelper_GetReport(t *testing.T) {
 	store := teststore.New()
 	hlpr := helper.NewHelper(store, logrus.New())
-	homework := model.TestHomework(t)
+	homework := model.TestHomeworkOne(t)
 
 	assert.NoError(t, store.Account().Create(homework.Student.Account))
 	assert.NoError(t, store.School().Create(homework.Student.School))
@@ -45,7 +45,7 @@ func TestReportHelper_GetReport(t *testing.T) {
 func TestReportHelper_GetFullReport(t *testing.T) {
 	store := teststore.New()
 	hlpr := helper.NewHelper(store, logrus.New())
-	homework := model.TestHomework(t)
+	homework := model.TestHomeworkOne(t)
 
 	assert.NoError(t, store.Account().Create(homework.Student.Account))
 	assert.NoError(t, store.School().Create(homework.Student.School))
@@ -61,7 +61,7 @@ func TestReportHelper_GetFullReport(t *testing.T) {
 func TestReportHelper_GetLessonsReport(t *testing.T) {
 	store := teststore.New()
 	hlpr := helper.NewHelper(store, logrus.New())
-	homework := model.TestHomework(t)
+	homework := model.TestHomeworkOne(t)
 
 	assert.NoError(t, store.Account().Create(homework.Student.Account))
 	assert.NoError(t, store.School().Create(homework.Student.School))

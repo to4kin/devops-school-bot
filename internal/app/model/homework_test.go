@@ -16,14 +16,14 @@ func TestHomework_Validate(t *testing.T) {
 		{
 			name: "valid",
 			h: func() *model.Homework {
-				return model.TestHomework(t)
+				return model.TestHomeworkOne(t)
 			},
 			isValid: true,
 		},
 		{
 			name: "empty_student",
 			h: func() *model.Homework {
-				h := model.TestHomework(t)
+				h := model.TestHomeworkOne(t)
 				h.Student = &model.Student{}
 				return h
 			},
@@ -32,7 +32,7 @@ func TestHomework_Validate(t *testing.T) {
 		{
 			name: "empty_lesson",
 			h: func() *model.Homework {
-				h := model.TestHomework(t)
+				h := model.TestHomeworkOne(t)
 				h.Lesson = &model.Lesson{}
 				return h
 			},

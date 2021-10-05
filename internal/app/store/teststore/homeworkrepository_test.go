@@ -11,7 +11,7 @@ import (
 
 func TestHomeworkRepository_Create(t *testing.T) {
 	s := teststore.New()
-	h := model.TestHomework(t)
+	h := model.TestHomeworkOne(t)
 
 	assert.NoError(t, s.Account().Create(h.Student.Account))
 	assert.NoError(t, s.School().Create(h.Student.School))
@@ -25,7 +25,7 @@ func TestHomeworkRepository_Create(t *testing.T) {
 
 func TestHomeworkRepository_Update(t *testing.T) {
 	s := teststore.New()
-	h := model.TestHomework(t)
+	h := model.TestHomeworkOne(t)
 
 	assert.EqualError(t, s.Homework().Update(h), store.ErrRecordNotFound.Error())
 
@@ -43,7 +43,7 @@ func TestHomeworkRepository_Update(t *testing.T) {
 
 func TestHomeworkRepository_FindByID(t *testing.T) {
 	s := teststore.New()
-	h := model.TestHomework(t)
+	h := model.TestHomeworkOne(t)
 
 	_, err := s.Homework().FindByID(h.ID)
 	assert.EqualError(t, err, store.ErrRecordNotFound.Error())
@@ -61,7 +61,7 @@ func TestHomeworkRepository_FindByID(t *testing.T) {
 
 func TestHomeworkRepository_FindByStudentID(t *testing.T) {
 	s := teststore.New()
-	h := model.TestHomework(t)
+	h := model.TestHomeworkOne(t)
 
 	_, err := s.Homework().FindByStudentID(h.Student.ID)
 	assert.EqualError(t, err, store.ErrRecordNotFound.Error())
@@ -79,7 +79,7 @@ func TestHomeworkRepository_FindByStudentID(t *testing.T) {
 
 func TestHomeworkRepository_FindBySchoolID(t *testing.T) {
 	s := teststore.New()
-	h := model.TestHomework(t)
+	h := model.TestHomeworkOne(t)
 
 	_, err := s.Homework().FindBySchoolID(h.Student.School.ID)
 	assert.EqualError(t, err, store.ErrRecordNotFound.Error())
@@ -97,7 +97,7 @@ func TestHomeworkRepository_FindBySchoolID(t *testing.T) {
 
 func TestHomeworkRepository_FindBySchoolIDLessonID(t *testing.T) {
 	s := teststore.New()
-	h := model.TestHomework(t)
+	h := model.TestHomeworkOne(t)
 
 	_, err := s.Homework().FindBySchoolID(h.Student.School.ID)
 	assert.EqualError(t, err, store.ErrRecordNotFound.Error())
@@ -115,7 +115,7 @@ func TestHomeworkRepository_FindBySchoolIDLessonID(t *testing.T) {
 
 func TestHomeworkRepository_FindByStudentIDLessonID(t *testing.T) {
 	s := teststore.New()
-	h := model.TestHomework(t)
+	h := model.TestHomeworkOne(t)
 
 	_, err := s.Homework().FindByStudentIDLessonID(h.Student.ID, h.Lesson.ID)
 	assert.EqualError(t, err, store.ErrRecordNotFound.Error())

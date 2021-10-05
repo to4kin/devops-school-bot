@@ -51,10 +51,18 @@ func TestInactiveSchool(t *testing.T) *School {
 	}
 }
 
-// TestLesson ...
-func TestLesson(t *testing.T) *Lesson {
+// TestLessonOne ...
+func TestLessonOne(t *testing.T) *Lesson {
 	return &Lesson{
-		Title:  "golang",
+		Title:  "golang1",
+		Module: TestModule(t),
+	}
+}
+
+// TestLessonTwo ...
+func TestLessonTwo(t *testing.T) *Lesson {
+	return &Lesson{
+		Title:  "golang2",
 		Module: TestModule(t),
 	}
 }
@@ -110,12 +118,24 @@ func TestInactiveListener(t *testing.T) *Student {
 	}
 }
 
-// TestHomework ...
-func TestHomework(t *testing.T) *Homework {
+// TestHomeworkOne ...
+func TestHomeworkOne(t *testing.T) *Homework {
 	return &Homework{
 		Created:   time.Now(),
 		Student:   TestStudent(t),
-		Lesson:    TestLesson(t),
+		Lesson:    TestLessonOne(t),
+		MessageID: int64(99999),
+		Verify:    true,
+		Active:    true,
+	}
+}
+
+// TestHomeworkTwo ...
+func TestHomeworkTwo(t *testing.T) *Homework {
+	return &Homework{
+		Created:   time.Now(),
+		Student:   TestStudent(t),
+		Lesson:    TestLessonTwo(t),
 		MessageID: int64(99999),
 		Verify:    true,
 		Active:    true,

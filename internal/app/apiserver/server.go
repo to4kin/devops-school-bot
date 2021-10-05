@@ -80,6 +80,9 @@ func (srv *server) configureBotHandler() {
 	srv.bot.Handle(telebot.OnPhoto, srv.handleOnText)
 	srv.bot.Handle(telebot.OnDocument, srv.handleOnText)
 	srv.bot.Handle(telebot.OnCallback, srv.handleCallback)
+
+	srv.bot.Handle(telebot.OnEdited, srv.handleOnText)
+
 }
 
 func (srv *server) botWebHookHandler() http.HandlerFunc {

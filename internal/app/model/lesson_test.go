@@ -16,14 +16,14 @@ func TestLesson_Validate(t *testing.T) {
 		{
 			name: "valid",
 			l: func() *model.Lesson {
-				return model.TestLesson(t)
+				return model.TestLessonOne(t)
 			},
 			isValid: true,
 		},
 		{
 			name: "empty_title",
 			l: func() *model.Lesson {
-				l := model.TestLesson(t)
+				l := model.TestLessonOne(t)
 				l.Title = ""
 				return l
 			},
@@ -32,7 +32,7 @@ func TestLesson_Validate(t *testing.T) {
 		{
 			name: "empty_module",
 			l: func() *model.Lesson {
-				l := model.TestLesson(t)
+				l := model.TestLessonOne(t)
 				l.Module = &model.Module{}
 				return l
 			},

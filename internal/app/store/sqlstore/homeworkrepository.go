@@ -51,6 +51,29 @@ func (r *HomeworkRepository) Update(h *model.Homework) error {
 	return nil
 }
 
+// DeleteByMessageID ...
+func (r *HomeworkRepository) DeleteByMessageID(messageID int64) error {
+	res, err := r.store.db.Exec(
+		"DELETE FROM homework WHERE message_id = $1",
+		messageID,
+	)
+
+	if err != nil {
+		return err
+	}
+
+	count, err := res.RowsAffected()
+	if err != nil {
+		return err
+	}
+
+	if count == 0 {
+		return store.ErrRecordNotFound
+	}
+
+	return nil
+}
+
 // FindByID ...
 func (r *HomeworkRepository) FindByID(id int64) (*model.Homework, error) {
 	h := &model.Homework{

@@ -65,7 +65,7 @@ func TestModule_FindByTitle(t *testing.T) {
 
 func TestModule_FindBySchoolID(t *testing.T) {
 	s := teststore.New()
-	h := model.TestHomework(t)
+	h := model.TestHomeworkOne(t)
 
 	_, err := s.Module().FindBySchoolID(h.Student.School.ID)
 	assert.EqualError(t, err, store.ErrRecordNotFound.Error())

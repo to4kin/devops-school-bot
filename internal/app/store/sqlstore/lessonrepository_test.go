@@ -14,7 +14,7 @@ func TestLessonRepository_Create(t *testing.T) {
 	defer teardown("lesson, module")
 
 	s := sqlstore.New(db)
-	l := model.TestLesson(t)
+	l := model.TestLessonOne(t)
 
 	assert.NoError(t, s.Module().Create(l.Module))
 	assert.NoError(t, s.Lesson().Create(l))
@@ -26,7 +26,7 @@ func TestLesson_FindAll(t *testing.T) {
 	defer teardown("lesson, module")
 
 	s := sqlstore.New(db)
-	l := model.TestLesson(t)
+	l := model.TestLessonOne(t)
 
 	_, err := s.Lesson().FindAll()
 	assert.EqualError(t, err, store.ErrRecordNotFound.Error())
@@ -44,7 +44,7 @@ func TestLesson_FindByID(t *testing.T) {
 	defer teardown("lesson, module")
 
 	s := sqlstore.New(db)
-	l := model.TestLesson(t)
+	l := model.TestLessonOne(t)
 
 	_, err := s.Lesson().FindByID(l.ID)
 	assert.EqualError(t, err, store.ErrRecordNotFound.Error())
@@ -62,7 +62,7 @@ func TestLesson_FindByTitle(t *testing.T) {
 	defer teardown("lesson, module")
 
 	s := sqlstore.New(db)
-	l := model.TestLesson(t)
+	l := model.TestLessonOne(t)
 
 	_, err := s.Lesson().FindByTitle(l.Title)
 	assert.EqualError(t, err, store.ErrRecordNotFound.Error())
@@ -80,7 +80,7 @@ func TestLesson_FindBySchoolID(t *testing.T) {
 	defer teardown("homework", "lesson", "module", "student", "school", "account")
 
 	s := sqlstore.New(db)
-	h := model.TestHomework(t)
+	h := model.TestHomeworkOne(t)
 
 	_, err := s.Lesson().FindBySchoolID(h.Student.School.ID)
 	assert.EqualError(t, err, store.ErrRecordNotFound.Error())
