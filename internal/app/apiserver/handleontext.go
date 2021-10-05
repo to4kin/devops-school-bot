@@ -24,6 +24,7 @@ func (srv *server) handleOnText(c telebot.Context) error {
 	text := ""
 	var entities []telebot.MessageEntity
 
+	// NOTE: multimedia messages have CaptionEntities and Caption, not Entities and Text
 	if c.Message().Text != "" {
 		text = strings.ToLower(c.Message().Text)
 		entities = c.Message().Entities
@@ -79,6 +80,7 @@ func (srv *server) handleOnText(c telebot.Context) error {
 			return nil
 		}
 
+		// NOTE: if c.Update().EditedMessage is not null - the message was edited
 		if c.Update().EditedMessage != nil {
 			srv.logger.WithFields(logrus.Fields{
 				"message_id": c.Update().EditedMessage.ID,
