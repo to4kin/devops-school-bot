@@ -292,17 +292,6 @@ func (hlpr *Helper) GetSchoolHomeworks(callback *model.Callback) (string, *teleb
 	}
 	hlpr.logger.WithFields(school.LogrusFields()).Debug("school found")
 
-	reportMessage, err := hlpr.GetLessonsReport(school)
-	if err != nil && err != store.ErrRecordNotFound {
-		return "", nil, err
-	}
-
-	if err == store.ErrRecordNotFound {
-		reportMessage = ErrReportNotFound
-	}
-
-	replyMarkup := &telebot.ReplyMarkup{}
-
 	hlpr.logger.WithFields(logrus.Fields{
 		"school_id": school.ID,
 	}).Debug("get all homeworks from database by school_id")
@@ -314,16 +303,29 @@ func (hlpr *Helper) GetSchoolHomeworks(callback *model.Callback) (string, *teleb
 		"count": len(homeworks),
 	}).Debug("homeworks found")
 
+	reportMessage, err := hlpr.GetLessonsReport(school)
+	if err != nil && err != store.ErrRecordNotFound {
+		return "", nil, err
+	}
+
+	if err == store.ErrRecordNotFound {
+		reportMessage = ErrReportNotFound
+	}
+
+	replyMarkup := &telebot.ReplyMarkup{}
 	var interfaceSlice []model.Interface = make([]model.Interface, len(homeworks))
 	for i, v := range homeworks {
 		interfaceSlice[i] = v
 	}
-	rows := rowsWithButtons(interfaceSlice, &model.Callback{
+	interfaceSlice = removeDuplicate(interfaceSlice)
+
+	homeworkCallback := &model.Callback{
 		Type:        "homework",
 		Command:     "get",
 		ListCommand: "get",
-	})
+	}
 
+	rows := rowsWithButtons(interfaceSlice, homeworkCallback)
 	rows = append(rows, backToSchoolRow(replyMarkup, callback, school.ID))
 	replyMarkup.Inline(rows...)
 

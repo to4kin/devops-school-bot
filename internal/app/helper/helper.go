@@ -96,3 +96,15 @@ func rowsWithButtons(values []model.Interface, callback *model.Callback) []teleb
 
 	return rows
 }
+
+func removeDuplicate(slice []model.Interface) []model.Interface {
+	allKeys := make(map[string]bool)
+	list := []model.Interface{}
+	for _, item := range slice {
+		if _, value := allKeys[item.GetButtonTitle()]; !value {
+			allKeys[item.GetButtonTitle()] = true
+			list = append(list, item)
+		}
+	}
+	return list
+}

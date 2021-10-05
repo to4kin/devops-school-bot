@@ -5,6 +5,7 @@ import (
 
 	"github.com/sirupsen/logrus"
 	"gitlab.devops.telekom.de/tvpp/prototypes/devops-school-bot/internal/app/model"
+	"gitlab.devops.telekom.de/tvpp/prototypes/devops-school-bot/internal/app/store"
 	"gopkg.in/tucnak/telebot.v3"
 )
 
@@ -49,8 +50,9 @@ func (hlpr *Helper) GetHomework(callback *model.Callback) (string, *telebot.Repl
 	replyMarkup.Inline(rows...)
 
 	hlpr.logger.WithFields(logrus.Fields{
+		"school_id": homework.Student.School.ID,
 		"lesson_id": homework.Lesson.ID,
-	}).Debug("get all homeworks from database by lesson_id")
+	}).Debug("get all homeworks from database by school_id and lesson_id")
 	homeworks, err := hlpr.store.Homework().FindBySchoolIDLessonID(homework.Student.School.ID, homework.Lesson.ID)
 	if err != nil {
 		return "", nil, err
@@ -59,13 +61,23 @@ func (hlpr *Helper) GetHomework(callback *model.Callback) (string, *telebot.Repl
 		"count": len(homeworks),
 	}).Debug("homeworks found")
 
+	disabledCound := 0
+	enabledCound := 0
+	for _, hw := range homeworks {
+		if hw.Active {
+			enabledCound++
+		} else {
+			disabledCound++
+		}
+	}
+
 	return fmt.Sprintf(
-			"School: <b>%v</b>\n\nHomework info:\n\nTitle: %v\nModule: %v\nIn School: %v\nStatus: %v",
+			"School: <b>%v</b>\n\nHomework info:\n\nTitle: %v\nModule: %v\nEnabled: %d\nDisabled: %d",
 			homework.Student.School.Title,
 			homework.Lesson.Title,
 			homework.Lesson.Module.Title,
-			len(homeworks),
-			homework.GetStatusText(),
+			enabledCound,
+			disabledCound,
 		),
 		replyMarkup,
 		nil
@@ -93,13 +105,21 @@ func (hlpr *Helper) GetHomeworksList(callback *model.Callback) (string, *telebot
 		"count": len(homeworks),
 	}).Debug("homeworks found")
 
+	reportMessage, err := hlpr.GetLessonsReport(homework.Student.School)
+	if err != nil && err != store.ErrRecordNotFound {
+		return "", nil, err
+	}
+
+	if err == store.ErrRecordNotFound {
+		reportMessage = ErrReportNotFound
+	}
+
 	replyMarkup := &telebot.ReplyMarkup{}
 	var interfaceSlice []model.Interface = make([]model.Interface, len(homeworks))
 	for i, v := range homeworks {
 		interfaceSlice[i] = v
 	}
-
-	rows := rowsWithButtons(interfaceSlice, callback)
+	interfaceSlice = removeDuplicate(interfaceSlice)
 
 	schoolsListCallback := &model.Callback{
 		ID:          homework.Student.School.ID,
@@ -107,15 +127,12 @@ func (hlpr *Helper) GetHomeworksList(callback *model.Callback) (string, *telebot
 		Command:     "homeworks",
 		ListCommand: "homeworks",
 	}
+
+	rows := rowsWithButtons(interfaceSlice, callback)
 	rows = append(rows, backToSchoolRow(replyMarkup, schoolsListCallback, homework.Student.School.ID))
 	replyMarkup.Inline(rows...)
 
-	return fmt.Sprintf(
-			"School: <b>%v</b>\n\nChoose a homework from the list below:",
-			homework.Student.School.Title,
-		),
-		replyMarkup,
-		nil
+	return fmt.Sprintf("School <b>%v</b>\n\n%v", homework.Student.School.Title, reportMessage), replyMarkup, nil
 }
 
 // DisableHomework ...
@@ -153,7 +170,7 @@ func (hlpr *Helper) DisableHomework(callback *model.Callback) (string, *telebot.
 	replyMarkup := &telebot.ReplyMarkup{}
 	replyMarkup.Inline(backToHomeworkRow(replyMarkup, callback, homework.ID))
 
-	return fmt.Sprintf("Success! Homeworks with lesson <b>%v</b> was <b>DISABLED</b>", homework.Lesson.Title), replyMarkup, nil
+	return fmt.Sprintf("Success! Homeworks with lesson <b>%v</b> were <b>DISABLED</b>", homework.Lesson.Title), replyMarkup, nil
 }
 
 // EnableHomework ...
@@ -190,7 +207,7 @@ func (hlpr *Helper) EnableHomework(callback *model.Callback) (string, *telebot.R
 	replyMarkup := &telebot.ReplyMarkup{}
 	replyMarkup.Inline(backToHomeworkRow(replyMarkup, callback, homework.ID))
 
-	return fmt.Sprintf("Success! Homeworks with lesson <b>%v</b> was <b>ENABLED</b>", homework.Lesson.Title), replyMarkup, nil
+	return fmt.Sprintf("Success! Homeworks with lesson <b>%v</b> were <b>ENABLED</b>", homework.Lesson.Title), replyMarkup, nil
 }
 
 func backToHomeworkRow(replyMarkup *telebot.ReplyMarkup, callback *model.Callback, homeworkID int64) telebot.Row {
