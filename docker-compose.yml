@@ -11,27 +11,10 @@ services:
     volumes:
       - /pkg/devops-school-bot/db/postgresql/data:/var/lib/postgresql/data
   application:
-    image: artifactory.devops.telekom.de/tvpp-docker/devops-school-bot:latest
+    image: to4kin/devops-school-bot:latest
     container_name: devops-school-bot
     restart: always
-    volumes:
-      - /pkg/devops-school-bot/configs:/app/configs
-      - /pkg/devops-school-bot/db/migrations:/app/db/migrations
-    entrypoint: ["/app/devops-school-bot", "start", "-c", "/app/configs/devopsschoolbot.toml"]
+    environment:
+      DATABASE_URL: postgres://postgres/devops_school_dev?user=postgres&password=strongpassword&sslmode=disable
     depends_on:
       - postgres
-  adminer:
-    image: adminer
-    container_name: adminer
-    restart: always
-    depends_on:
-      - postgres
-  nginx:
-    image: nginx
-    container_name: nginx
-    restart: always
-    ports:
-      - 8080:8080
-    volumes:
-      - /pkg/devops-school-bot/nginx/nginx.conf:/etc/nginx/nginx.conf
-      - /pkg/devops-school-bot/nginx/.htpasswd:/etc/nginx/.htpasswd

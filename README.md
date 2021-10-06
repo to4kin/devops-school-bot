@@ -98,6 +98,31 @@ TELEGRAM_BOT_TOKEN="TEST_TELEGRAM_TOKEN"
 TELEGRAM_BOT_VERBOSE="false"
 ```
 
+## Docker
+
+```
+version: '3.7'
+
+services:
+  postgres:
+    image: postgres:13.4
+    container_name: postgres
+    restart: always
+    environment:
+      POSTGRES_DB: devops_school
+      POSTGRES_PASSWORD: strongpassword
+    volumes:
+      - postgresql_data:/var/lib/postgresql/data
+  application:
+    image: to4kin/devops-school-bot:latest
+    container_name: devops-school-bot
+    restart: always
+    environment:
+      DATABASE_URL: postgres://postgres/devops_school_dev?user=postgres&password=strongpassword&sslmode=disable
+    depends_on:
+      - postgres
+```
+
 ## Bot commands
 
 There're two types of telegram chat where the bot is accepting commands: `private chat` and `group chat`
