@@ -18,9 +18,14 @@ Manage students progress and provide the report if needed
 * Add bot to the chat
 * Make bot admin (to read all messages, not only commands)
 * Set a webhook to bot https address: `curl https://api.telegram.org/bot<BOT_TOKEN>/setWebhook\?url\=<BOT_HTTPS_URL>`
-* Create a config file for bot or use ENV variables, please check the example
-* Provide the db/migrations folder (or use docker image)
+
+#### via Binary
+* Create a config file for bot or use ENV variables, please check the [example](#configuration)
+* Provide the db/migrations folder
 * Start bot
+
+#### via Docker
+* ```docker run -it -p 3000:3000 -e DATABASE_URL="postgres_url" -e TELEGRAM_BOT_TOKEN="telegram_bot_token" to4kin/devops-school-bot:latest```
 
 ### Usage
 
@@ -56,9 +61,11 @@ Flags:
   -h, --help                 help for start
 ```
 
-### Config file
+### Configuration
 
-config.toml
+Availiable file formats: `JSON, TOML, YAML, HCL, envfile and Java properties`
+
+example-config.toml
 
 ```toml
 bind_addr = ":3000"
@@ -73,7 +80,7 @@ token = "TEST_TELEGRAM_TOKEN"
 verbose = false
 ```
 
-config.yaml:
+example-config.yaml:
 
 ```yaml
 bind_addr: :3000
@@ -98,7 +105,7 @@ TELEGRAM_BOT_TOKEN="TEST_TELEGRAM_TOKEN"
 TELEGRAM_BOT_VERBOSE="false"
 ```
 
-## Docker
+## Docker Compose example
 
 ```
 version: '3.7'
