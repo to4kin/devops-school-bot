@@ -78,6 +78,11 @@ migrations = "db/migrations"
 [telegram_bot]
 token = "TEST_TELEGRAM_TOKEN"
 verbose = false
+
+[cron]
+enable = true
+fullreport = true
+schedule = "0 15 * * FRI"
 ```
 
 example-config.yaml:
@@ -93,17 +98,32 @@ database:
 telegram_bot:
   token: TEST_TELEGRAM_TOKEN
   verbose: false
+
+cron:
+  enable: true
+  fullreport: true
+  schedule: "0 15 * * FRI"
 ```
 
 Or, you can use ENV variables to update config:
 ```bash
 BIND_ADDR=":3000"
 LOG_LEVEL="debug"
+
 DATABASE_URL="postgres://localhost/devops_school?user=postgres&password=example&sslmode=disable"
 DATABASE_MIGRATIONS="db/migrations"
+
 TELEGRAM_BOT_TOKEN="TEST_TELEGRAM_TOKEN"
 TELEGRAM_BOT_VERBOSE="false"
+
+CRON_ENABLE="true"
+CRON_FULLREPORT="true"
+CRON_SCHEDULE="0 15 * * FRI"
 ```
+
+### Cron job
+
+By default, the Bot will send a full report each Friday at 15:00 UTC time to all active school chats. It's the same report as /fullreport command. If you would like to use short report (as /report command) - set `fullreport = false`
 
 ## Docker Compose example
 

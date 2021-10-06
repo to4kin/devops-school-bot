@@ -6,6 +6,7 @@ type Config struct {
 	LogLevel    string      `mapstructure:"log_level"`
 	Database    database    `mapstructure:"database"`
 	TelegramBot telegramBot `mapstructure:"telegram_bot"`
+	Cron        cron        `mapstructure:"cron"`
 }
 
 type telegramBot struct {
@@ -16,6 +17,12 @@ type telegramBot struct {
 type database struct {
 	URL        string `mapstructure:"url"`
 	Migrations string `mapstructure:"migrations"`
+}
+
+type cron struct {
+	Enable     bool   `mapstructure:"enable"`
+	Fullreport bool   `mapstructure:"fullreport"`
+	Schedule   string `mapstructure:"schedule"`
 }
 
 // NewConfig ...

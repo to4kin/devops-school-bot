@@ -6,9 +6,12 @@ import (
 	"net/http"
 	"path"
 	"runtime"
+	"time"
 
+	"github.com/go-co-op/gocron"
 	"github.com/gorilla/mux"
 	"github.com/sirupsen/logrus"
+	"gitlab.devops.telekom.de/tvpp/prototypes/devops-school-bot/internal/app/helper"
 	"gitlab.devops.telekom.de/tvpp/prototypes/devops-school-bot/internal/app/store"
 	"gopkg.in/tucnak/telebot.v3"
 )
@@ -38,6 +41,52 @@ func (srv *server) ServeHTTP(rw http.ResponseWriter, r *http.Request) {
 
 func (srv *server) configureRouter() {
 	srv.router.HandleFunc("/", srv.botWebHookHandler()).Methods("POST")
+}
+
+func (srv *server) configureCron(schedule string, fullreport bool) {
+	cron := gocron.NewScheduler(time.UTC)
+	if _, err := cron.Cron(schedule).Do(func() {
+		schools, err := srv.store.School().FindByActive(true)
+		if err != nil {
+			srv.logger.Error(err)
+		}
+
+		hlpr := helper.NewHelper(srv.store, srv.logger)
+		for _, school := range schools {
+			schoolChat, err := srv.bot.ChatByID(school.ChatID)
+			if err != nil {
+				srv.logger.Error(err)
+				continue
+			}
+
+			var reportMessage string
+			if fullreport {
+				reportMessage, err = hlpr.GetFullReport(school)
+			} else {
+				reportMessage, err = hlpr.GetReport(school)
+			}
+
+			if err != nil {
+				srv.logger.Error(err)
+				continue
+			}
+
+			srv.logger.WithFields(logrus.Fields{
+				"school_title": school.Title,
+				"fullreport":   fullreport,
+			}).Debug("sent report by cron")
+			srv.bot.Send(schoolChat, fmt.Sprintf("School <b>%v</b>\n\n%v", school.Title, reportMessage), &telebot.SendOptions{ParseMode: "HTML"})
+		}
+
+	}); err != nil {
+		srv.logger.Error(err)
+	} else {
+		srv.logger.WithFields(logrus.Fields{
+			"schedule":   schedule,
+			"fullreport": fullreport,
+		}).Debug("cron was successfully registered")
+		cron.StartAsync()
+	}
 }
 
 func (srv *server) configureLogger(logLevel string) {

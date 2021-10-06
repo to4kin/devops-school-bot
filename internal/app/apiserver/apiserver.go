@@ -35,6 +35,10 @@ func Start(config *Config) error {
 	srv.configureLogger(config.LogLevel)
 	srv.configureBotHandler()
 
+	if config.Cron.Enable {
+		srv.configureCron(config.Cron.Schedule, config.Cron.Fullreport)
+	}
+
 	return http.ListenAndServe(config.BindAddr, srv)
 }
 

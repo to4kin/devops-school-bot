@@ -8,3 +8,8 @@ database:
 telegram_bot:
   token: telegram-bot-token
   verbose: false
+
+cron:
+  enable: true
+  fullreport: true
+  schedule: "0 15 * * FRI"
