@@ -7,6 +7,7 @@ import (
 	"github.com/golang-migrate/migrate/v4"
 	"github.com/golang-migrate/migrate/v4/database/postgres"
 	_ "github.com/golang-migrate/migrate/v4/source/file" // for migrations by file
+	"github.com/sirupsen/logrus"
 	"gitlab.devops.telekom.de/tvpp/prototypes/devops-school-bot/internal/app/store/sqlstore"
 	"gopkg.in/tucnak/telebot.v3"
 )
@@ -23,6 +24,16 @@ func Start(config *Config) error {
 	store := sqlstore.New(db)
 	srv := newServer(store)
 
+	if level, err := logrus.ParseLevel(config.LogLevel); err != nil {
+		srv.logger.Error(err)
+		srv.logger.SetLevel(logrus.InfoLevel)
+	} else {
+		srv.logger.SetLevel(level)
+		srv.logger.WithFields(logrus.Fields{
+			"log_level": level,
+		}).Info("log level was updated")
+	}
+
 	srv.bot, err = telebot.NewBot(telebot.Settings{
 		Token:   config.TelegramBot.Token,
 		Verbose: config.TelegramBot.Verbose,
@@ -32,7 +43,6 @@ func Start(config *Config) error {
 		return err
 	}
 
-	srv.configureLogger(config.LogLevel)
 	srv.configureBotHandler()
 
 	if config.Cron.Enable {

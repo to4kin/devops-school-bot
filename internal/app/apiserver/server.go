@@ -26,7 +26,7 @@ type server struct {
 func newServer(store store.Store) *server {
 	srv := &server{
 		router: mux.NewRouter(),
-		logger: logrus.New(),
+		logger: configureLogger(),
 		store:  store,
 	}
 
@@ -35,12 +35,28 @@ func newServer(store store.Store) *server {
 	return srv
 }
 
+func configureLogger() *logrus.Logger {
+	logger := logrus.New()
+
+	logger.SetReportCaller(true)
+	logger.Formatter = &logrus.TextFormatter{
+		CallerPrettyfier: func(f *runtime.Frame) (string, string) {
+			filename := path.Base(f.File)
+			return "", fmt.Sprintf("%s:%d", filename, f.Line)
+		},
+	}
+
+	logger.SetLevel(logrus.InfoLevel)
+	return logger
+}
+
 func (srv *server) ServeHTTP(rw http.ResponseWriter, r *http.Request) {
 	srv.router.ServeHTTP(rw, r)
 }
 
 func (srv *server) configureRouter() {
 	srv.router.HandleFunc("/", srv.botWebHookHandler()).Methods("POST")
+	srv.logger.Info("router handlers were successfully registered")
 }
 
 func (srv *server) configureCron(schedule string, fullreport bool) {
@@ -84,25 +100,8 @@ func (srv *server) configureCron(schedule string, fullreport bool) {
 		srv.logger.WithFields(logrus.Fields{
 			"schedule":   schedule,
 			"fullreport": fullreport,
-		}).Debug("cron was successfully registered")
+		}).Info("cron was successfully registered")
 		cron.StartAsync()
-	}
-}
-
-func (srv *server) configureLogger(logLevel string) {
-	srv.logger.SetReportCaller(true)
-	srv.logger.Formatter = &logrus.TextFormatter{
-		CallerPrettyfier: func(f *runtime.Frame) (string, string) {
-			filename := path.Base(f.File)
-			return "", fmt.Sprintf("%s:%d", filename, f.Line)
-		},
-	}
-
-	if level, err := logrus.ParseLevel(logLevel); err != nil {
-		srv.logger.Error(err)
-		srv.logger.SetLevel(logrus.InfoLevel)
-	} else {
-		srv.logger.SetLevel(level)
 	}
 }
 
@@ -132,6 +131,7 @@ func (srv *server) configureBotHandler() {
 
 	srv.bot.Handle(telebot.OnEdited, srv.handleOnText)
 
+	srv.logger.Info("bot handlers were successfully registered")
 }
 
 func (srv *server) botWebHookHandler() http.HandlerFunc {
@@ -142,6 +142,9 @@ func (srv *server) botWebHookHandler() http.HandlerFunc {
 			return
 		}
 
+		srv.logger.WithFields(logrus.Fields{
+			"update_id": u.ID,
+		}).Info("new message received")
 		srv.bot.ProcessUpdate(u)
 		srv.respond(rw, r, http.StatusOK, nil)
 	}
