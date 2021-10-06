@@ -119,6 +119,7 @@ services:
     restart: always
     environment:
       DATABASE_URL: postgres://postgres/devops_school_dev?user=postgres&password=strongpassword&sslmode=disable
+      TELEGRAM_BOT_TOKEN: TELEGRAM_BOT_TOKEN
     depends_on:
       - postgres
 ```
