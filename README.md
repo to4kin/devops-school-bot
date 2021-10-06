@@ -138,18 +138,22 @@ services:
     environment:
       POSTGRES_DB: devops_school
       POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: strongpassword
+      POSTGRES_PASSWORD: example
     volumes:
-      - postgresql_data:/var/lib/postgresql/data
+      - db_data:/var/lib/postgresql/data
   application:
     image: to4kin/devops-school-bot:latest
     container_name: devops-school-bot
     restart: always
     environment:
-      DATABASE_URL: postgres://postgres/devops_school?user=postgres&password=strongpassword&sslmode=disable
+      DATABASE_URL: postgres://postgres/devops_school?user=postgres&password=example&sslmode=disable
       TELEGRAM_BOT_TOKEN: TELEGRAM_BOT_TOKEN
     depends_on:
       - postgres
+
+volumes:
+  db_data:
+
 ```
 
 ## Bot commands
