@@ -1,0 +1,10 @@
+bind_addr: :3000
+log_level: debug
+
+database:
+  url: postgres://localhost/devops_school_dev?user=postgres&password=example&sslmode=disable
+  migrations: db/migrations
+
+telegram_bot:
+  token: telegram-bot-token
+  verbose: false

@@ -16,10 +16,10 @@ Manage students progress and provide the report if needed
 ### Start
 
 * Add bot to the chat
-* Make bot admin
+* Make bot admin (to read all messages, not only commands)
 * Set a webhook to bot https address: `curl https://api.telegram.org/bot<BOT_TOKEN>/setWebhook\?url\=<BOT_HTTPS_URL>`
-* Create a config.toml file for bot, please check the example in configs folder
-* Provide the db/migrations folder
+* Create a config file for bot or use ENV variables, please check the example
+* Provide the db/migrations folder (or use docker image)
 * Start bot
 
 ### Usage
@@ -58,6 +58,8 @@ Flags:
 
 ### Config file
 
+config.toml
+
 ```toml
 bind_addr = ":3000"
 log_level = "debug"
@@ -69,6 +71,31 @@ migrations = "db/migrations"
 [telegram_bot]
 token = "TEST_TELEGRAM_TOKEN"
 verbose = false
+```
+
+config.yaml:
+
+```yaml
+bind_addr: :3000
+log_level: debug
+
+database:
+  url: postgres://localhost/devops_school_dev?user=postgres&password=example&sslmode=disable
+  migrations: db/migrations
+
+telegram_bot:
+  token: TEST_TELEGRAM_TOKEN
+  verbose: false
+```
+
+Or, you can use ENV variables to update config:
+```bash
+BIND_ADDR=":3000"
+LOG_LEVEL="debug"
+DATABASE_URL="postgres://localhost/devops_school_dev?user=postgres&password=example&sslmode=disable"
+DATABASE_MIGRATIONS="db/migrations"
+TELEGRAM_BOT_TOKEN="TEST_TELEGRAM_TOKEN"
+TELEGRAM_BOT_VERBOSE="false"
 ```
 
 ## Bot commands

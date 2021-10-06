@@ -1,9 +1,11 @@
 package cmd
 
 import (
-	"github.com/BurntSushi/toml"
+	"strings"
+
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
+	"github.com/spf13/viper"
 	"gitlab.devops.telekom.de/tvpp/prototypes/devops-school-bot/internal/app/apiserver"
 )
 
@@ -23,9 +25,20 @@ var startCmd = &cobra.Command{
 Simply execute devops-school-bot start -c path/to/config/file.toml
 or skip this flag to use default path`,
 	Run: func(cmd *cobra.Command, args []string) {
+		replacer := strings.NewReplacer(".", "_")
+		viper.SetEnvKeyReplacer(replacer)
+
+		viper.SetConfigFile(configPath)
+		if err := viper.ReadInConfig(); err != nil {
+			logrus.Error(err)
+		}
+
+		viper.AutomaticEnv()
+
 		config := apiserver.NewConfig()
-		if _, err := toml.DecodeFile(configPath, config); err != nil {
-			logrus.Fatal(err)
+		err := viper.Unmarshal(&config)
+		if err != nil {
+			logrus.Error(err)
 		}
 
 		if err := apiserver.Start(config); err != nil {
