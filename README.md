@@ -72,7 +72,7 @@ bind_addr = ":3000"
 log_level = "debug"
 
 [database]
-url = "postgres://localhost/devops_school_dev?user=postgres&password=example&sslmode=disable"
+url = "postgres://localhost/devops_school?user=postgres&password=example&sslmode=disable"
 migrations = "db/migrations"
 
 [telegram_bot]
@@ -87,7 +87,7 @@ bind_addr: :3000
 log_level: debug
 
 database:
-  url: postgres://localhost/devops_school_dev?user=postgres&password=example&sslmode=disable
+  url: postgres://localhost/devops_school?user=postgres&password=example&sslmode=disable
   migrations: db/migrations
 
 telegram_bot:
@@ -99,7 +99,7 @@ Or, you can use ENV variables to update config:
 ```bash
 BIND_ADDR=":3000"
 LOG_LEVEL="debug"
-DATABASE_URL="postgres://localhost/devops_school_dev?user=postgres&password=example&sslmode=disable"
+DATABASE_URL="postgres://localhost/devops_school?user=postgres&password=example&sslmode=disable"
 DATABASE_MIGRATIONS="db/migrations"
 TELEGRAM_BOT_TOKEN="TEST_TELEGRAM_TOKEN"
 TELEGRAM_BOT_VERBOSE="false"
@@ -117,6 +117,7 @@ services:
     restart: always
     environment:
       POSTGRES_DB: devops_school
+      POSTGRES_USER: postgres
       POSTGRES_PASSWORD: strongpassword
     volumes:
       - postgresql_data:/var/lib/postgresql/data
@@ -125,7 +126,7 @@ services:
     container_name: devops-school-bot
     restart: always
     environment:
-      DATABASE_URL: postgres://postgres/devops_school_dev?user=postgres&password=strongpassword&sslmode=disable
+      DATABASE_URL: postgres://postgres/devops_school?user=postgres&password=strongpassword&sslmode=disable
       TELEGRAM_BOT_TOKEN: TELEGRAM_BOT_TOKEN
     depends_on:
       - postgres
