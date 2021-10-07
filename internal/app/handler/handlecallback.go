@@ -1,4 +1,4 @@
-package apiserver
+package handler
 
 import (
 	"github.com/sirupsen/logrus"
@@ -7,7 +7,7 @@ import (
 	"gopkg.in/tucnak/telebot.v3"
 )
 
-func (srv *server) handleCallback(c telebot.Context) error {
+func (srv *Handler) handleCallback(c telebot.Context) error {
 	srv.logger.WithFields(logrus.Fields{
 		"callback_data": c.Callback().Data[1:],
 	}).Debug("handle callback")

@@ -6,7 +6,9 @@ import (
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
-	"gitlab.devops.telekom.de/tvpp/prototypes/devops-school-bot/internal/app/apiserver"
+	"gitlab.devops.telekom.de/tvpp/prototypes/devops-school-bot/internal/app/configuration"
+	"gitlab.devops.telekom.de/tvpp/prototypes/devops-school-bot/internal/app/server/apiserver"
+	"gitlab.devops.telekom.de/tvpp/prototypes/devops-school-bot/internal/app/server/awslambda"
 )
 
 var (
@@ -35,14 +37,22 @@ or skip this flag to use default path`,
 
 		viper.AutomaticEnv()
 
-		config := apiserver.NewConfig()
+		config := configuration.NewConfig()
 		err := viper.Unmarshal(&config)
 		if err != nil {
 			logrus.Error(err)
 		}
 
-		if err := apiserver.Start(config); err != nil {
-			logrus.Fatal(err)
+		if config.AWSLambda.Enabled {
+			awslambda := awslambda.New(config)
+			if err := awslambda.Start(); err != nil {
+				logrus.Fatal(err)
+			}
+		} else {
+			apiserver := apiserver.New(config)
+			if err := apiserver.Start(); err != nil {
+				logrus.Fatal(err)
+			}
 		}
 	},
 }

@@ -1,4 +1,4 @@
-package apiserver
+package handler
 
 import (
 	"fmt"
@@ -17,7 +17,7 @@ var (
 	msgUserInfo    string = "Account info:\n\nFirst name: %v\nLast name: %v\nUsername: @%v\nSuperuser: %v"
 )
 
-func (srv *server) handleStart(c telebot.Context) error {
+func (srv *Handler) handleStart(c telebot.Context) error {
 	srv.logger.WithFields(logrus.Fields{
 		"telegram_id": c.Sender().ID,
 	}).Debug("get account from database by telegram_id")

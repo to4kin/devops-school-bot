@@ -1,4 +1,4 @@
-package apiserver
+package handler
 
 import (
 	"regexp"
@@ -16,7 +16,7 @@ var (
 	homeworkHashtag string = "#homework"
 )
 
-func (srv *server) handleOnText(c telebot.Context) error {
+func (srv *Handler) handleOnText(c telebot.Context) error {
 	if c.Message().Private() {
 		return nil
 	}

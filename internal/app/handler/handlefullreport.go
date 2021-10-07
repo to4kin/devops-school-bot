@@ -1,8 +1,7 @@
-package apiserver
+package handler
 
 import (
 	"fmt"
-	"time"
 
 	"github.com/sirupsen/logrus"
 	"gitlab.devops.telekom.de/tvpp/prototypes/devops-school-bot/internal/app/helper"
@@ -11,11 +10,7 @@ import (
 	"gopkg.in/tucnak/telebot.v3"
 )
 
-var (
-	msgSchoolStarted string = "school <b>%v</b> started"
-)
-
-func (srv *server) handleStartSchool(c telebot.Context) error {
+func (srv *Handler) handleFullReport(c telebot.Context) error {
 	srv.logger.WithFields(logrus.Fields{
 		"telegram_id": c.Sender().ID,
 	}).Debug("get account from database by telegram_id")
@@ -31,15 +26,16 @@ func (srv *server) handleStartSchool(c telebot.Context) error {
 		return c.EditOrReply(helper.ErrInsufficientPermissions, &telebot.SendOptions{ParseMode: "HTML"})
 	}
 
+	hlpr := helper.NewHelper(srv.store, srv.logger)
+
 	if c.Message().Private() {
 		callback := &model.Callback{
 			ID:          0,
 			Type:        "school",
-			Command:     "start",
-			ListCommand: "start",
+			Command:     "full_report",
+			ListCommand: "full_report",
 		}
 
-		hlpr := helper.NewHelper(srv.store, srv.logger)
 		replyMessage, replyMarkup, err := hlpr.GetSchoolsList(callback)
 		if err != nil {
 			srv.logger.Error(err)
@@ -54,37 +50,26 @@ func (srv *server) handleStartSchool(c telebot.Context) error {
 	}).Debug("get school by chat_id")
 	school, err := srv.store.School().FindByChatID(c.Message().Chat.ID)
 	if err != nil {
+		srv.logger.Error(err)
+
 		if err == store.ErrRecordNotFound {
-			srv.logger.Debug("school not found, will create a new one")
-			school = &model.School{
-				Created: time.Now(),
-				Title:   c.Message().Chat.Title,
-				ChatID:  c.Message().Chat.ID,
-				Active:  true,
-			}
-
-			if err := srv.store.School().Create(school); err != nil {
-				srv.logger.Error(err)
-				return c.EditOrReply(helper.ErrInternal, &telebot.SendOptions{ParseMode: "HTML"})
-			}
-
-			srv.logger.WithFields(school.LogrusFields()).Debug("school created")
-			return c.EditOrReply(fmt.Sprintf(msgSchoolStarted, school.Title), &telebot.SendOptions{ParseMode: "HTML"})
+			return c.EditOrReply(helper.ErrSchoolNotStarted, &telebot.SendOptions{ParseMode: "HTML"})
 		}
 
+		return c.EditOrReply(helper.ErrInternal, &telebot.SendOptions{ParseMode: "HTML"})
+	}
+	srv.logger.WithFields(school.LogrusFields()).Debug("school found")
+
+	reportMessage, err := hlpr.GetFullReport(school)
+	if err != nil && err != store.ErrRecordNotFound {
 		srv.logger.Error(err)
 		return c.EditOrReply(helper.ErrInternal, &telebot.SendOptions{ParseMode: "HTML"})
 	}
 
-	if !school.Active {
-		srv.logger.WithFields(school.LogrusFields()).Debug("school will be started")
-		school.Active = true
-		if err := srv.store.School().Update(school); err != nil {
-			srv.logger.Error(err)
-			return c.EditOrReply(helper.ErrInternal, &telebot.SendOptions{ParseMode: "HTML"})
-		}
+	if err == store.ErrRecordNotFound {
+		reportMessage = helper.ErrReportNotFound
 	}
 
-	srv.logger.WithFields(school.LogrusFields()).Debug("school started")
-	return c.EditOrReply(fmt.Sprintf(msgSchoolStarted, school.Title), &telebot.SendOptions{ParseMode: "HTML"})
+	srv.logger.Debug("report sent")
+	return c.EditOrReply(fmt.Sprintf("School <b>%v</b>\n\n%v", school.Title, reportMessage), &telebot.SendOptions{ParseMode: "HTML"})
 }

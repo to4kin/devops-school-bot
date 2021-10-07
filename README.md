@@ -27,6 +27,57 @@ Manage students progress and provide the report if needed
 #### via Docker
 * ```docker run -it -p 3000:3000 -e DATABASE_URL="postgres_url" -e TELEGRAM_BOT_TOKEN="telegram_bot_token" to4kin/devops-school-bot:latest```
 
+#### via AWS Lambda
+
+Use `serverless` framework to deploy AWS Lambda. Do not forget set environment variable `AWSLAMBDA_ENABLED=true`
+
+```yaml
+service: devops-school-bot
+useDotenv: true
+configValidationMode: error
+frameworkVersion: '>=2.61.0'
+
+provider:
+  region: "eu-central-1"
+  lambdaHashingVersion: "20201221"
+  name: aws
+  runtime: go1.x
+  logRetentionInDays: 30
+  endpointType: regional
+  tracing:
+    apiGateway: true
+    lambda: true
+  ecr:
+    images:
+      latest:
+        path: ./
+  iam:
+    role:
+      statements:
+        - Effect: "Allow"
+          Resource: "*"
+          Action:
+            - "xray:*"
+
+functions:
+  webhook: 
+    image: latest
+    timeout: 15
+    description: Manage students progress and provide the report if needed
+    memorySize: 128
+    environment:
+      AWSLAMBDA_ENABLED: true
+      DATABASE_URL: ${env:DATABASE_URL}
+      TELEGRAM_BOT_TOKEN: ${env:TELEGRAM_BOT_TOKEN}
+      
+    events:
+      - http:
+          path: /webhook
+          method: POST
+          cors: false
+
+```
+
 ### Usage
 
 ```bash
@@ -68,8 +119,18 @@ Availiable file formats: `JSON, TOML, YAML, HCL, envfile and Java properties`
 example-config.toml
 
 ```toml
-bind_addr = ":3000"
 log_level = "debug"
+
+[apiserver]
+bind_addr = ":3000"
+
+[apiserver.cron]
+enabled = true
+fullreport = true
+schedule = "0 15 * * FRI"
+
+[awslambda]
+enabled = false
 
 [database]
 url = "postgres://localhost/devops_school?user=postgres&password=example&sslmode=disable"
@@ -79,17 +140,23 @@ migrations = "db/migrations"
 token = "TEST_TELEGRAM_TOKEN"
 verbose = false
 
-[cron]
-enable = true
-fullreport = true
-schedule = "0 15 * * FRI"
 ```
 
 example-config.yaml:
 
 ```yaml
-bind_addr: :3000
 log_level: debug
+
+apiserver:
+  bind_addr: :3000
+
+  cron:
+    enabled: true
+    fullreport: true
+    schedule: "0 15 * * FRI"
+
+awslambda:
+  enabled: false
 
 database:
   url: postgres://localhost/devops_school?user=postgres&password=example&sslmode=disable
@@ -99,16 +166,18 @@ telegram_bot:
   token: TEST_TELEGRAM_TOKEN
   verbose: false
 
-cron:
-  enable: true
-  fullreport: true
-  schedule: "0 15 * * FRI"
 ```
 
 Or, you can use ENV variables to update config:
 ```bash
-BIND_ADDR=":3000"
 LOG_LEVEL="debug"
+
+APISERVER_BIND_ADDR=":3000"
+APISERVER_CRON_ENABLED="true"
+APISERVER_CRON_FULLREPORT="true"
+APISERVER_CRON_SCHEDULE="0 15 * * FRI"
+
+AWSLAMBDA_ENABLED="false"
 
 DATABASE_URL="postgres://localhost/devops_school?user=postgres&password=example&sslmode=disable"
 DATABASE_MIGRATIONS="db/migrations"
@@ -116,9 +185,6 @@ DATABASE_MIGRATIONS="db/migrations"
 TELEGRAM_BOT_TOKEN="TEST_TELEGRAM_TOKEN"
 TELEGRAM_BOT_VERBOSE="false"
 
-CRON_ENABLE="true"
-CRON_FULLREPORT="true"
-CRON_SCHEDULE="0 15 * * FRI"
 ```
 
 ### Cron job

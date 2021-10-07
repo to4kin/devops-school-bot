@@ -1,4 +1,4 @@
-package apiserver
+package handler
 
 import (
 	"fmt"
@@ -37,7 +37,7 @@ var (
 `
 )
 
-func (srv *server) handleHelp(c telebot.Context) error {
+func (srv *Handler) handleHelp(c telebot.Context) error {
 	message := msgHelpCommand
 
 	srv.logger.WithFields(logrus.Fields{

@@ -1,4 +1,4 @@
-package apiserver
+package handler
 
 import (
 	"github.com/sirupsen/logrus"
@@ -8,7 +8,7 @@ import (
 	"gopkg.in/tucnak/telebot.v3"
 )
 
-func (srv *server) handleHomework(c telebot.Context) error {
+func (srv *Handler) handleHomework(c telebot.Context) error {
 	hlpr := helper.NewHelper(srv.store, srv.logger)
 
 	if c.Message().Private() {

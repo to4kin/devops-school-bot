@@ -1,4 +1,4 @@
-package apiserver
+package handler
 
 import (
 	"fmt"
@@ -11,7 +11,7 @@ import (
 	"gopkg.in/tucnak/telebot.v3"
 )
 
-func (srv *server) handleJoinStudent(c telebot.Context) error {
+func (srv *Handler) handleJoinStudent(c telebot.Context) error {
 	if c.Message().Private() {
 		return c.EditOrReply(helper.ErrWrongChatType, &telebot.SendOptions{ParseMode: "HTML"})
 	}

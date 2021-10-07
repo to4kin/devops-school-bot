@@ -1,5 +1,15 @@
-bind_addr: :3000
 log_level: debug
+
+apiserver:
+  bind_addr: :3000
+
+  cron:
+    enabled: true
+    fullreport: true
+    schedule: "0 15 * * FRI"
+
+awslambda:
+  enabled: false
 
 database:
   url: postgres://localhost/devops_school_dev?user=postgres&password=example&sslmode=disable
@@ -8,8 +18,3 @@ database:
 telegram_bot:
   token: telegram-bot-token
   verbose: false
-
-cron:
-  enable: true
-  fullreport: true
-  schedule: "0 15 * * FRI"

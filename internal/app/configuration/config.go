@@ -1,17 +1,21 @@
-package apiserver
+package configuration
 
 // Config ...
 type Config struct {
-	BindAddr    string      `mapstructure:"bind_addr"`
 	LogLevel    string      `mapstructure:"log_level"`
+	Apiserver   apiserver   `mapstructure:"apiserver"`
+	AWSLambda   awslambda   `mapstructure:"awslambda"`
 	Database    database    `mapstructure:"database"`
 	TelegramBot telegramBot `mapstructure:"telegram_bot"`
-	Cron        cron        `mapstructure:"cron"`
 }
 
-type telegramBot struct {
-	Token   string `mapstructure:"token"`
-	Verbose bool   `mapstructure:"verbose"`
+type apiserver struct {
+	BindAddr string `mapstructure:"bind_addr"`
+	Cron     cron   `mapstructure:"cron"`
+}
+
+type awslambda struct {
+	Enabled bool `mapstructure:"enabled"`
 }
 
 type database struct {
@@ -19,16 +23,18 @@ type database struct {
 	Migrations string `mapstructure:"migrations"`
 }
 
+type telegramBot struct {
+	Token   string `mapstructure:"token"`
+	Verbose bool   `mapstructure:"verbose"`
+}
+
 type cron struct {
-	Enable     bool   `mapstructure:"enable"`
+	Enabled    bool   `mapstructure:"enabled"`
 	Fullreport bool   `mapstructure:"fullreport"`
 	Schedule   string `mapstructure:"schedule"`
 }
 
 // NewConfig ...
 func NewConfig() *Config {
-	return &Config{
-		BindAddr: ":3000",
-		LogLevel: "info",
-	}
+	return &Config{}
 }

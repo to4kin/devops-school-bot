@@ -1,4 +1,4 @@
-package apiserver
+package handler
 
 import (
 	"github.com/sirupsen/logrus"
@@ -7,7 +7,7 @@ import (
 	"gopkg.in/tucnak/telebot.v3"
 )
 
-func (srv *server) handleSchools(c telebot.Context) error {
+func (srv *Handler) handleSchools(c telebot.Context) error {
 	if !c.Message().Private() {
 		return c.EditOrReply(helper.ErrWrongChatType, &telebot.SendOptions{ParseMode: "HTML"})
 	}
