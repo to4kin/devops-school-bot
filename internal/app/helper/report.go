@@ -13,7 +13,7 @@ func (hlpr *Helper) GetUserReport(account *model.Account, school *model.School) 
 	hlpr.logger.WithFields(logrus.Fields{
 		"account_id": account.ID,
 		"school_id":  school.ID,
-	}).Debug("get student from database by account_id and school_id")
+	}).Info("get student from database by account_id and school_id")
 	student, err := hlpr.store.Student().FindByAccountIDSchoolID(account.ID, school.ID)
 	if err != nil {
 		if err == store.ErrRecordNotFound {
@@ -22,7 +22,7 @@ func (hlpr *Helper) GetUserReport(account *model.Account, school *model.School) 
 
 		return "", err
 	}
-	hlpr.logger.WithFields(student.LogrusFields()).Debug("student found")
+	hlpr.logger.WithFields(student.LogrusFields()).Info("student found")
 
 	if !student.Active {
 		return "Your student account is blocked!\n\nPlease contact mentors or teachers", nil
@@ -30,7 +30,7 @@ func (hlpr *Helper) GetUserReport(account *model.Account, school *model.School) 
 
 	hlpr.logger.WithFields(logrus.Fields{
 		"student_id": student.ID,
-	}).Debug("get student homeworks from database by student_id")
+	}).Info("get student homeworks from database by student_id")
 	studentHomeworks, err := hlpr.store.Homework().FindByStudentID(student.ID)
 	if err != nil {
 		if err == store.ErrRecordNotFound {
@@ -40,18 +40,18 @@ func (hlpr *Helper) GetUserReport(account *model.Account, school *model.School) 
 	}
 	hlpr.logger.WithFields(logrus.Fields{
 		"count": len(studentHomeworks),
-	}).Debug("student homeworks found")
+	}).Info("student homeworks found")
 
 	hlpr.logger.WithFields(logrus.Fields{
 		"school_id": school.ID,
-	}).Debug("get lessons from database by school_id")
+	}).Info("get lessons from database by school_id")
 	allLessons, err := hlpr.store.Lesson().FindBySchoolID(school.ID)
 	if err != nil {
 		return "", err
 	}
 	hlpr.logger.WithFields(logrus.Fields{
 		"count": len(allLessons),
-	}).Debug("lessons found")
+	}).Info("lessons found")
 
 	reportMessage := fmt.Sprintf(
 		"Hello, @%v!\n\n"+msgStudentInfo,
@@ -136,25 +136,25 @@ func (hlpr *Helper) GetUserReport(account *model.Account, school *model.School) 
 func (hlpr *Helper) GetReport(school *model.School) (string, error) {
 	hlpr.logger.WithFields(logrus.Fields{
 		"school_id": school.ID,
-	}).Debug("get lessons from database by school_id")
+	}).Info("get lessons from database by school_id")
 	lessons, err := hlpr.store.Lesson().FindBySchoolID(school.ID)
 	if err != nil {
 		return "", err
 	}
 	hlpr.logger.WithFields(logrus.Fields{
 		"count": len(lessons),
-	}).Debug("lessons found")
+	}).Info("lessons found")
 
 	hlpr.logger.WithFields(logrus.Fields{
 		"school_id": school.ID,
-	}).Debug("get students from database by school_id")
+	}).Info("get students from database by school_id")
 	students, err := hlpr.store.Student().FindBySchoolID(school.ID)
 	if err != nil {
 		return "", err
 	}
 	hlpr.logger.WithFields(logrus.Fields{
 		"count": len(students),
-	}).Debug("students found")
+	}).Info("students found")
 
 	reportMessage, err := hlpr.prepareReportMsg(students, lessons)
 	if err != nil {
@@ -185,14 +185,14 @@ func (hlpr *Helper) GetFullReport(school *model.School) (string, error) {
 func (hlpr *Helper) GetLessonsReport(school *model.School) (string, error) {
 	hlpr.logger.WithFields(logrus.Fields{
 		"school_id": school.ID,
-	}).Debug("get lessons from database by school_id")
+	}).Info("get lessons from database by school_id")
 	lessons, err := hlpr.store.Lesson().FindBySchoolID(school.ID)
 	if err != nil {
 		return "", err
 	}
 	hlpr.logger.WithFields(logrus.Fields{
 		"count": len(lessons),
-	}).Debug("lessons found")
+	}).Info("lessons found")
 
 	reportMessage := "<b>Homework list</b>\n"
 	reportMessage += fmt.Sprintf("\n<b>Module: %v\n</b>", lessons[0].Module.Title)

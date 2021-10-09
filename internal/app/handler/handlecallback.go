@@ -7,40 +7,40 @@ import (
 	"gopkg.in/tucnak/telebot.v3"
 )
 
-func (srv *Handler) handleCallback(c telebot.Context) error {
-	srv.logger.WithFields(logrus.Fields{
+func (handler *Handler) handleCallback(c telebot.Context) error {
+	handler.logger.WithFields(logrus.Fields{
 		"callback_data": c.Callback().Data[1:],
-	}).Debug("handle callback")
+	}).Info("handle callback")
 
-	srv.logger.WithFields(logrus.Fields{
+	handler.logger.WithFields(logrus.Fields{
 		"telegram_id": c.Sender().ID,
-	}).Debug("get account from database by telegram_id")
-	account, err := srv.store.Account().FindByTelegramID(int64(c.Sender().ID))
+	}).Info("get account from database by telegram_id")
+	account, err := handler.store.Account().FindByTelegramID(int64(c.Sender().ID))
 	if err != nil {
-		srv.logger.Error(err)
+		handler.logger.Error(err)
 		return c.EditOrReply(helper.ErrInternal, &telebot.SendOptions{ParseMode: "HTML"})
 	}
-	srv.logger.WithFields(account.LogrusFields()).Debug("account found")
+	handler.logger.WithFields(account.LogrusFields()).Info("account found")
 
 	if !account.Superuser {
-		srv.logger.WithFields(account.LogrusFields()).Debug("account has insufficient permissions")
+		handler.logger.WithFields(account.LogrusFields()).Info("account has insufficient permissions")
 		return c.EditOrReply(helper.ErrInsufficientPermissions, &telebot.SendOptions{ParseMode: "HTML"})
 	}
 
 	callback := &model.Callback{}
 	callback.Unmarshal(c.Callback().Data[1:])
 
-	srv.logger.WithFields(logrus.Fields{
+	handler.logger.WithFields(logrus.Fields{
 		"callback_id":           callback.ID,
 		"callback_type":         callback.Type,
 		"callback_command":      callback.Command,
 		"callback_list_command": callback.ListCommand,
-	}).Debug("parse callback data")
+	}).Info("parse callback data")
 
 	replyMessage := ""
 	replyMarkup := &telebot.ReplyMarkup{}
 
-	hlpr := helper.NewHelper(srv.store, srv.logger)
+	hlpr := helper.NewHelper(handler.store, handler.logger)
 
 	switch callback.Type {
 	case "school":
@@ -124,7 +124,7 @@ func (srv *Handler) handleCallback(c telebot.Context) error {
 	}
 
 	if err != nil {
-		srv.logger.Error(err)
+		handler.logger.Error(err)
 		return c.EditOrReply(helper.ErrInternal, &telebot.SendOptions{ParseMode: "HTML"})
 	}
 

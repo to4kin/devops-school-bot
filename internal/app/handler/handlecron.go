@@ -12,7 +12,7 @@ import (
 func (handler *Handler) HandleCron(fullreport bool) {
 	handler.logger.WithFields(logrus.Fields{
 		"fullreport": fullreport,
-	}).Debug("cron job started")
+	}).Info("cron job started")
 
 	schools, err := handler.store.School().FindByActive(true)
 	if err != nil {
@@ -42,7 +42,7 @@ func (handler *Handler) HandleCron(fullreport bool) {
 		handler.logger.WithFields(logrus.Fields{
 			"school_title": school.Title,
 			"fullreport":   fullreport,
-		}).Debug("sent report by cron")
+		}).Info("sent report by cron")
 		handler.bot.Send(schoolChat, fmt.Sprintf("School <b>%v</b>\n\n%v", school.Title, reportMessage), &telebot.SendOptions{ParseMode: "HTML"})
 	}
 }

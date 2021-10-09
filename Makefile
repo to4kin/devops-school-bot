@@ -103,10 +103,10 @@ docker-stop: ; $(info $(M) stopping docker container...) @ ## Stop and remove a 
 	$Q $(DOCKER) stop $(shell basename $(MODULE)); docker rm $(shell basename $(MODULE))
 
 .PHONY: docker-release
-docker-release: docker-build-nc docker-publish ; @ ## Make a release by building and publishing the `{version}` ans `latest` tagged images
+docker-release: docker-build-nc docker-publish ; @ ## Make a release by building and publishing the `{version}` and `latest` tagged images
 
 .PHONY: docker-publish
-docker-publish: docker-publish-latest docker-publish-version ; @ ## Publish the `{version}` ans `latest` tagged images
+docker-publish: docker-publish-latest docker-publish-version ; @ ## Publish the `{version}` and `latest` tagged images
 
 .PHONY: docker-publish-latest
 docker-publish-latest: docker-tag-latest ; $(info $(M) publishing latest docker image to $(DOCKER_REGISTRY)...) @ ## Publish the `latest` tagged image
@@ -117,7 +117,7 @@ docker-publish-version: docker-tag-version ; $(info $(M) publishing version dock
 	$Q $(DOCKER) push $(DOCKER_REGISTRY)/$(shell basename $(MODULE)):$(VERSION:v%=%)
 
 .PHONY: docker-tag
-docker-tag: docker-tag-latest docker-tag-version ; @ ## Generate container tags for the `{version}` ans `latest` tags
+docker-tag: docker-tag-latest docker-tag-version ; @ ## Generate container tags for the `{version}` and `latest` tags
 
 .PHONY: docker-tag-latest
 docker-tag-latest: ; $(info $(M) tagging docker image as latest...) @ ## Generate container `latest` tag

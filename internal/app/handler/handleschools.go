@@ -7,23 +7,23 @@ import (
 	"gopkg.in/tucnak/telebot.v3"
 )
 
-func (srv *Handler) handleSchools(c telebot.Context) error {
+func (handler *Handler) handleSchools(c telebot.Context) error {
 	if !c.Message().Private() {
 		return c.EditOrReply(helper.ErrWrongChatType, &telebot.SendOptions{ParseMode: "HTML"})
 	}
 
-	srv.logger.WithFields(logrus.Fields{
+	handler.logger.WithFields(logrus.Fields{
 		"telegram_id": c.Sender().ID,
-	}).Debug("get account from database by telegram_id")
-	account, err := srv.store.Account().FindByTelegramID(int64(c.Sender().ID))
+	}).Info("get account from database by telegram_id")
+	account, err := handler.store.Account().FindByTelegramID(int64(c.Sender().ID))
 	if err != nil {
-		srv.logger.Error(err)
+		handler.logger.Error(err)
 		return c.EditOrReply(helper.ErrInternal, &telebot.SendOptions{ParseMode: "HTML"})
 	}
-	srv.logger.WithFields(account.LogrusFields()).Debug("account found")
+	handler.logger.WithFields(account.LogrusFields()).Info("account found")
 
 	if !account.Superuser {
-		srv.logger.WithFields(account.LogrusFields()).Debug("account has insufficient permissions")
+		handler.logger.WithFields(account.LogrusFields()).Info("account has insufficient permissions")
 		return c.EditOrReply(helper.ErrInsufficientPermissions, &telebot.SendOptions{ParseMode: "HTML"})
 	}
 
@@ -34,10 +34,10 @@ func (srv *Handler) handleSchools(c telebot.Context) error {
 		ListCommand: "get",
 	}
 
-	hlpr := helper.NewHelper(srv.store, srv.logger)
+	hlpr := helper.NewHelper(handler.store, handler.logger)
 	replyMessage, replyMarkup, err := hlpr.GetSchoolsList(callback)
 	if err != nil {
-		srv.logger.Error(err)
+		handler.logger.Error(err)
 		return c.EditOrReply(helper.ErrInternal, &telebot.SendOptions{ParseMode: "HTML"})
 	}
 

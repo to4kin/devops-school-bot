@@ -15,19 +15,19 @@ var (
 	msgSchoolStarted string = "school <b>%v</b> started"
 )
 
-func (srv *Handler) handleStartSchool(c telebot.Context) error {
-	srv.logger.WithFields(logrus.Fields{
+func (handler *Handler) handleStartSchool(c telebot.Context) error {
+	handler.logger.WithFields(logrus.Fields{
 		"telegram_id": c.Sender().ID,
-	}).Debug("get account from database by telegram_id")
-	account, err := srv.store.Account().FindByTelegramID(int64(c.Sender().ID))
+	}).Info("get account from database by telegram_id")
+	account, err := handler.store.Account().FindByTelegramID(int64(c.Sender().ID))
 	if err != nil {
-		srv.logger.Error(err)
+		handler.logger.Error(err)
 		return c.EditOrReply(helper.ErrInternal, &telebot.SendOptions{ParseMode: "HTML"})
 	}
-	srv.logger.WithFields(account.LogrusFields()).Debug("account found")
+	handler.logger.WithFields(account.LogrusFields()).Info("account found")
 
 	if !account.Superuser {
-		srv.logger.WithFields(account.LogrusFields()).Debug("account has insufficient permissions")
+		handler.logger.WithFields(account.LogrusFields()).Info("account has insufficient permissions")
 		return c.EditOrReply(helper.ErrInsufficientPermissions, &telebot.SendOptions{ParseMode: "HTML"})
 	}
 
@@ -39,23 +39,23 @@ func (srv *Handler) handleStartSchool(c telebot.Context) error {
 			ListCommand: "start",
 		}
 
-		hlpr := helper.NewHelper(srv.store, srv.logger)
+		hlpr := helper.NewHelper(handler.store, handler.logger)
 		replyMessage, replyMarkup, err := hlpr.GetSchoolsList(callback)
 		if err != nil {
-			srv.logger.Error(err)
+			handler.logger.Error(err)
 			return c.EditOrReply(helper.ErrInternal, &telebot.SendOptions{ParseMode: "HTML"})
 		}
 
 		return c.EditOrReply(replyMessage, replyMarkup)
 	}
 
-	srv.logger.WithFields(logrus.Fields{
+	handler.logger.WithFields(logrus.Fields{
 		"chat_id": c.Message().Chat.ID,
-	}).Debug("get school by chat_id")
-	school, err := srv.store.School().FindByChatID(c.Message().Chat.ID)
+	}).Info("get school by chat_id")
+	school, err := handler.store.School().FindByChatID(c.Message().Chat.ID)
 	if err != nil {
 		if err == store.ErrRecordNotFound {
-			srv.logger.Debug("school not found, will create a new one")
+			handler.logger.Info("school not found, will create a new one")
 			school = &model.School{
 				Created: time.Now(),
 				Title:   c.Message().Chat.Title,
@@ -63,28 +63,28 @@ func (srv *Handler) handleStartSchool(c telebot.Context) error {
 				Active:  true,
 			}
 
-			if err := srv.store.School().Create(school); err != nil {
-				srv.logger.Error(err)
+			if err := handler.store.School().Create(school); err != nil {
+				handler.logger.Error(err)
 				return c.EditOrReply(helper.ErrInternal, &telebot.SendOptions{ParseMode: "HTML"})
 			}
 
-			srv.logger.WithFields(school.LogrusFields()).Debug("school created")
+			handler.logger.WithFields(school.LogrusFields()).Info("school created")
 			return c.EditOrReply(fmt.Sprintf(msgSchoolStarted, school.Title), &telebot.SendOptions{ParseMode: "HTML"})
 		}
 
-		srv.logger.Error(err)
+		handler.logger.Error(err)
 		return c.EditOrReply(helper.ErrInternal, &telebot.SendOptions{ParseMode: "HTML"})
 	}
 
 	if !school.Active {
-		srv.logger.WithFields(school.LogrusFields()).Debug("school will be started")
+		handler.logger.WithFields(school.LogrusFields()).Info("school will be started")
 		school.Active = true
-		if err := srv.store.School().Update(school); err != nil {
-			srv.logger.Error(err)
+		if err := handler.store.School().Update(school); err != nil {
+			handler.logger.Error(err)
 			return c.EditOrReply(helper.ErrInternal, &telebot.SendOptions{ParseMode: "HTML"})
 		}
 	}
 
-	srv.logger.WithFields(school.LogrusFields()).Debug("school started")
+	handler.logger.WithFields(school.LogrusFields()).Info("school started")
 	return c.EditOrReply(fmt.Sprintf(msgSchoolStarted, school.Title), &telebot.SendOptions{ParseMode: "HTML"})
 }

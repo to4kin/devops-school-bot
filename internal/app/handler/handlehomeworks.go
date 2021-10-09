@@ -8,8 +8,8 @@ import (
 	"gopkg.in/tucnak/telebot.v3"
 )
 
-func (srv *Handler) handleHomework(c telebot.Context) error {
-	hlpr := helper.NewHelper(srv.store, srv.logger)
+func (handler *Handler) handleHomework(c telebot.Context) error {
+	hlpr := helper.NewHelper(handler.store, handler.logger)
 
 	if c.Message().Private() {
 		callback := &model.Callback{
@@ -21,19 +21,19 @@ func (srv *Handler) handleHomework(c telebot.Context) error {
 
 		replyMessage, replyMarkup, err := hlpr.GetSchoolsList(callback)
 		if err != nil {
-			srv.logger.Error(err)
+			handler.logger.Error(err)
 			return c.EditOrReply(helper.ErrInternal, &telebot.SendOptions{ParseMode: "HTML"})
 		}
 
 		return c.EditOrReply(replyMessage, replyMarkup)
 	}
 
-	srv.logger.WithFields(logrus.Fields{
+	handler.logger.WithFields(logrus.Fields{
 		"chat_id": c.Message().Chat.ID,
-	}).Debug("get school by chat_id")
-	school, err := srv.store.School().FindByChatID(c.Message().Chat.ID)
+	}).Info("get school by chat_id")
+	school, err := handler.store.School().FindByChatID(c.Message().Chat.ID)
 	if err != nil {
-		srv.logger.Error(err)
+		handler.logger.Error(err)
 
 		if err == store.ErrRecordNotFound {
 			return c.EditOrReply(helper.ErrSchoolNotStarted, &telebot.SendOptions{ParseMode: "HTML"})
@@ -41,11 +41,11 @@ func (srv *Handler) handleHomework(c telebot.Context) error {
 
 		return c.EditOrReply(helper.ErrInternal, &telebot.SendOptions{ParseMode: "HTML"})
 	}
-	srv.logger.WithFields(school.LogrusFields()).Debug("school found")
+	handler.logger.WithFields(school.LogrusFields()).Info("school found")
 
 	reportMessage, err := hlpr.GetLessonsReport(school)
 	if err != nil && err != store.ErrRecordNotFound {
-		srv.logger.Error(err)
+		handler.logger.Error(err)
 		return c.EditOrReply(helper.ErrInternal, &telebot.SendOptions{ParseMode: "HTML"})
 	}
 
@@ -53,6 +53,6 @@ func (srv *Handler) handleHomework(c telebot.Context) error {
 		reportMessage = helper.ErrReportNotFound
 	}
 
-	srv.logger.Debug("report sent")
+	handler.logger.Info("report sent")
 	return c.EditOrReply(reportMessage, &telebot.SendOptions{ParseMode: "HTML"})
 }

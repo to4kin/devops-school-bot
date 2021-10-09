@@ -16,7 +16,7 @@ var (
 	homeworkHashtag string = "#homework"
 )
 
-func (srv *Handler) handleOnText(c telebot.Context) error {
+func (handler *Handler) handleOnText(c telebot.Context) error {
 	if c.Message().Private() {
 		return nil
 	}
@@ -39,63 +39,63 @@ func (srv *Handler) handleOnText(c telebot.Context) error {
 	utfEncodedString := utf16.Encode([]rune(text))
 
 	if strings.Contains(text, homeworkHashtag) {
-		srv.logger.WithFields(logrus.Fields{
+		handler.logger.WithFields(logrus.Fields{
 			"chat_id": c.Message().Chat.ID,
-		}).Debug("get school by chat_id")
-		school, err := srv.store.School().FindByChatID(c.Message().Chat.ID)
+		}).Info("get school by chat_id")
+		school, err := handler.store.School().FindByChatID(c.Message().Chat.ID)
 		if err != nil {
-			srv.logger.Error(err)
+			handler.logger.Error(err)
 			return nil
 		}
-		srv.logger.WithFields(school.LogrusFields()).Debug("school found")
+		handler.logger.WithFields(school.LogrusFields()).Info("school found")
 
 		if !school.Active {
-			srv.logger.WithFields(school.LogrusFields()).Debug("school already finished")
+			handler.logger.WithFields(school.LogrusFields()).Info("school already finished")
 			return nil
 		}
 
-		srv.logger.WithFields(logrus.Fields{
+		handler.logger.WithFields(logrus.Fields{
 			"telegram_id": c.Sender().ID,
-		}).Debug("get account from database by telegram_id")
-		account, err := srv.store.Account().FindByTelegramID(int64(c.Sender().ID))
+		}).Info("get account from database by telegram_id")
+		account, err := handler.store.Account().FindByTelegramID(int64(c.Sender().ID))
 		if err != nil {
-			srv.logger.Error(err)
+			handler.logger.Error(err)
 			return nil
 		}
-		srv.logger.WithFields(account.LogrusFields()).Debug("account found")
+		handler.logger.WithFields(account.LogrusFields()).Info("account found")
 
-		srv.logger.WithFields(logrus.Fields{
+		handler.logger.WithFields(logrus.Fields{
 			"account_id": account.ID,
 			"school_id":  school.ID,
-		}).Debug("get student from database by account_id and school_id")
-		student, err := srv.store.Student().FindByAccountIDSchoolID(account.ID, school.ID)
+		}).Info("get student from database by account_id and school_id")
+		student, err := handler.store.Student().FindByAccountIDSchoolID(account.ID, school.ID)
 		if err != nil {
-			srv.logger.Error(err)
+			handler.logger.Error(err)
 			return nil
 		}
-		srv.logger.WithFields(student.LogrusFields()).Debug("student found")
+		handler.logger.WithFields(student.LogrusFields()).Info("student found")
 
 		if !student.Active {
-			srv.logger.WithFields(student.LogrusFields()).Debug("student is not active")
+			handler.logger.WithFields(student.LogrusFields()).Info("student is not active")
 			return nil
 		}
 
 		// NOTE: if c.Update().EditedMessage is not null - the message was edited
 		if c.Update().EditedMessage != nil {
-			srv.logger.WithFields(logrus.Fields{
+			handler.logger.WithFields(logrus.Fields{
 				"message_id": c.Update().EditedMessage.ID,
-			}).Debug("message was edited, need to delete old homeworks first")
-			if err := srv.store.Homework().DeleteByMessageID(int64(c.Update().EditedMessage.ID)); err != nil {
+			}).Info("message was edited, need to delete old homeworks first")
+			if err := handler.store.Homework().DeleteByMessageID(int64(c.Update().EditedMessage.ID)); err != nil {
 				if err == store.ErrRecordNotFound {
-					srv.logger.Debug(err)
+					handler.logger.Info(err)
 				} else {
-					srv.logger.Error(err)
+					handler.logger.Error(err)
 					return nil
 				}
 			} else {
-				srv.logger.WithFields(logrus.Fields{
+				handler.logger.WithFields(logrus.Fields{
 					"message_id": c.Update().EditedMessage.ID,
-				}).Debug("all messages were deleted")
+				}).Info("all messages were deleted")
 			}
 		}
 
@@ -109,82 +109,82 @@ func (srv *Handler) handleOnText(c telebot.Context) error {
 				runeString := utf16.Decode(utfEncodedString[entity.Offset : entity.Offset+entity.Length])
 				hashtag := string(runeString)
 				if hashtag == homeworkHashtag {
-					srv.logger.WithFields(logrus.Fields{
+					handler.logger.WithFields(logrus.Fields{
 						"hashtag": homeworkHashtag,
-					}).Debug("homework hashtag skipped")
+					}).Info("homework hashtag skipped")
 					continue
 				}
 
-				srv.logger.WithFields(logrus.Fields{
+				handler.logger.WithFields(logrus.Fields{
 					"hashtag": hashtag,
-				}).Debug("hashtag found")
+				}).Info("hashtag found")
 
 				reg, err := regexp.Compile("[^a-zA-Z]+")
 				if err != nil {
-					srv.logger.Error(err)
+					handler.logger.Error(err)
 					return nil
 				}
 				moduleTitle := reg.ReplaceAllString(hashtag, "")
 
-				srv.logger.WithFields(logrus.Fields{
+				handler.logger.WithFields(logrus.Fields{
 					"title": moduleTitle,
-				}).Debug("get module from database by title")
-				module, err := srv.store.Module().FindByTitle(moduleTitle)
+				}).Info("get module from database by title")
+				module, err := handler.store.Module().FindByTitle(moduleTitle)
 				if err != nil {
 					if err == store.ErrRecordNotFound {
-						srv.logger.Debug("module not found, will create a new one")
+						handler.logger.Info("module not found, will create a new one")
 						module = &model.Module{
 							Title: moduleTitle,
 						}
 
-						if err := srv.store.Module().Create(module); err != nil {
-							srv.logger.Error(err)
+						if err := handler.store.Module().Create(module); err != nil {
+							handler.logger.Error(err)
 							continue
 						}
 
-						srv.logger.WithFields(module.LogrusFields()).Debug("module created")
+						handler.logger.WithFields(module.LogrusFields()).Info("module created")
 					} else {
-						srv.logger.Error(err)
+						handler.logger.Error(err)
 						continue
 					}
 				} else {
-					srv.logger.WithFields(module.LogrusFields()).Debug("module found")
+					handler.logger.WithFields(module.LogrusFields()).Info("module found")
 				}
 
-				srv.logger.WithFields(logrus.Fields{
+				handler.logger.WithFields(logrus.Fields{
 					"title": hashtag,
-				}).Debug("get lesson from database by title")
-				lesson, err := srv.store.Lesson().FindByTitle(hashtag)
+				}).Info("get lesson from database by title")
+				lesson, err := handler.store.Lesson().FindByTitle(hashtag)
 				if err != nil {
 					if err == store.ErrRecordNotFound {
-						srv.logger.Debug("lesson not found, will create a new one")
+						handler.logger.Info("lesson not found, will create a new one")
 						lesson = &model.Lesson{
 							Title:  hashtag,
 							Module: module,
 						}
 
-						if err := srv.store.Lesson().Create(lesson); err != nil {
-							srv.logger.Error(err)
+						if err := handler.store.Lesson().Create(lesson); err != nil {
+							handler.logger.Error(err)
 							continue
 						}
 
-						srv.logger.WithFields(lesson.LogrusFields()).Debug("lesson created")
+						handler.logger.WithFields(lesson.LogrusFields()).Info("lesson created")
 					} else {
-						srv.logger.Error(err)
+						handler.logger.Error(err)
 						continue
 					}
 				} else {
-					srv.logger.WithFields(lesson.LogrusFields()).Debug("lesson found")
+					handler.logger.WithFields(lesson.LogrusFields()).Info("lesson found")
 				}
 
-				srv.logger.WithFields(logrus.Fields{
+				handler.logger.WithFields(logrus.Fields{
 					"student_id": student.ID,
 					"lesson_id":  lesson.ID,
-				}).Debug("get homework from database by student_id and lesson_id")
-				homework, err := srv.store.Homework().FindByStudentIDLessonID(student.ID, lesson.ID)
+				}).Info("get homework from database by student_id and lesson_id")
+				homework, err := handler.store.Homework().FindByStudentIDLessonID(student.ID, lesson.ID)
 				if err != nil {
 					if err == store.ErrRecordNotFound {
-						srv.logger.Debug("homework not found, will create a new one")
+						handler.logger.Info("homework not found, will create a new one")
 						homework = &model.Homework{
 							Created:   time.Now(),
 							Student:   student,
@@ -194,19 +194,19 @@ func (srv *Handler) handleOnText(c telebot.Context) error {
 							Active:    true,
 						}
 
-						if err := srv.store.Homework().Create(homework); err != nil {
-							srv.logger.Error(err)
+						if err := handler.store.Homework().Create(homework); err != nil {
+							handler.logger.Error(err)
 							continue
 						}
 
-						srv.logger.WithFields(homework.LogrusFields()).Debug("homework created")
+						handler.logger.WithFields(homework.LogrusFields()).Info("homework created")
 						continue
 					} else {
-						srv.logger.Error(err)
+						handler.logger.Error(err)
 						continue
 					}
 				}
-				srv.logger.WithFields(homework.LogrusFields()).Debug("homework found")
+				handler.logger.WithFields(homework.LogrusFields()).Info("homework found")
 			}
 		}
 	}

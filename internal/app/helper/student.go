@@ -12,12 +12,12 @@ import (
 func (hlpr *Helper) GetStudent(callback *model.Callback) (string, *telebot.ReplyMarkup, error) {
 	hlpr.logger.WithFields(logrus.Fields{
 		"id": callback.ID,
-	}).Debug("get student from database by id")
+	}).Info("get student from database by id")
 	student, err := hlpr.store.Student().FindByID(callback.ID)
 	if err != nil {
 		return "", nil, err
 	}
-	hlpr.logger.WithFields(student.LogrusFields()).Debug("student found")
+	hlpr.logger.WithFields(student.LogrusFields()).Info("student found")
 
 	var buttons []telebot.Btn
 	replyMarkup := &telebot.ReplyMarkup{}
@@ -89,23 +89,23 @@ func (hlpr *Helper) GetStudent(callback *model.Callback) (string, *telebot.Reply
 func (hlpr *Helper) GetStudentsList(callback *model.Callback) (string, *telebot.ReplyMarkup, error) {
 	hlpr.logger.WithFields(logrus.Fields{
 		"id": callback.ID,
-	}).Debug("get student from database by id")
+	}).Info("get student from database by id")
 	student, err := hlpr.store.Student().FindByID(callback.ID)
 	if err != nil {
 		return "", nil, err
 	}
-	hlpr.logger.WithFields(student.LogrusFields()).Debug("student found")
+	hlpr.logger.WithFields(student.LogrusFields()).Info("student found")
 
 	hlpr.logger.WithFields(logrus.Fields{
 		"school_id": student.School.ID,
-	}).Debug("get all students from database by school_id")
+	}).Info("get all students from database by school_id")
 	students, err := hlpr.store.Student().FindByFullCourseSchoolID(student.FullCourse, student.School.ID)
 	if err != nil {
 		return "", nil, err
 	}
 	hlpr.logger.WithFields(logrus.Fields{
 		"count": len(students),
-	}).Debug("students found")
+	}).Info("students found")
 
 	replyMarkup := &telebot.ReplyMarkup{}
 	var interfaceSlice []model.Interface = make([]model.Interface, len(students))
@@ -124,20 +124,20 @@ func (hlpr *Helper) GetStudentsList(callback *model.Callback) (string, *telebot.
 func (hlpr *Helper) BlockStudent(callback *model.Callback) (string, *telebot.ReplyMarkup, error) {
 	hlpr.logger.WithFields(logrus.Fields{
 		"id": callback.ID,
-	}).Debug("get student from database by id")
+	}).Info("get student from database by id")
 	student, err := hlpr.store.Student().FindByID(callback.ID)
 	if err != nil {
 		return "", nil, err
 	}
-	hlpr.logger.WithFields(student.LogrusFields()).Debug("student found")
+	hlpr.logger.WithFields(student.LogrusFields()).Info("student found")
 
 	student.Active = false
 
-	hlpr.logger.Debug("block student")
+	hlpr.logger.Info("block student")
 	if err := hlpr.store.Student().Update(student); err != nil {
 		return "", nil, err
 	}
-	hlpr.logger.WithFields(student.LogrusFields()).Debug("student blocked")
+	hlpr.logger.WithFields(student.LogrusFields()).Info("student blocked")
 
 	replyMarkup := &telebot.ReplyMarkup{}
 	replyMarkup.Inline(backToStudentRow(replyMarkup, callback, student.ID))
@@ -149,20 +149,20 @@ func (hlpr *Helper) BlockStudent(callback *model.Callback) (string, *telebot.Rep
 func (hlpr *Helper) UnblockStudent(callback *model.Callback) (string, *telebot.ReplyMarkup, error) {
 	hlpr.logger.WithFields(logrus.Fields{
 		"id": callback.ID,
-	}).Debug("get student from database by id")
+	}).Info("get student from database by id")
 	student, err := hlpr.store.Student().FindByID(callback.ID)
 	if err != nil {
 		return "", nil, err
 	}
-	hlpr.logger.WithFields(student.LogrusFields()).Debug("student found")
+	hlpr.logger.WithFields(student.LogrusFields()).Info("student found")
 
 	student.Active = true
 
-	hlpr.logger.Debug("unblock student")
+	hlpr.logger.Info("unblock student")
 	if err := hlpr.store.Student().Update(student); err != nil {
 		return "", nil, err
 	}
-	hlpr.logger.WithFields(student.LogrusFields()).Debug("student unblocked")
+	hlpr.logger.WithFields(student.LogrusFields()).Info("student unblocked")
 
 	replyMarkup := &telebot.ReplyMarkup{}
 	replyMarkup.Inline(backToStudentRow(replyMarkup, callback, student.ID))
@@ -174,20 +174,20 @@ func (hlpr *Helper) UnblockStudent(callback *model.Callback) (string, *telebot.R
 func (hlpr *Helper) SetStudent(callback *model.Callback) (string, *telebot.ReplyMarkup, error) {
 	hlpr.logger.WithFields(logrus.Fields{
 		"id": callback.ID,
-	}).Debug("get student from database by id")
+	}).Info("get student from database by id")
 	student, err := hlpr.store.Student().FindByID(callback.ID)
 	if err != nil {
 		return "", nil, err
 	}
-	hlpr.logger.WithFields(student.LogrusFields()).Debug("student found")
+	hlpr.logger.WithFields(student.LogrusFields()).Info("student found")
 
 	student.FullCourse = true
 
-	hlpr.logger.Debug("move student to full course")
+	hlpr.logger.Info("move student to full course")
 	if err := hlpr.store.Student().Update(student); err != nil {
 		return "", nil, err
 	}
-	hlpr.logger.WithFields(student.LogrusFields()).Debug("student moved")
+	hlpr.logger.WithFields(student.LogrusFields()).Info("student moved")
 
 	replyMarkup := &telebot.ReplyMarkup{}
 	replyMarkup.Inline(backToStudentRow(replyMarkup, callback, student.ID))
@@ -199,20 +199,20 @@ func (hlpr *Helper) SetStudent(callback *model.Callback) (string, *telebot.Reply
 func (hlpr *Helper) SetListener(callback *model.Callback) (string, *telebot.ReplyMarkup, error) {
 	hlpr.logger.WithFields(logrus.Fields{
 		"id": callback.ID,
-	}).Debug("get student from database by id")
+	}).Info("get student from database by id")
 	student, err := hlpr.store.Student().FindByID(callback.ID)
 	if err != nil {
 		return "", nil, err
 	}
-	hlpr.logger.WithFields(student.LogrusFields()).Debug("student found")
+	hlpr.logger.WithFields(student.LogrusFields()).Info("student found")
 
 	student.FullCourse = false
 
-	hlpr.logger.Debug("move student to listeners")
+	hlpr.logger.Info("move student to listeners")
 	if err := hlpr.store.Student().Update(student); err != nil {
 		return "", nil, err
 	}
-	hlpr.logger.WithFields(student.LogrusFields()).Debug("student moved")
+	hlpr.logger.WithFields(student.LogrusFields()).Info("student moved")
 
 	replyMarkup := &telebot.ReplyMarkup{}
 	replyMarkup.Inline(backToStudentRow(replyMarkup, callback, student.ID))

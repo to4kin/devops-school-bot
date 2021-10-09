@@ -34,6 +34,9 @@ func NewHandler(config *configuration.Config, store store.Store) (*Handler, erro
 		Token:       config.TelegramBot.Token,
 		Verbose:     config.TelegramBot.Verbose,
 		Synchronous: true,
+		OnError: func(err error, ctx telebot.Context) {
+			logger.Error(err)
+		},
 	})
 	if err != nil {
 		return nil, err

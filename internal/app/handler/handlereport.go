@@ -10,23 +10,23 @@ import (
 	"gopkg.in/tucnak/telebot.v3"
 )
 
-func (srv *Handler) handleReport(c telebot.Context) error {
-	srv.logger.WithFields(logrus.Fields{
+func (handler *Handler) handleReport(c telebot.Context) error {
+	handler.logger.WithFields(logrus.Fields{
 		"telegram_id": c.Sender().ID,
-	}).Debug("get account from database by telegram_id")
-	account, err := srv.store.Account().FindByTelegramID(int64(c.Sender().ID))
+	}).Info("get account from database by telegram_id")
+	account, err := handler.store.Account().FindByTelegramID(int64(c.Sender().ID))
 	if err != nil {
-		srv.logger.Error(err)
+		handler.logger.Error(err)
 		return c.EditOrReply(helper.ErrInternal, &telebot.SendOptions{ParseMode: "HTML"})
 	}
-	srv.logger.WithFields(account.LogrusFields()).Debug("account found")
+	handler.logger.WithFields(account.LogrusFields()).Info("account found")
 
 	if !account.Superuser {
-		srv.logger.WithFields(account.LogrusFields()).Debug("account has insufficient permissions")
+		handler.logger.WithFields(account.LogrusFields()).Info("account has insufficient permissions")
 		return c.EditOrReply(helper.ErrInsufficientPermissions, &telebot.SendOptions{ParseMode: "HTML"})
 	}
 
-	hlpr := helper.NewHelper(srv.store, srv.logger)
+	hlpr := helper.NewHelper(handler.store, handler.logger)
 
 	if c.Message().Private() {
 		callback := &model.Callback{
@@ -38,19 +38,19 @@ func (srv *Handler) handleReport(c telebot.Context) error {
 
 		replyMessage, replyMarkup, err := hlpr.GetSchoolsList(callback)
 		if err != nil {
-			srv.logger.Error(err)
+			handler.logger.Error(err)
 			return c.EditOrReply(helper.ErrInternal, &telebot.SendOptions{ParseMode: "HTML"})
 		}
 
 		return c.EditOrReply(replyMessage, replyMarkup)
 	}
 
-	srv.logger.WithFields(logrus.Fields{
+	handler.logger.WithFields(logrus.Fields{
 		"chat_id": c.Message().Chat.ID,
-	}).Debug("get school by chat_id")
-	school, err := srv.store.School().FindByChatID(c.Message().Chat.ID)
+	}).Info("get school by chat_id")
+	school, err := handler.store.School().FindByChatID(c.Message().Chat.ID)
 	if err != nil {
-		srv.logger.Error(err)
+		handler.logger.Error(err)
 
 		if err == store.ErrRecordNotFound {
 			return c.EditOrReply(helper.ErrSchoolNotStarted, &telebot.SendOptions{ParseMode: "HTML"})
@@ -58,11 +58,11 @@ func (srv *Handler) handleReport(c telebot.Context) error {
 
 		return c.EditOrReply(helper.ErrInternal, &telebot.SendOptions{ParseMode: "HTML"})
 	}
-	srv.logger.WithFields(school.LogrusFields()).Debug("school found")
+	handler.logger.WithFields(school.LogrusFields()).Info("school found")
 
 	reportMessage, err := hlpr.GetReport(school)
 	if err != nil && err != store.ErrRecordNotFound {
-		srv.logger.Error(err)
+		handler.logger.Error(err)
 		return c.EditOrReply(helper.ErrInternal, &telebot.SendOptions{ParseMode: "HTML"})
 	}
 
@@ -70,6 +70,6 @@ func (srv *Handler) handleReport(c telebot.Context) error {
 		reportMessage = helper.ErrReportNotFound
 	}
 
-	srv.logger.Debug("report sent")
+	handler.logger.Info("report sent")
 	return c.EditOrReply(fmt.Sprintf("School <b>%v</b>\n\n%v", school.Title, reportMessage), &telebot.SendOptions{ParseMode: "HTML"})
 }

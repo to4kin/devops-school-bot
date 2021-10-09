@@ -37,21 +37,21 @@ var (
 `
 )
 
-func (srv *Handler) handleHelp(c telebot.Context) error {
+func (handler *Handler) handleHelp(c telebot.Context) error {
 	message := msgHelpCommand
 
-	srv.logger.WithFields(logrus.Fields{
+	handler.logger.WithFields(logrus.Fields{
 		"telegram_id": c.Sender().ID,
-	}).Debug("get account from database by telegram_id")
-	account, err := srv.store.Account().FindByTelegramID(int64(c.Sender().ID))
+	}).Info("get account from database by telegram_id")
+	account, err := handler.store.Account().FindByTelegramID(int64(c.Sender().ID))
 	if err != nil {
 		if err == store.ErrRecordNotFound {
-			srv.logger.Debug(err)
+			handler.logger.Info(err)
 		} else {
-			srv.logger.Error(err)
+			handler.logger.Error(err)
 		}
 	} else {
-		srv.logger.WithFields(account.LogrusFields()).Debug("account found")
+		handler.logger.WithFields(account.LogrusFields()).Info("account found")
 
 		if account.Superuser {
 			if c.Message().Private() {
