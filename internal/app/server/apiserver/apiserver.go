@@ -42,7 +42,7 @@ func (srv *Server) Start() error {
 
 	if srv.config.Apiserver.Cron.Enabled {
 		cron := gocron.NewScheduler(time.UTC)
-		if _, err := cron.Cron(srv.config.Apiserver.Cron.Schedule).Do(handler.HandleCron, srv.config.Apiserver.Cron.Schedule); err != nil {
+		if _, err := cron.Cron(srv.config.Apiserver.Cron.Schedule).Do(handler.HandleCron, srv.config.Apiserver.Cron.Fullreport); err != nil {
 			return err
 		}
 
