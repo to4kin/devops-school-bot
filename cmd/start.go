@@ -7,6 +7,7 @@ import (
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 	"gitlab.devops.telekom.de/tvpp/prototypes/devops-school-bot/internal/app/configuration"
+	"gitlab.devops.telekom.de/tvpp/prototypes/devops-school-bot/internal/app/server"
 	"gitlab.devops.telekom.de/tvpp/prototypes/devops-school-bot/internal/app/server/apiserver"
 	"gitlab.devops.telekom.de/tvpp/prototypes/devops-school-bot/internal/app/server/awslambda"
 )
@@ -43,16 +44,15 @@ or skip this flag to use default path`,
 			logrus.Error(err)
 		}
 
+		var srv server.Server
 		if config.AWSLambda.Enabled {
-			awslambda := awslambda.New(config)
-			if err := awslambda.Start(); err != nil {
-				logrus.Fatal(err)
-			}
+			srv = awslambda.New(config)
 		} else {
-			apiserver := apiserver.New(config)
-			if err := apiserver.Start(); err != nil {
-				logrus.Fatal(err)
-			}
+			srv = apiserver.New(config)
+		}
+
+		if err := srv.Start(); err != nil {
+			logrus.Fatal(err)
 		}
 	},
 }

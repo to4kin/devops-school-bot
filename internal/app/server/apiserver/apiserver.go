@@ -13,20 +13,20 @@ import (
 )
 
 // Server ...
-type Server struct {
+type APIServer struct {
 	config *configuration.Config
 }
 
 // New ...
-func New(config *configuration.Config) *Server {
-	return &Server{
+func New(config *configuration.Config) *APIServer {
+	return &APIServer{
 		config: config,
 	}
 }
 
 // Start ...
-func (srv *Server) Start() error {
-	db, err := server.NewPostgres(srv.config.Database.URL, srv.config.Database.Migrations)
+func (apiserver *APIServer) Start() error {
+	db, err := server.NewPostgres(apiserver.config.Database.URL, apiserver.config.Database.Migrations)
 	if err != nil {
 		return err
 	}
@@ -35,14 +35,14 @@ func (srv *Server) Start() error {
 
 	store := sqlstore.New(db)
 
-	handler, err := handler.NewHandler(srv.config, store)
+	handler, err := handler.NewHandler(apiserver.config, store)
 	if err != nil {
 		return err
 	}
 
-	if srv.config.Apiserver.Cron.Enabled {
+	if apiserver.config.Apiserver.Cron.Enabled {
 		cron := gocron.NewScheduler(time.UTC)
-		if _, err := cron.Cron(srv.config.Apiserver.Cron.Schedule).Do(handler.HandleCron, srv.config.Apiserver.Cron.Fullreport); err != nil {
+		if _, err := cron.Cron(apiserver.config.Apiserver.Cron.Schedule).Do(handler.HandleCron, apiserver.config.Apiserver.Cron.Fullreport); err != nil {
 			return err
 		}
 
@@ -52,5 +52,5 @@ func (srv *Server) Start() error {
 	router := mux.NewRouter()
 	router.HandleFunc("/", handler.HandleWebHook()).Methods("POST")
 
-	return http.ListenAndServe(srv.config.Apiserver.BindAddr, router)
+	return http.ListenAndServe(apiserver.config.Apiserver.BindAddr, router)
 }

@@ -9,20 +9,20 @@ import (
 )
 
 // Server ...
-type Server struct {
+type AWSLambda struct {
 	config *configuration.Config
 }
 
 // New ...
-func New(config *configuration.Config) *Server {
-	return &Server{
+func New(config *configuration.Config) *AWSLambda {
+	return &AWSLambda{
 		config: config,
 	}
 }
 
 // Start ...
-func (srv *Server) Start() error {
-	db, err := server.NewPostgres(srv.config.Database.URL, srv.config.Database.Migrations)
+func (awslambda *AWSLambda) Start() error {
+	db, err := server.NewPostgres(awslambda.config.Database.URL, awslambda.config.Database.Migrations)
 	if err != nil {
 		return err
 	}
@@ -31,7 +31,7 @@ func (srv *Server) Start() error {
 
 	store := sqlstore.New(db)
 
-	handler, err := handler.NewHandler(srv.config, store)
+	handler, err := handler.NewHandler(awslambda.config, store)
 	if err != nil {
 		return err
 	}
