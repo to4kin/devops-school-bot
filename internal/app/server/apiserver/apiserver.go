@@ -12,7 +12,7 @@ import (
 	"gitlab.devops.telekom.de/tvpp/prototypes/devops-school-bot/internal/app/store/sqlstore"
 )
 
-// Server ...
+// APIServer ...
 type APIServer struct {
 	config *configuration.Config
 }

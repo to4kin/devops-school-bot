@@ -8,7 +8,7 @@ import (
 	"gitlab.devops.telekom.de/tvpp/prototypes/devops-school-bot/internal/app/store/sqlstore"
 )
 
-// Server ...
+// AWSLambda ...
 type AWSLambda struct {
 	config *configuration.Config
 }
