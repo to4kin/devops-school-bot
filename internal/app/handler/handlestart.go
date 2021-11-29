@@ -18,6 +18,10 @@ var (
 )
 
 func (handler *Handler) handleStart(c telebot.Context) error {
+	if !c.Message().Private() {
+		return c.EditOrReply(fmt.Sprintf(helper.ErrWrongChatType, "PRIVATE"), &telebot.SendOptions{ParseMode: "HTML"})
+	}
+
 	handler.logger.WithFields(logrus.Fields{
 		"telegram_id": c.Sender().ID,
 	}).Info("get account from database by telegram_id")
