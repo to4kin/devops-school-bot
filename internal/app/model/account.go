@@ -2,6 +2,7 @@ package model
 
 import (
 	"encoding/json"
+	"fmt"
 	"time"
 
 	validation "github.com/go-ozzo/ozzo-validation/v4"
@@ -57,6 +58,32 @@ func (a *Account) GetID() int64 {
 // GetButtonTitle returns "@" + Account.Username
 func (a *Account) GetButtonTitle() string {
 	return "@" + a.Username
+}
+
+// GetFullName returns a full name for account
+//
+// NOTE:
+// - returns FirstName + LastName by default
+// - returns FirstName only if LastName is empty
+// - returns LastName only if FirstName is empty
+func (a *Account) GetFullName() string {
+	if a.FirstName == "" {
+		return a.LastName
+	}
+
+	if a.LastName == "" {
+		return a.FirstName
+	}
+
+	return fmt.Sprintf("%v %v", a.FirstName, a.LastName)
+}
+
+// GetMention returns mention of a user
+//
+// NOTE: mention is returned in HTML style
+// <a href="tg://user?id=Account.TelegramID">Account.GetFullName()</a>
+func (a *Account) GetMention() string {
+	return fmt.Sprintf("<a href=\"tg://user?id=%d\">%v</a>", a.TelegramID, a.GetFullName())
 }
 
 // Validate func is needed to validate Account object fields before INSERT

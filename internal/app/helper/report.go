@@ -2,6 +2,7 @@ package helper
 
 import (
 	"fmt"
+	"sort"
 
 	"github.com/sirupsen/logrus"
 	"gitlab.devops.telekom.de/tvpp/prototypes/devops-school-bot/internal/app/model"
@@ -173,19 +174,53 @@ func (hlpr *Helper) GetReport(school *model.School) (string, error) {
 	}).Info("lessons found")
 
 	hlpr.logger.WithFields(logrus.Fields{
-		"school_id": school.ID,
+		"school_id":   school.ID,
+		"full_course": "true",
 	}).Info("get students from database by school_id")
-	students, err := hlpr.store.Student().FindBySchoolID(school.ID)
-	if err != nil {
+	students, err := hlpr.store.Student().FindByFullCourseSchoolID(true, school.ID)
+	if err != nil && err != store.ErrRecordNotFound {
 		return "", err
 	}
 	hlpr.logger.WithFields(logrus.Fields{
 		"count": len(students),
 	}).Info("students found")
 
-	reportMessage, err := hlpr.prepareReportMsg(students, lessons)
-	if err != nil {
+	reportMessage := "Academic perfomance:\n\nStudents Report:\n"
+
+	if len(students) > 0 {
+		message, err := hlpr.prepareReportMsg(students, lessons)
+		if err != nil {
+			return "", err
+		}
+
+		reportMessage += message
+	} else {
+		reportMessage += ErrReportNotFound
+	}
+
+	hlpr.logger.WithFields(logrus.Fields{
+		"school_id":   school.ID,
+		"full_course": "false",
+	}).Info("get listeners from database by school_id")
+	listeners, err := hlpr.store.Student().FindByFullCourseSchoolID(false, school.ID)
+	if err != nil && err != store.ErrRecordNotFound {
 		return "", err
+	}
+	hlpr.logger.WithFields(logrus.Fields{
+		"count": len(listeners),
+	}).Info("listeners found")
+
+	reportMessage += "\nListeners Report:\n"
+
+	if len(listeners) > 0 {
+		message, err := hlpr.prepareReportMsg(listeners, lessons)
+		if err != nil {
+			return "", err
+		}
+
+		reportMessage += message
+	} else {
+		reportMessage += ErrReportNotFound
 	}
 
 	return reportMessage, nil
@@ -238,14 +273,26 @@ func (hlpr *Helper) GetLessonsReport(school *model.School) (string, error) {
 }
 
 func (hlpr *Helper) prepareReportMsg(students []*model.Student, lessons []*model.Lesson) (string, error) {
-	reportMessage := "Academic performance\n\n<b><u>Name - Accepted/Not Provided - Type</u></b>\n<pre>"
+
+	type AccountReport struct {
+		Account     *model.Account
+		Accepted    int
+		NotProvided int
+	}
+
+	reports := []*AccountReport{}
+
+	reportMessage := "<b><u>Accepted/Not Provided - Name</u></b>\n"
 	for _, student := range students {
 		if !student.Active {
 			continue
 		}
 
-		acceptedHomework := 0
-		notProvidedHomework := 0
+		accountReport := &AccountReport{
+			Account:     student.Account,
+			Accepted:    0,
+			NotProvided: 0,
+		}
 
 		homeworks, err := hlpr.store.Homework().FindByStudentID(student.ID)
 		if err != nil && err != store.ErrRecordNotFound {
@@ -258,12 +305,12 @@ func (hlpr *Helper) prepareReportMsg(students []*model.Student, lessons []*model
 				for _, homework := range homeworks {
 					if homework.Lesson.ID == lesson.ID {
 						counted = true
-						acceptedHomework++
+						accountReport.Accepted++
 					}
 				}
 
 				if !counted {
-					notProvidedHomework++
+					accountReport.NotProvided++
 				}
 			}
 		} else {
@@ -280,22 +327,30 @@ func (hlpr *Helper) prepareReportMsg(students []*model.Student, lessons []*model
 						for _, homework := range homeworks {
 							if homework.Lesson.ID == lesson.ID {
 								counted = true
-								acceptedHomework++
+								accountReport.Accepted++
 							}
 						}
 
 						if !counted {
-							notProvidedHomework++
+							accountReport.NotProvided++
 						}
 					}
 				}
 			}
 		}
 
-		reportMessage += fmt.Sprintf("%v %v - %d/%d - %v\n",
-			student.Account.FirstName, student.Account.LastName, acceptedHomework, notProvidedHomework, student.GetType())
+		reports = append(reports, accountReport)
 	}
-	reportMessage += "</pre>"
+
+	sort.Slice(reports, func(i, j int) bool {
+		return reports[i].Accepted > reports[j].Accepted
+	})
+
+	for _, report := range reports {
+		reportMessage += fmt.Sprintf("%d/%d - %v\n",
+			report.Accepted, report.NotProvided, report.Account.GetMention())
+
+	}
 
 	return reportMessage, nil
 }
