@@ -22,10 +22,10 @@ func (handler *Handler) handleCallback(c telebot.Context) error {
 	}
 	handler.logger.WithFields(account.LogrusFields()).Info("account found")
 
-	if !account.Superuser {
-		handler.logger.WithFields(account.LogrusFields()).Info("account has insufficient permissions")
-		return c.EditOrReply(helper.ErrInsufficientPermissions, &telebot.SendOptions{ParseMode: "HTML"})
-	}
+	//if !account.Superuser {
+	//	handler.logger.WithFields(account.LogrusFields()).Info("account has insufficient permissions")
+	//	return c.EditOrReply(helper.ErrInsufficientPermissions, &telebot.SendOptions{ParseMode: "HTML"})
+	//}
 
 	callback := &model.Callback{}
 	callback.Unmarshal(c.Callback().Data[1:])

@@ -7,23 +7,34 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
-// Module ...
+// Module object represents a module
 type Module struct {
-	ID    int64  `json:"id"`
+	// ID returns a Module.ID
+	//
+	// NOTE: filled in automatically after INSERT to the store
+	ID int64 `json:"id"`
+
+	// Title returns a module title
+	//
+	// NOTE:
+	// *field is required
 	Title string `json:"title"`
 }
 
-// GetID ...
+// GetID returns Module.ID
 func (l *Module) GetID() int64 {
 	return l.ID
 }
 
-// GetButtonTitle ...
+// GetButtonTitle returns Module.Title
 func (l *Module) GetButtonTitle() string {
 	return l.Title
 }
 
-// Validate ...
+// Validate func is needed to validate Module object before INSERT
+//
+// NOTE:
+// - Title is required
 func (l *Module) Validate() error {
 	return validation.ValidateStruct(
 		l,
@@ -31,7 +42,7 @@ func (l *Module) Validate() error {
 	)
 }
 
-// ToString ...
+// ToString converts Module object to json string
 func (l *Module) ToString() string {
 	str, err := json.MarshalIndent(l, "", "  ")
 	if err != nil {
@@ -41,7 +52,10 @@ func (l *Module) ToString() string {
 	return string(str)
 }
 
-// LogrusFields ...
+// LogrusFields returns logrus.Fields for logrus logger
+//
+// NOTE:
+// available fields are "id", "title"
 func (l *Module) LogrusFields() logrus.Fields {
 	return logrus.Fields{
 		"id":    l.ID,

@@ -25,7 +25,7 @@ build: fmt lint | $(BIN) ; $(info $(M) building executable…) @ ## Build progra
 	$(shell export GOOS=$(GOOS); export GOARCH=$(GOARCH); export CGO_ENABLED=0;\
 	$(GO) build \
 		-tags release \
-		-ldflags '-X $(MODULE)/cmd.version=$(VERSION) -X $(MODULE)/internal/app/apiserver.msgVersion=$(VERSION) -X $(MODULE)/internal/app/apiserver.msgBuildDate=$(DATE) -X $(MODULE)/cmd.buildDate=$(DATE)' \
+		-ldflags '-X $(MODULE)/cmd.version=$(VERSION) -X $(MODULE)/cmd.buildDate=$(DATE)' \
 		-o $(BIN)/$(shell basename $(MODULE)).$(GOOS).$(GOARCH) main.go)))
 
 # Tools

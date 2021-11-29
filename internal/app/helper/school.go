@@ -10,7 +10,11 @@ import (
 	"gopkg.in/tucnak/telebot.v3"
 )
 
-// GetSchoolsList ...
+// GetSchoolsList returns schools from database depends on Callback
+// The message is populated with buttons
+// if Callback.ListCommand is start - returns all inactive schools
+// if Callback.ListCommand is stop - returns all active schools
+// In other cases retruns all schools
 func (hlpr *Helper) GetSchoolsList(callback *model.Callback) (string, *telebot.ReplyMarkup, error) {
 	var err error
 	var schools []*model.School
@@ -49,7 +53,11 @@ func (hlpr *Helper) GetSchoolsList(callback *model.Callback) (string, *telebot.R
 	return "Choose a school from the list below:", replyMarkup, nil
 }
 
-// GetSchool ...
+// GetSchool returns School card, where
+// Buttons Start school/Stop school depend on Active
+// Button Students depend on count of students (>0)
+// Button Listeners depend on count of Listeners (>0)
+// Buttons Report/Full Report and Homeworks depend on cound of Homeworks (>0)
 func (hlpr *Helper) GetSchool(callback *model.Callback) (string, *telebot.ReplyMarkup, error) {
 	hlpr.logger.WithFields(logrus.Fields{
 		"id": callback.ID,
@@ -130,6 +138,10 @@ func (hlpr *Helper) GetSchool(callback *model.Callback) (string, *telebot.ReplyM
 		fullReportCallback := *callback
 		fullReportCallback.Command = "full_report"
 		buttons = append(buttons, replyMarkup.Data("Full Report", fullReportCallback.ToString()))
+
+		homeworksCallback := *callback
+		homeworksCallback.Command = "homeworks"
+		buttons = append(buttons, replyMarkup.Data("Homeworks", homeworksCallback.ToString()))
 	}
 
 	var rows []telebot.Row
@@ -179,7 +191,7 @@ func (hlpr *Helper) GetSchool(callback *model.Callback) (string, *telebot.ReplyM
 	), replyMarkup, nil
 }
 
-// StartSchool ...
+// StartSchool updates School status in database
 func (hlpr *Helper) StartSchool(callback *model.Callback) (string, *telebot.ReplyMarkup, error) {
 	hlpr.logger.WithFields(logrus.Fields{
 		"id": callback.ID,
@@ -204,7 +216,7 @@ func (hlpr *Helper) StartSchool(callback *model.Callback) (string, *telebot.Repl
 	return fmt.Sprintf("Success! School <b>%v</b> started", school.Title), replyMarkup, nil
 }
 
-// StopSchool ...
+// StopSchool updates School status in database
 func (hlpr *Helper) StopSchool(callback *model.Callback) (string, *telebot.ReplyMarkup, error) {
 	hlpr.logger.WithFields(logrus.Fields{
 		"id": callback.ID,
@@ -229,7 +241,7 @@ func (hlpr *Helper) StopSchool(callback *model.Callback) (string, *telebot.Reply
 	return fmt.Sprintf("Success! School <b>%v</b> finished", school.Title), replyMarkup, nil
 }
 
-// ReportSchool ...
+// ReportSchool returns report for School
 func (hlpr *Helper) ReportSchool(callback *model.Callback) (string, *telebot.ReplyMarkup, error) {
 	hlpr.logger.WithFields(logrus.Fields{
 		"id": callback.ID,
@@ -255,7 +267,7 @@ func (hlpr *Helper) ReportSchool(callback *model.Callback) (string, *telebot.Rep
 	return fmt.Sprintf("School <b>%v</b>\n\n%v", school.Title, reportMessage), replyMarkup, nil
 }
 
-// FullReportSchool ...
+// FullReportSchool return Dull Report for School
 func (hlpr *Helper) FullReportSchool(callback *model.Callback) (string, *telebot.ReplyMarkup, error) {
 	hlpr.logger.WithFields(logrus.Fields{
 		"id": callback.ID,
@@ -281,7 +293,7 @@ func (hlpr *Helper) FullReportSchool(callback *model.Callback) (string, *telebot
 	return fmt.Sprintf("School <b>%v</b>\n\n%v", school.Title, reportMessage), replyMarkup, nil
 }
 
-// GetSchoolHomeworks ...
+// GetSchoolHomeworks returns Homeworks for School
 func (hlpr *Helper) GetSchoolHomeworks(callback *model.Callback) (string, *telebot.ReplyMarkup, error) {
 	hlpr.logger.WithFields(logrus.Fields{
 		"id": callback.ID,
@@ -313,19 +325,20 @@ func (hlpr *Helper) GetSchoolHomeworks(callback *model.Callback) (string, *teleb
 	}
 
 	replyMarkup := &telebot.ReplyMarkup{}
-	var interfaceSlice []model.Interface = make([]model.Interface, len(homeworks))
-	for i, v := range homeworks {
-		interfaceSlice[i] = v
-	}
-	interfaceSlice = removeDuplicate(interfaceSlice)
+	//var interfaceSlice []model.Interface = make([]model.Interface, len(homeworks))
+	//for i, v := range homeworks {
+	//	interfaceSlice[i] = v
+	//}
+	//interfaceSlice = removeDuplicate(interfaceSlice)
 
-	homeworkCallback := &model.Callback{
-		Type:        "homework",
-		Command:     "get",
-		ListCommand: "get",
-	}
+	//homeworkCallback := &model.Callback{
+	//	Type:        "homework",
+	//	Command:     "get",
+	//	ListCommand: "get",
+	//}
 
-	rows := rowsWithButtons(interfaceSlice, homeworkCallback)
+	var rows []telebot.Row
+	//rows := rowsWithButtons(interfaceSlice, homeworkCallback)
 	rows = append(rows, backToSchoolRow(replyMarkup, callback, school.ID))
 	replyMarkup.Inline(rows...)
 

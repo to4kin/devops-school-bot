@@ -44,6 +44,9 @@ or skip this flag to use default path`,
 			logrus.Error(err)
 		}
 
+		config.BuildDate = buildDate
+		config.Version = version
+
 		var srv server.Server
 		if config.AWSLambda.Enabled {
 			srv = awslambda.New(config)

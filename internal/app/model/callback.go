@@ -21,12 +21,18 @@ type Callback struct {
 	ListCommand string
 }
 
-// ToString ...
+// ToString converts Callback object to string with separator
+//
+// NOTE: default separator is "|", so the string will be ->
+// ID|Type|Command|ListCommand
 func (c *Callback) ToString() string {
 	return fmt.Sprintf("%d%v%v%v%v%v%v", c.ID, sep, c.Type, sep, c.Command, sep, c.ListCommand)
 }
 
-// Unmarshal ...
+// Unmarshal converts string to Callback object
+//
+// NOTE: string should be in a correct format ->
+// ID|Type|Command|ListCommand
 func (c *Callback) Unmarshal(s string) error {
 	str := strings.Split(s, sep)
 

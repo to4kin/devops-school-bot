@@ -8,121 +8,148 @@ import (
 	"gitlab.devops.telekom.de/tvpp/prototypes/devops-school-bot/internal/app/store"
 )
 
-// GetUserReport ...
+// GetUserReport returns report for User
+// Account should be a vald Account struct
+// School can be nil, in this case report will be generated for all schools where User is a student
 func (hlpr *Helper) GetUserReport(account *model.Account, school *model.School) (string, error) {
-	hlpr.logger.WithFields(logrus.Fields{
-		"account_id": account.ID,
-		"school_id":  school.ID,
-	}).Info("get student from database by account_id and school_id")
-	student, err := hlpr.store.Student().FindByAccountIDSchoolID(account.ID, school.ID)
-	if err != nil {
-		if err == store.ErrRecordNotFound {
-			return ErrUserNotJoined, nil
+
+	students := []*model.Student{}
+	if school != nil {
+		hlpr.logger.WithFields(logrus.Fields{
+			"account_id": account.ID,
+			"school_id":  school.ID,
+		}).Info("get student from database by account_id and school_id")
+		st, err := hlpr.store.Student().FindByAccountIDSchoolID(account.ID, school.ID)
+		if err != nil {
+			if err == store.ErrRecordNotFound {
+				return ErrUserNotJoined, nil
+			}
+
+			return "", err
 		}
+		hlpr.logger.WithFields(st.LogrusFields()).Info("student found")
+		students = append(students, st)
+	} else {
+		hlpr.logger.WithFields(logrus.Fields{
+			"account_id": account.ID,
+		}).Info("get students from database by account_id")
+		sts, err := hlpr.store.Student().FindByAccountID(account.ID)
+		if err != nil {
+			if err == store.ErrRecordNotFound {
+				return ErrUserNotJoined, nil
+			}
 
-		return "", err
-	}
-	hlpr.logger.WithFields(student.LogrusFields()).Info("student found")
-
-	if !student.Active {
-		return "Your student account is blocked!\n\nPlease contact mentors or teachers", nil
-	}
-
-	hlpr.logger.WithFields(logrus.Fields{
-		"student_id": student.ID,
-	}).Info("get student homeworks from database by student_id")
-	studentHomeworks, err := hlpr.store.Homework().FindByStudentID(student.ID)
-	if err != nil {
-		if err == store.ErrRecordNotFound {
-			return fmt.Sprintf("you haven't submitted your homework yet\n\n%v", sysHomeworkAdd), nil
+			return "", err
 		}
-		return "", err
-	}
-	hlpr.logger.WithFields(logrus.Fields{
-		"count": len(studentHomeworks),
-	}).Info("student homeworks found")
+		hlpr.logger.WithFields(logrus.Fields{
+			"count": len(sts),
+		}).Info("student found")
 
-	hlpr.logger.WithFields(logrus.Fields{
-		"school_id": school.ID,
-	}).Info("get lessons from database by school_id")
-	allLessons, err := hlpr.store.Lesson().FindBySchoolID(school.ID)
-	if err != nil {
-		return "", err
+		students = sts
 	}
-	hlpr.logger.WithFields(logrus.Fields{
-		"count": len(allLessons),
-	}).Info("lessons found")
 
 	reportMessage := fmt.Sprintf(
-		"Hello, @%v!\n\n"+msgStudentInfo,
+		"Hello, @%v!\n\n"+msgStudentInfo+"\n",
 		account.Username,
-		student.Account.FirstName,
-		student.Account.LastName,
-		student.GetType(),
-		student.GetStatusText(),
+		account.FirstName,
+		account.LastName,
 	)
 
-	if student.FullCourse {
-		reportMessage += "\n\n" + SysStudentGuide
-		reportMessage += fmt.Sprintf("\n\nYour progress in <b>%v</b>:\n", school.Title)
+	for _, student := range students {
+		reportMessage += fmt.Sprintf("\nSchool: <b>%v</b>:\nType: %v\nStatus: %v\n\n", student.School.Title, student.GetType(), student.GetStatusText())
 
-		for _, lesson := range allLessons {
-			counted := false
-			for _, homework := range studentHomeworks {
-				if homework.Lesson.ID == lesson.ID {
-					counted = true
-					reportMessage += fmt.Sprintf(
-						"%v - %v [%v]\n",
-						iconGreenCircle,
-						lesson.Title,
-						fmt.Sprintf(
-							"<a href='%v'>Go To Message</a>",
-							homework.GetURL(),
-						),
-					)
+		if !student.Active {
+			reportMessage += "Your student account is blocked!\nPlease contact mentors or teachers"
+			continue
+		}
+
+		hlpr.logger.WithFields(logrus.Fields{
+			"student_id": student.ID,
+		}).Info("get student homeworks from database by student_id")
+		studentHomeworks, err := hlpr.store.Homework().FindByStudentID(student.ID)
+		if err != nil {
+			if err == store.ErrRecordNotFound {
+				reportMessage += fmt.Sprintf("you haven't submitted your homework yet\n\n%v", sysHomeworkAdd)
+				continue
+			}
+			return "", err
+		}
+		hlpr.logger.WithFields(logrus.Fields{
+			"count": len(studentHomeworks),
+		}).Info("student homeworks found")
+
+		hlpr.logger.WithFields(logrus.Fields{
+			"school_id": student.School.ID,
+		}).Info("get lessons from database by school_id")
+		allLessons, err := hlpr.store.Lesson().FindBySchoolID(student.School.ID)
+		if err != nil {
+			return "", err
+		}
+		hlpr.logger.WithFields(logrus.Fields{
+			"count": len(allLessons),
+		}).Info("lessons found")
+
+		if student.FullCourse {
+			reportMessage += "<b>Progress:</b>\n"
+
+			for _, lesson := range allLessons {
+				counted := false
+				for _, homework := range studentHomeworks {
+					if homework.Lesson.ID == lesson.ID {
+						counted = true
+						reportMessage += fmt.Sprintf(
+							"%v - %v [%v]\n",
+							iconGreenCircle,
+							lesson.Title,
+							fmt.Sprintf(
+								"<a href='%v'>Go To Message</a>",
+								homework.GetURL(),
+							),
+						)
+					}
+				}
+
+				if !counted {
+					reportMessage += fmt.Sprintf("%v - %v\n", iconRedCircle, lesson.Title)
 				}
 			}
+		} else {
+			reportMessage += "<b>Progress:</b>\n"
+			reportMessage += "You have joined the following modules:\n"
+			studentModules := []*model.Module{}
 
-			if !counted {
-				reportMessage += fmt.Sprintf("%v - %v\n", iconRedCircle, lesson.Title)
+			for _, homework := range studentHomeworks {
+				studentModules = appendModule(studentModules, homework.Lesson.Module)
 			}
-		}
-	} else {
-		reportMessage += "\n\n" + SysListenerGuide
-		reportMessage += "\n\nYou have joined the following modules:\n"
-		studentModules := []*model.Module{}
 
-		for _, homework := range studentHomeworks {
-			studentModules = appendModule(studentModules, homework.Lesson.Module)
-		}
+			for _, module := range studentModules {
+				reportMessage += fmt.Sprintf("- <b>%v</b>\n", module.Title)
+			}
 
-		for _, module := range studentModules {
-			reportMessage += fmt.Sprintf("- <b>%v</b>\n", module.Title)
-		}
+			reportMessage += "\n"
 
-		reportMessage += fmt.Sprintf("\nYour progress in <b>%v</b>:\n", school.Title)
-
-		for _, module := range studentModules {
-			for _, lesson := range allLessons {
-				if module.ID == lesson.Module.ID {
-					counted := false
-					for _, homework := range studentHomeworks {
-						if homework.Lesson.ID == lesson.ID {
-							counted = true
-							reportMessage += fmt.Sprintf(
-								"%v - %v [%v]\n",
-								iconGreenCircle,
-								lesson.Title,
-								fmt.Sprintf(
-									"<a href='%v'>Go To Message</a>",
-									homework.GetURL(),
-								),
-							)
+			for _, module := range studentModules {
+				for _, lesson := range allLessons {
+					if module.ID == lesson.Module.ID {
+						counted := false
+						for _, homework := range studentHomeworks {
+							if homework.Lesson.ID == lesson.ID {
+								counted = true
+								reportMessage += fmt.Sprintf(
+									"%v - %v [%v]\n",
+									iconGreenCircle,
+									lesson.Title,
+									fmt.Sprintf(
+										"<a href='%v'>Go To Message</a>",
+										homework.GetURL(),
+									),
+								)
+							}
 						}
-					}
 
-					if !counted {
-						reportMessage += fmt.Sprintf("%v - %v\n", iconRedCircle, lesson.Title)
+						if !counted {
+							reportMessage += fmt.Sprintf("%v - %v\n", iconRedCircle, lesson.Title)
+						}
 					}
 				}
 			}
@@ -132,7 +159,7 @@ func (hlpr *Helper) GetUserReport(account *model.Account, school *model.School) 
 	return reportMessage, nil
 }
 
-// GetReport ...
+// GetReport returns academic perfomance for all active stundents in school
 func (hlpr *Helper) GetReport(school *model.School) (string, error) {
 	hlpr.logger.WithFields(logrus.Fields{
 		"school_id": school.ID,
@@ -164,7 +191,8 @@ func (hlpr *Helper) GetReport(school *model.School) (string, error) {
 	return reportMessage, nil
 }
 
-// GetFullReport ...
+// GetFullReport returns academic performance for all active students in school.
+// Additionally adds the list of homeworks at the beginning
 func (hlpr *Helper) GetFullReport(school *model.School) (string, error) {
 	fullReport, err := hlpr.GetLessonsReport(school)
 	if err != nil {
@@ -181,7 +209,8 @@ func (hlpr *Helper) GetFullReport(school *model.School) (string, error) {
 	return fullReport, nil
 }
 
-// GetLessonsReport ...
+// GetLessonsReport returns the list of homeworks for school
+// The list is populated only with active homeworks provided by students
 func (hlpr *Helper) GetLessonsReport(school *model.School) (string, error) {
 	hlpr.logger.WithFields(logrus.Fields{
 		"school_id": school.ID,

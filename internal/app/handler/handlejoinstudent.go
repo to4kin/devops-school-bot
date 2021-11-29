@@ -13,7 +13,7 @@ import (
 
 func (handler *Handler) handleJoinStudent(c telebot.Context) error {
 	if c.Message().Private() {
-		return c.EditOrReply(helper.ErrWrongChatType, &telebot.SendOptions{ParseMode: "HTML"})
+		return c.EditOrReply(fmt.Sprintf(helper.ErrWrongChatType, "SCHOOL"), &telebot.SendOptions{ParseMode: "HTML"})
 	}
 
 	handler.logger.WithFields(logrus.Fields{

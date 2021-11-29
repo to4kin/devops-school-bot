@@ -9,22 +9,49 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
-// Student ...
+// Student object represents a student
 type Student struct {
-	ID         int64     `json:"id,string"`
-	Created    time.Time `json:"created"`
-	Account    *Account  `json:"account"`
-	School     *School   `json:"school"`
-	Active     bool      `json:"active,string"`
-	FullCourse bool      `json:"full_course,string"`
+	// ID returns a Student.ID
+	//
+	// NOTE: filled in automatically after INSERT to the store
+	ID int64 `json:"id,string"`
+
+	// Created returns time.Time
+	//
+	// NOTE: should be set before INSERT to the store,
+	// *field is required
+	Created time.Time `json:"created"`
+
+	// Account object represents an account
+	Account *Account `json:"account"`
+
+	// School object represents a school
+	School *School `json:"school"`
+
+	// Active returns true/false
+	//
+	// NOTE: false by default if not specified
+	Active bool `json:"active,string"`
+
+	// FullCourse returns true/false
+	//
+	// NOTE:
+	// - "true" means - "Student"
+	// - "false" means - "Listener"
+	// false by default if not specifieda
+	FullCourse bool `json:"full_course,string"`
 }
 
-// GetID ...
+// GetID returns Student.ID
 func (s *Student) GetID() int64 {
 	return s.ID
 }
 
-// GetStatusText ...
+// GetStatusText returns string depending on active
+//
+// NOTE:
+// 🟢 if active is true
+// 🔴 if active is false
 func (s *Student) GetStatusText() string {
 	if s.Active {
 		return "🟢"
@@ -33,12 +60,18 @@ func (s *Student) GetStatusText() string {
 	return "🔴"
 }
 
-// GetButtonTitle ...
+// GetButtonTitle returns composite string depending on active
+//
+// NOTE: GetStatusText + <sapce> + Account.Username
 func (s *Student) GetButtonTitle() string {
 	return fmt.Sprintf("%v @%v", s.GetStatusText(), s.Account.Username)
 }
 
-// GetType ...
+// GetType returns student type
+//
+// NOTE:
+// - type is "Student" if FullCourse is true
+// - type is "Listener" if FullCourse is false
 func (s *Student) GetType() string {
 	if s.FullCourse {
 		return "Student"
@@ -46,7 +79,12 @@ func (s *Student) GetType() string {
 	return "Listener"
 }
 
-// Validate ...
+// Validate func is needed to validate Student object fields before INSERT
+//
+// NOTE:
+// - Created is required
+// - Account is required
+// - School is required
 func (s *Student) Validate() error {
 	return validation.ValidateStruct(
 		s,
@@ -56,7 +94,7 @@ func (s *Student) Validate() error {
 	)
 }
 
-// ToString ...
+// ToString converts Student object to json string
 func (s *Student) ToString() string {
 	str, err := json.MarshalIndent(s, "", "  ")
 	if err != nil {
@@ -66,7 +104,10 @@ func (s *Student) ToString() string {
 	return string(str)
 }
 
-// LogrusFields ...
+// LogrusFields returns logrus.Fields for logrus logger
+//
+// NOTE:
+// available fields are "id", "account", "school", "active", "full_course"
 func (s *Student) LogrusFields() logrus.Fields {
 	return logrus.Fields{
 		"id":          s.ID,

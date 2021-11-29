@@ -80,6 +80,23 @@ func (r *StudentRepository) FindBySchoolID(schoolID int64) ([]*model.Student, er
 	return result, nil
 }
 
+// FindByAccountID ...
+func (r *StudentRepository) FindByAccountID(accountID int64) ([]*model.Student, error) {
+	result := []*model.Student{}
+
+	for _, s := range r.students {
+		if s.Account.ID == accountID {
+			result = append(result, s)
+		}
+	}
+
+	if len(result) == 0 {
+		return nil, store.ErrRecordNotFound
+	}
+
+	return result, nil
+}
+
 // FindByAccountIDSchoolID ...
 func (r *StudentRepository) FindByAccountIDSchoolID(accountID int64, schoolID int64) (*model.Student, error) {
 	for _, s := range r.students {

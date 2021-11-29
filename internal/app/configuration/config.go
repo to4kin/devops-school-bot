@@ -7,6 +7,8 @@ type Config struct {
 	AWSLambda   awslambda   `mapstructure:"awslambda"`
 	Database    database    `mapstructure:"database"`
 	TelegramBot telegramBot `mapstructure:"telegram_bot"`
+	BuildDate   string
+	Version     string
 }
 
 type apiserver struct {

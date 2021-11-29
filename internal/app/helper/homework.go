@@ -129,6 +129,7 @@ func (hlpr *Helper) GetHomeworksList(callback *model.Callback) (string, *telebot
 	}
 
 	rows := rowsWithButtons(interfaceSlice, callback)
+	//var rows []telebot.Row
 	rows = append(rows, backToSchoolRow(replyMarkup, schoolsListCallback, homework.Student.School.ID))
 	replyMarkup.Inline(rows...)
 

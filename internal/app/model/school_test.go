@@ -29,6 +29,15 @@ func TestSchool_Validate(t *testing.T) {
 			},
 			isValid: false,
 		},
+		{
+			name: "zero_chat_id",
+			s: func() *model.School {
+				s := model.TestSchool(t)
+				s.ChatID = 0
+				return s
+			},
+			isValid: false,
+		},
 	}
 
 	for _, tc := range testCases {

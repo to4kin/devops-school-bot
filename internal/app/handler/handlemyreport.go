@@ -1,6 +1,8 @@
 package handler
 
 import (
+	"fmt"
+
 	"github.com/sirupsen/logrus"
 	"gitlab.devops.telekom.de/tvpp/prototypes/devops-school-bot/internal/app/helper"
 	"gitlab.devops.telekom.de/tvpp/prototypes/devops-school-bot/internal/app/store"
@@ -8,8 +10,8 @@ import (
 )
 
 func (handler *Handler) handleMyReport(c telebot.Context) error {
-	if c.Message().Private() {
-		return c.EditOrReply(helper.ErrWrongChatType, &telebot.SendOptions{ParseMode: "HTML"})
+	if !c.Message().Private() {
+		return c.EditOrReply(fmt.Sprintf(helper.ErrWrongChatType, "PRIVATE"), &telebot.SendOptions{ParseMode: "HTML"})
 	}
 
 	handler.logger.WithFields(logrus.Fields{
@@ -27,23 +29,9 @@ func (handler *Handler) handleMyReport(c telebot.Context) error {
 	}
 	handler.logger.WithFields(account.LogrusFields()).Info("account found")
 
-	handler.logger.WithFields(logrus.Fields{
-		"chat_id": c.Message().Chat.ID,
-	}).Info("get school by chat_id")
-	school, err := handler.store.School().FindByChatID(c.Message().Chat.ID)
-	if err != nil {
-		handler.logger.Error(err)
-
-		if err == store.ErrRecordNotFound {
-			return c.EditOrReply(helper.ErrSchoolNotStarted, &telebot.SendOptions{ParseMode: "HTML"})
-		}
-
-		return c.EditOrReply(helper.ErrInternal, &telebot.SendOptions{ParseMode: "HTML"})
-	}
-	handler.logger.WithFields(school.LogrusFields()).Info("school found")
-
 	hlpr := helper.NewHelper(handler.store, handler.logger)
-	reportMessage, err := hlpr.GetUserReport(account, school)
+
+	reportMessage, err := hlpr.GetUserReport(account, nil)
 	if err != nil {
 		handler.logger.Error(err)
 		return c.EditOrReply(helper.ErrInternal, &telebot.SendOptions{ParseMode: "HTML"})

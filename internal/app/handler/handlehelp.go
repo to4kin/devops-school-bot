@@ -10,16 +10,26 @@ import (
 )
 
 var (
-	msgVersion   string = "dev"
-	msgBuildDate string = ""
-	msgBotInfo   string = "\n\n<b>Bot information:</b>\nVersion: %v\nBuild date: %v\nBuilt with: %v"
+	msgBotInfo string = "\n\n<b>Bot information:</b>\nVersion: %v\nBuild date: %v\nBuilt with: %v"
 
-	msgHelpCommand string = `I'll manage students homeworks
+	msgGroupHelp string = `I'll manage students homeworks
+
+<b>User Commands</b>
+/joinstudent - Join school as student
+/joinmodule - Join school as listener
+/help - Help message
+
+<b>Superuser Commands</b>
+/startschool - Start school
+/stopschool - Finish school
+/report - School progress
+/fullreport - School progress with homework list
+`
+
+	msgPrivateHelp string = `I'll manage students homeworks
 
 <b>User Commands</b>
 /start - Add user to database
-/joinstudent - Join school as student
-/joinmodule - Join school as listener
 /myreport - Your progress
 /homeworks - Homeworks list
 /help - Help message
@@ -38,7 +48,13 @@ var (
 )
 
 func (handler *Handler) handleHelp(c telebot.Context) error {
-	message := msgHelpCommand
+	message := ""
+
+	if c.Message().Private() {
+		message = msgPrivateHelp
+	} else {
+		message = msgGroupHelp
+	}
 
 	handler.logger.WithFields(logrus.Fields{
 		"telegram_id": c.Sender().ID,
@@ -55,7 +71,7 @@ func (handler *Handler) handleHelp(c telebot.Context) error {
 
 		if account.Superuser {
 			if c.Message().Private() {
-				message += fmt.Sprintf(msgBotInfo, msgVersion, msgBuildDate, runtime.Version())
+				message += fmt.Sprintf(msgBotInfo, handler.version, handler.buildDate, runtime.Version())
 			}
 		}
 	}

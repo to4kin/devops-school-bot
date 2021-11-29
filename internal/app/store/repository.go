@@ -48,6 +48,7 @@ type StudentRepository interface {
 	FindAll() ([]*model.Student, error)
 	FindByID(int64) (*model.Student, error)
 	FindBySchoolID(int64) ([]*model.Student, error)
+	FindByAccountID(int64) ([]*model.Student, error)
 	FindByAccountIDSchoolID(int64, int64) (*model.Student, error)
 	FindByFullCourseSchoolID(bool, int64) ([]*model.Student, error)
 }

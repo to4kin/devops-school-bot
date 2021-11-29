@@ -7,24 +7,41 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
-// Lesson ...
+// Lesson object represents a lesson
 type Lesson struct {
-	ID     int64   `json:"id"`
-	Title  string  `json:"title"`
+	// ID returns a Lesson.ID
+	//
+	// NOTE: filled in automatically after INSERT to the store
+	ID int64 `json:"id"`
+
+	// Title returns a lesson title
+	//
+	// NOTE:
+	// *field is required
+	Title string `json:"title"`
+
+	// Module object
+	//
+	// NOTE:
+	// *object is required
 	Module *Module `json:"module"`
 }
 
-// GetID ...
+// GetID returns Lesson.ID
 func (l *Lesson) GetID() int64 {
 	return l.ID
 }
 
-// GetButtonTitle ...
+// GetButtonTitle returns Lesson.Title
 func (l *Lesson) GetButtonTitle() string {
 	return l.Title
 }
 
-// Validate ...
+// Validate func is needed to validate Lesson object fields before INSERT
+//
+// NOTE:
+// - Title is required
+// - Module is required
 func (l *Lesson) Validate() error {
 	return validation.ValidateStruct(
 		l,
@@ -33,7 +50,7 @@ func (l *Lesson) Validate() error {
 	)
 }
 
-// ToString ...
+// ToString converts Lesson object to json string
 func (l *Lesson) ToString() string {
 	str, err := json.MarshalIndent(l, "", "  ")
 	if err != nil {
@@ -43,7 +60,10 @@ func (l *Lesson) ToString() string {
 	return string(str)
 }
 
-// LogrusFields ...
+// LogrusFields returns logrus.Fields for logrus logger
+//
+// NOTE:
+// available fields are "id", "title", "module"
 func (l *Lesson) LogrusFields() logrus.Fields {
 	return logrus.Fields{
 		"id":     l.ID,

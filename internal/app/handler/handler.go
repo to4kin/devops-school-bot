@@ -10,9 +10,11 @@ import (
 
 // Handler ...
 type Handler struct {
-	logger *logrus.Logger
-	store  store.Store
-	bot    *telebot.Bot
+	logger    *logrus.Logger
+	store     store.Store
+	bot       *telebot.Bot
+	buildDate string
+	version   string
 }
 
 // NewHandler ...
@@ -43,9 +45,11 @@ func NewHandler(config *configuration.Config, store store.Store) (*Handler, erro
 	}
 
 	handler := &Handler{
-		logger: logger,
-		store:  store,
-		bot:    bot,
+		logger:    logger,
+		store:     store,
+		bot:       bot,
+		buildDate: config.BuildDate,
+		version:   config.Version,
 	}
 
 	handler.configureBotHandlers()

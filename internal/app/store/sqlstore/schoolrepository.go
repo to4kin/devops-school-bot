@@ -7,12 +7,12 @@ import (
 	"gitlab.devops.telekom.de/tvpp/prototypes/devops-school-bot/internal/app/store"
 )
 
-// SchoolRepository ...
+// SchoolRepository struct with a pointer to Store
 type SchoolRepository struct {
 	store *Store
 }
 
-// Create ...
+// Create func insert School to database and update ID
 func (r *SchoolRepository) Create(s *model.School) error {
 	if err := s.Validate(); err != nil {
 		return err
@@ -29,7 +29,7 @@ func (r *SchoolRepository) Create(s *model.School) error {
 	)
 }
 
-// Update ...
+// Update func will update Title and Active options by ID
 func (r *SchoolRepository) Update(s *model.School) error {
 	if err := r.store.db.QueryRow(
 		"UPDATE school SET title = $2, active = $3 WHERE id = $1 RETURNING id",
@@ -49,7 +49,7 @@ func (r *SchoolRepository) Update(s *model.School) error {
 	return nil
 }
 
-// FindAll ...
+// FindAll returns all schools from database
 func (r *SchoolRepository) FindAll() ([]*model.School, error) {
 	rowsCount := 0
 	schools := []*model.School{}
@@ -92,7 +92,7 @@ func (r *SchoolRepository) FindAll() ([]*model.School, error) {
 	return schools, nil
 }
 
-// FindByID ...
+// FindByID returns School by ID
 func (r *SchoolRepository) FindByID(id int64) (*model.School, error) {
 	s := &model.School{}
 	if err := r.store.db.QueryRow(
@@ -116,7 +116,7 @@ func (r *SchoolRepository) FindByID(id int64) (*model.School, error) {
 
 }
 
-// FindByTitle ...
+// FindByTitle returns School by Title
 func (r *SchoolRepository) FindByTitle(title string) (*model.School, error) {
 	s := &model.School{}
 	if err := r.store.db.QueryRow(
@@ -140,7 +140,7 @@ func (r *SchoolRepository) FindByTitle(title string) (*model.School, error) {
 
 }
 
-// FindByChatID ...
+// FindByChatID returns School by telegram chat ID
 func (r *SchoolRepository) FindByChatID(chatID int64) (*model.School, error) {
 	s := &model.School{}
 	if err := r.store.db.QueryRow(
@@ -164,7 +164,7 @@ func (r *SchoolRepository) FindByChatID(chatID int64) (*model.School, error) {
 
 }
 
-// FindByActive ...
+// FindByActive returns all active schools
 func (r *SchoolRepository) FindByActive(active bool) ([]*model.School, error) {
 	rowsCount := 0
 	schools := []*model.School{}
