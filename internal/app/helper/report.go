@@ -50,7 +50,7 @@ func (hlpr *Helper) GetUserReport(account *model.Account, school *model.School) 
 	}
 
 	reportMessage := fmt.Sprintf(
-		"Hello, @%v!\n\n"+msgStudentInfo+"\n",
+		"Hello, @%v!\n\n<b>Student info:</b>\nFirst name: %v\nLast name: %v\n",
 		account.Username,
 		account.FirstName,
 		account.LastName,
@@ -90,9 +90,8 @@ func (hlpr *Helper) GetUserReport(account *model.Account, school *model.School) 
 			"count": len(allLessons),
 		}).Info("lessons found")
 
+		reportMessage += "<b>Progress:</b>\n"
 		if student.FullCourse {
-			reportMessage += "<b>Progress:</b>\n"
-
 			for _, lesson := range allLessons {
 				counted := false
 				for _, homework := range studentHomeworks {
@@ -115,7 +114,6 @@ func (hlpr *Helper) GetUserReport(account *model.Account, school *model.School) 
 				}
 			}
 		} else {
-			reportMessage += "<b>Progress:</b>\n"
 			reportMessage += "You have joined the following modules:\n"
 			studentModules := []*model.Module{}
 
@@ -210,17 +208,15 @@ func (hlpr *Helper) GetReport(school *model.School) (string, error) {
 		"count": len(listeners),
 	}).Info("listeners found")
 
-	reportMessage += "\nListeners Report:\n"
-
 	if len(listeners) > 0 {
+		reportMessage += "\nListeners Report:\n"
+
 		message, err := hlpr.prepareReportMsg(listeners, lessons)
 		if err != nil {
 			return "", err
 		}
 
 		reportMessage += message
-	} else {
-		reportMessage += ErrReportNotFound
 	}
 
 	return reportMessage, nil

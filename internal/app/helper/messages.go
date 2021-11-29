@@ -30,8 +30,6 @@ var (
 )
 
 var (
-	msgStudentInfo string = "<b>Student info:</b>\nFirst name: %v\nLast name: %v"
-
 	iconGreenCircle string = `🟢`
 	//iconYellowCircle string = `🟡`
 	iconRedCircle string = `🔴`

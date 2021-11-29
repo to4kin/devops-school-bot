@@ -64,7 +64,7 @@ func (s *Student) GetStatusText() string {
 //
 // NOTE: GetStatusText + <sapce> + Account.Username
 func (s *Student) GetButtonTitle() string {
-	return fmt.Sprintf("%v @%v", s.GetStatusText(), s.Account.Username)
+	return fmt.Sprintf("%v%v", s.GetStatusText(), s.Account.GetFullName())
 }
 
 // GetType returns student type
