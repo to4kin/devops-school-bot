@@ -62,7 +62,7 @@ func (r *StudentRepository) FindAll() ([]*model.Student, error) {
 		FROM student st
 		JOIN account acc ON acc.id = st.account_id
 		JOIN school sch ON sch.id = st.school_id
-		ORDER BY acc.username ASC
+		ORDER BY acc.first_name, acc.last_name, acc.username ASC
 		`,
 	)
 	if err != nil {
@@ -170,7 +170,7 @@ func (r *StudentRepository) FindByAccountID(accountID int64) ([]*model.Student, 
 		JOIN account acc ON acc.id = st.account_id
 		JOIN school sch ON sch.id = st.school_id
 		WHERE st.account_id = $1
-		ORDER BY acc.username ASC
+		ORDER BY acc.first_name, acc.last_name, acc.username ASC
 		`,
 		accountID,
 	)
@@ -235,7 +235,7 @@ func (r *StudentRepository) FindBySchoolID(schoolID int64) ([]*model.Student, er
 		JOIN account acc ON acc.id = st.account_id
 		JOIN school sch ON sch.id = st.school_id
 		WHERE st.school_id = $1
-		ORDER BY acc.username ASC
+		ORDER BY acc.first_name, acc.last_name, acc.username ASC
 		`,
 		schoolID,
 	)
@@ -345,7 +345,7 @@ func (r *StudentRepository) FindByFullCourseSchoolID(fullCourse bool, schoolID i
 		JOIN account acc ON acc.id = st.account_id
 		JOIN school sch ON sch.id = st.school_id
 		WHERE st.school_id = $1 AND st.full_course = $2
-		ORDER BY acc.username ASC
+		ORDER BY acc.first_name, acc.last_name, acc.username ASC
 		`,
 		schoolID,
 		fullCourse,
