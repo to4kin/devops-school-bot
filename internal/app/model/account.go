@@ -58,11 +58,11 @@ func (a *Account) GetID() int64 {
 // GetStatusText returns string depending on active
 //
 // NOTE:
-// 💀 if superuser is true
+// 👤 if superuser is true
 // <empty> if superuser is false
 func (a *Account) GetStatusText() string {
 	if a.Superuser {
-		return "💀"
+		return "👤"
 	}
 
 	return ""
