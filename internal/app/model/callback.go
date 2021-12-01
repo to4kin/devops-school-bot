@@ -1,54 +1,88 @@
 package model
 
 import (
-	"errors"
-	"fmt"
+	"encoding/json"
 	"strconv"
-	"strings"
-)
+	"time"
 
-var sep string = "|"
+	validation "github.com/go-ozzo/ozzo-validation/v4"
+	"github.com/sirupsen/logrus"
+)
 
 // Callback represents a telebot.Callback().Data() for inline messages
 type Callback struct {
-	// ID of element in database
-	ID int64
-	// Type of element
-	Type string
+	// ID returns a Callback.ID
+	//
+	// NOTE: filled in automatically after INSERT to the store
+	ID int64 `json:"id"`
+
+	// Created returns time.Time when the record was created
+	//
+	// NOTE: should be set before INSERT to the store,
+	// *field is required
+	Created time.Time `json:"created"`
+
+	// Type returns type of callback element
+	//
+	// NOTE: field can be one of "Account", "Homework", "Lesson", "Module"
+	// "School", "Student"
+	Type string `json:"type"`
+
+	// TypeID returns id of type element
+	TypeID int64 `json:"type_id"`
+
 	// Command for button
-	Command string
+	Command string `json:"command"`
+
 	// Command for elements in list
-	ListCommand string
+	ListCommand string `json:"list_command"`
 }
 
-// ToString converts Callback object to string with separator
+// GetStringID converts int64 ID to a string with base = 10
+func (c *Callback) GetStringID() string {
+	return strconv.FormatInt(c.ID, 10)
+}
+
+// Validate func is needed to validate Callback object before INSERT
 //
-// NOTE: default separator is "|", so the string will be ->
-// ID|Type|Command|ListCommand
+// NOTE:
+// - Created is required
+// - Type is required
+// - TypeID is required
+// - Command is required
+// - ListCommand is required
+func (c *Callback) Validate() error {
+	return validation.ValidateStruct(
+		c,
+		validation.Field(&c.Created, validation.Required),
+		validation.Field(&c.Type, validation.Required),
+		validation.Field(&c.TypeID, validation.Required),
+		validation.Field(&c.Command, validation.Required),
+		validation.Field(&c.ListCommand, validation.Required),
+	)
+}
+
+// ToString converts Callback object to json string
 func (c *Callback) ToString() string {
-	return fmt.Sprintf("%d%v%v%v%v%v%v", c.ID, sep, c.Type, sep, c.Command, sep, c.ListCommand)
+	str, err := json.MarshalIndent(c, "", "  ")
+	if err != nil {
+		return ""
+	}
+
+	return string(str)
 }
 
-// Unmarshal converts string to Callback object
+// LogrusFields returns logrus.Fields for logrus logger
 //
-// NOTE: string should be in a correct format ->
-// ID|Type|Command|ListCommand
-func (c *Callback) Unmarshal(s string) error {
-	str := strings.Split(s, sep)
-
-	if len(str) != 4 {
-		return errors.New("incorrect string")
+// NOTE:
+// available fields are "id", "created", "type", "type_id", "command", "list_command"
+func (c *Callback) LogrusFields() logrus.Fields {
+	return logrus.Fields{
+		"id":           c.ID,
+		"created":      c.Created,
+		"type":         c.Type,
+		"type_id":      c.TypeID,
+		"command":      c.Command,
+		"list_command": c.ListCommand,
 	}
-
-	var err error
-	c.ID, err = strconv.ParseInt(str[0], 10, 64)
-	if err != nil {
-		return err
-	}
-
-	c.Type = str[1]
-	c.Command = str[2]
-	c.ListCommand = str[3]
-
-	return nil
 }

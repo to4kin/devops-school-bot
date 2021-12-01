@@ -8,4 +8,5 @@ type Store interface {
 	Module() ModuleRepository
 	Student() StudentRepository
 	Homework() HomeworkRepository
+	Callback() CallbackRepository
 }

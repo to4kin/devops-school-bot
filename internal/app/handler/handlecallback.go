@@ -1,9 +1,10 @@
 package handler
 
 import (
+	"strconv"
+
 	"github.com/sirupsen/logrus"
 	"gitlab.devops.telekom.de/tvpp/prototypes/devops-school-bot/internal/app/helper"
-	"gitlab.devops.telekom.de/tvpp/prototypes/devops-school-bot/internal/app/model"
 	"gopkg.in/tucnak/telebot.v3"
 )
 
@@ -12,30 +13,37 @@ func (handler *Handler) handleCallback(c telebot.Context) error {
 		"callback_data": c.Callback().Data[1:],
 	}).Info("handle callback")
 
-	handler.logger.WithFields(logrus.Fields{
-		"telegram_id": c.Sender().ID,
-	}).Info("get account from database by telegram_id")
-	account, err := handler.store.Account().FindByTelegramID(int64(c.Sender().ID))
+	callbackID, err := strconv.ParseInt(c.Callback().Data[1:], 10, 64)
 	if err != nil {
 		handler.logger.Error(err)
 		return c.EditOrReply(helper.ErrInternal, &telebot.SendOptions{ParseMode: "HTML"})
 	}
-	handler.logger.WithFields(account.LogrusFields()).Info("account found")
+
+	handler.logger.WithFields(logrus.Fields{
+		"callback_id": callbackID,
+	}).Info("callback parsed")
+
+	// handler.logger.WithFields(logrus.Fields{
+	// 	"telegram_id": c.Sender().ID,
+	// }).Info("get account from database by telegram_id")
+	// account, err := handler.store.Account().FindByTelegramID(int64(c.Sender().ID))
+	// if err != nil {
+	// 	handler.logger.Error(err)
+	// 	return c.EditOrReply(helper.ErrInternal, &telebot.SendOptions{ParseMode: "HTML"})
+	// }
+	// handler.logger.WithFields(account.LogrusFields()).Info("account found")
 
 	//if !account.Superuser {
 	//	handler.logger.WithFields(account.LogrusFields()).Info("account has insufficient permissions")
 	//	return c.EditOrReply(helper.ErrInsufficientPermissions, &telebot.SendOptions{ParseMode: "HTML"})
 	//}
 
-	callback := &model.Callback{}
-	callback.Unmarshal(c.Callback().Data[1:])
-
-	handler.logger.WithFields(logrus.Fields{
-		"callback_id":           callback.ID,
-		"callback_type":         callback.Type,
-		"callback_command":      callback.Command,
-		"callback_list_command": callback.ListCommand,
-	}).Info("parse callback data")
+	callback, err := handler.store.Callback().FindByID(callbackID)
+	if err != nil {
+		handler.logger.Error(err)
+		return c.EditOrReply(helper.ErrInternal, &telebot.SendOptions{ParseMode: "HTML"})
+	}
+	handler.logger.WithFields(callback.LogrusFields()).Info("callback found")
 
 	replyMessage := ""
 	replyMarkup := &telebot.ReplyMarkup{}

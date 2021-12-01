@@ -2,6 +2,7 @@ package helper
 
 import (
 	"fmt"
+	"time"
 
 	"github.com/sirupsen/logrus"
 	"gitlab.devops.telekom.de/tvpp/prototypes/devops-school-bot/internal/app/model"
@@ -18,6 +19,7 @@ func (hlpr *Helper) GetUsersList(callback *model.Callback) (string, *telebot.Rep
 		hlpr.logger.Info("get all users from database")
 		accounts, err = hlpr.store.Account().FindBySuperuser(false)
 	case "unset_superuser":
+		// TODO: remove Sender from accounts,because user can remove superuser permissions for himself
 		hlpr.logger.Info("get all superusers from database")
 		accounts, err = hlpr.store.Account().FindBySuperuser(true)
 	default:
@@ -41,7 +43,10 @@ func (hlpr *Helper) GetUsersList(callback *model.Callback) (string, *telebot.Rep
 	for i, v := range accounts {
 		interfaceSlice[i] = v
 	}
-	rows := rowsWithButtons(interfaceSlice, callback)
+	rows, err := hlpr.rowsWithButtons(interfaceSlice, callback)
+	if err != nil {
+		return "", nil, err
+	}
 
 	replyMarkup := &telebot.ReplyMarkup{}
 	replyMarkup.Inline(rows...)
@@ -51,9 +56,9 @@ func (hlpr *Helper) GetUsersList(callback *model.Callback) (string, *telebot.Rep
 // GetUser ...
 func (hlpr *Helper) GetUser(callback *model.Callback, sender *telebot.User) (string, *telebot.ReplyMarkup, error) {
 	hlpr.logger.WithFields(logrus.Fields{
-		"id": callback.ID,
+		"id": callback.TypeID,
 	}).Info("get account from database by id")
-	account, err := hlpr.store.Account().FindByID(callback.ID)
+	account, err := hlpr.store.Account().FindByID(callback.TypeID)
 	if err != nil {
 		return "", nil, err
 	}
@@ -63,25 +68,58 @@ func (hlpr *Helper) GetUser(callback *model.Callback, sender *telebot.User) (str
 	replyMarkup := &telebot.ReplyMarkup{}
 	if sender.ID != account.TelegramID {
 		if account.Superuser {
-			unsetSuperuserCallback := *callback
-			unsetSuperuserCallback.Command = "unset_superuser"
-			rows = append(rows, replyMarkup.Row(replyMarkup.Data("Unset Superuser", unsetSuperuserCallback.ToString())))
+			unsetSuperuserCallback := &model.Callback{
+				Created:     time.Now(),
+				Type:        callback.Type,
+				TypeID:      callback.TypeID,
+				Command:     "unset_superuser",
+				ListCommand: callback.ListCommand,
+			}
+			if err := hlpr.prepareCallback(unsetSuperuserCallback); err != nil {
+				return "", nil, err
+			}
+			rows = append(rows, replyMarkup.Row(replyMarkup.Data("Unset Superuser", unsetSuperuserCallback.GetStringID())))
+
 		} else {
-			setSuperuserCallback := *callback
-			setSuperuserCallback.Command = "set_superuser"
-			rows = append(rows, replyMarkup.Row(replyMarkup.Data("Set Superuser", setSuperuserCallback.ToString())))
+			setSuperuserCallback := &model.Callback{
+				Created:     time.Now(),
+				Type:        callback.Type,
+				TypeID:      callback.TypeID,
+				Command:     "set_superuser",
+				ListCommand: callback.ListCommand,
+			}
+			if err := hlpr.prepareCallback(setSuperuserCallback); err != nil {
+				return "", nil, err
+			}
+			rows = append(rows, replyMarkup.Row(replyMarkup.Data("Set Superuser", setSuperuserCallback.GetStringID())))
 		}
 	} else {
 		if account.FirstName != sender.FirstName || account.LastName != sender.LastName || account.Username != sender.Username {
-			updateCallback := *callback
-			updateCallback.Command = "update"
-			rows = append(rows, replyMarkup.Row(replyMarkup.Data("Update account", updateCallback.ToString())))
+			updateCallback := &model.Callback{
+				Created:     time.Now(),
+				Type:        callback.Type,
+				TypeID:      callback.TypeID,
+				Command:     "update",
+				ListCommand: callback.ListCommand,
+			}
+			if err := hlpr.prepareCallback(updateCallback); err != nil {
+				return "", nil, err
+			}
+			rows = append(rows, replyMarkup.Row(replyMarkup.Data("Update account", updateCallback.GetStringID())))
 		}
 	}
 
-	backToUsersListCallback := *callback
-	backToUsersListCallback.Command = "accounts_list"
-	rows = append(rows, replyMarkup.Row(replyMarkup.Data("<< Back to Users List", backToUsersListCallback.ToString())))
+	backToUsersListCallback := &model.Callback{
+		Created:     time.Now(),
+		Type:        callback.Type,
+		TypeID:      callback.TypeID,
+		Command:     "accounts_list",
+		ListCommand: callback.ListCommand,
+	}
+	if err := hlpr.prepareCallback(backToUsersListCallback); err != nil {
+		return "", nil, err
+	}
+	rows = append(rows, replyMarkup.Row(replyMarkup.Data("<< Back to Users List", backToUsersListCallback.GetStringID())))
 	replyMarkup.Inline(rows...)
 
 	return fmt.Sprintf(
@@ -96,9 +134,9 @@ func (hlpr *Helper) GetUser(callback *model.Callback, sender *telebot.User) (str
 // UpdateUser ...
 func (hlpr *Helper) UpdateUser(callback *model.Callback, sender *telebot.User) (string, *telebot.ReplyMarkup, error) {
 	hlpr.logger.WithFields(logrus.Fields{
-		"id": callback.ID,
+		"id": callback.TypeID,
 	}).Info("get account from database by id")
-	account, err := hlpr.store.Account().FindByID(callback.ID)
+	account, err := hlpr.store.Account().FindByID(callback.TypeID)
 	if err != nil {
 		return "", nil, err
 	}
@@ -115,7 +153,11 @@ func (hlpr *Helper) UpdateUser(callback *model.Callback, sender *telebot.User) (
 	hlpr.logger.WithFields(account.LogrusFields()).Info("account updated")
 
 	replyMarkup := &telebot.ReplyMarkup{}
-	replyMarkup.Inline(backToUserRow(replyMarkup, callback, account.ID))
+	backRow, err := hlpr.backToUserRow(replyMarkup, callback.ListCommand, account.ID)
+	if err != nil {
+		return "", nil, err
+	}
+	replyMarkup.Inline(backRow)
 
 	return fmt.Sprintf("Success! Account <b>%v</b> updated", account.Username), replyMarkup, nil
 }
@@ -123,9 +165,9 @@ func (hlpr *Helper) UpdateUser(callback *model.Callback, sender *telebot.User) (
 // SetSuperuser ...
 func (hlpr *Helper) SetSuperuser(callback *model.Callback) (string, *telebot.ReplyMarkup, error) {
 	hlpr.logger.WithFields(logrus.Fields{
-		"id": callback.ID,
+		"id": callback.TypeID,
 	}).Info("get account from database by id")
-	account, err := hlpr.store.Account().FindByID(callback.ID)
+	account, err := hlpr.store.Account().FindByID(callback.TypeID)
 	if err != nil {
 		return "", nil, err
 	}
@@ -140,7 +182,11 @@ func (hlpr *Helper) SetSuperuser(callback *model.Callback) (string, *telebot.Rep
 	hlpr.logger.WithFields(account.LogrusFields()).Info("account updated")
 
 	replyMarkup := &telebot.ReplyMarkup{}
-	replyMarkup.Inline(backToUserRow(replyMarkup, callback, account.ID))
+	backRow, err := hlpr.backToUserRow(replyMarkup, callback.ListCommand, account.ID)
+	if err != nil {
+		return "", nil, err
+	}
+	replyMarkup.Inline(backRow)
 
 	return fmt.Sprintf("Success! Superuser access <b>ENABLED</b> for user <b>%v</b>", account.Username), replyMarkup, nil
 }
@@ -148,9 +194,9 @@ func (hlpr *Helper) SetSuperuser(callback *model.Callback) (string, *telebot.Rep
 // UnsetSuperuser ...
 func (hlpr *Helper) UnsetSuperuser(callback *model.Callback) (string, *telebot.ReplyMarkup, error) {
 	hlpr.logger.WithFields(logrus.Fields{
-		"id": callback.ID,
+		"id": callback.TypeID,
 	}).Info("get account from database by id")
-	account, err := hlpr.store.Account().FindByID(callback.ID)
+	account, err := hlpr.store.Account().FindByID(callback.TypeID)
 	if err != nil {
 		return "", nil, err
 	}
@@ -165,32 +211,44 @@ func (hlpr *Helper) UnsetSuperuser(callback *model.Callback) (string, *telebot.R
 	hlpr.logger.WithFields(account.LogrusFields()).Info("account updated")
 
 	replyMarkup := &telebot.ReplyMarkup{}
-	replyMarkup.Inline(backToUserRow(replyMarkup, callback, account.ID))
+	backRow, err := hlpr.backToUserRow(replyMarkup, callback.ListCommand, account.ID)
+	if err != nil {
+		return "", nil, err
+	}
+	replyMarkup.Inline(backRow)
 
 	return fmt.Sprintf("Success! Superuser access <b>DISABLED</b> for user <b>%v</b>", account.Username), replyMarkup, nil
 }
 
-func backToUserRow(replyMarkup *telebot.ReplyMarkup, callback *model.Callback, accountID int64) telebot.Row {
+func (hlpr *Helper) backToUserRow(replyMarkup *telebot.ReplyMarkup, listCommand string, accountID int64) (telebot.Row, error) {
 	backToUser := &model.Callback{
-		ID:          accountID,
+		Created:     time.Now(),
 		Type:        "account",
+		TypeID:      accountID,
 		Command:     "get",
-		ListCommand: callback.ListCommand,
+		ListCommand: listCommand,
+	}
+	if err := hlpr.prepareCallback(backToUser); err != nil {
+		return nil, err
 	}
 
 	backToUsersList := &model.Callback{
-		ID:          accountID,
+		Created:     time.Now(),
 		Type:        "account",
+		TypeID:      accountID,
 		Command:     "accounts_list",
-		ListCommand: callback.ListCommand,
+		ListCommand: listCommand,
+	}
+	if err := hlpr.prepareCallback(backToUsersList); err != nil {
+		return nil, err
 	}
 
-	if callback.ListCommand == "get" {
+	if listCommand == "get" {
 		return replyMarkup.Row(
-			replyMarkup.Data("<< Back to User", backToUser.ToString()),
-			replyMarkup.Data("<< Back to Users List", backToUsersList.ToString()),
-		)
+			replyMarkup.Data("<< Back to User", backToUser.GetStringID()),
+			replyMarkup.Data("<< Back to Users List", backToUsersList.GetStringID()),
+		), nil
 	}
 
-	return replyMarkup.Row(replyMarkup.Data("<< Back to Users List", backToUsersList.ToString()))
+	return replyMarkup.Row(replyMarkup.Data("<< Back to Users List", backToUsersList.GetStringID())), nil
 }

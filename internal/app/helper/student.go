@@ -2,6 +2,7 @@ package helper
 
 import (
 	"fmt"
+	"time"
 
 	"github.com/sirupsen/logrus"
 	"gitlab.devops.telekom.de/tvpp/prototypes/devops-school-bot/internal/app/model"
@@ -11,9 +12,9 @@ import (
 // GetStudent ...
 func (hlpr *Helper) GetStudent(callback *model.Callback) (string, *telebot.ReplyMarkup, error) {
 	hlpr.logger.WithFields(logrus.Fields{
-		"id": callback.ID,
+		"id": callback.TypeID,
 	}).Info("get student from database by id")
-	student, err := hlpr.store.Student().FindByID(callback.ID)
+	student, err := hlpr.store.Student().FindByID(callback.TypeID)
 	if err != nil {
 		return "", nil, err
 	}
@@ -24,38 +25,54 @@ func (hlpr *Helper) GetStudent(callback *model.Callback) (string, *telebot.Reply
 
 	if student.Active {
 		blockCallback := &model.Callback{
-			ID:          callback.ID,
+			Created:     time.Now(),
 			Type:        "student",
+			TypeID:      callback.TypeID,
 			Command:     "block",
 			ListCommand: callback.ListCommand,
 		}
-		buttons = append(buttons, replyMarkup.Data("Block student", blockCallback.ToString()))
+		if err := hlpr.prepareCallback(blockCallback); err != nil {
+			return "", nil, err
+		}
+		buttons = append(buttons, replyMarkup.Data("Block student", blockCallback.GetStringID()))
 	} else {
 		unblockCallback := &model.Callback{
-			ID:          callback.ID,
+			Created:     time.Now(),
 			Type:        "student",
+			TypeID:      callback.TypeID,
 			Command:     "unblock",
 			ListCommand: callback.ListCommand,
 		}
-		buttons = append(buttons, replyMarkup.Data("Unblock student", unblockCallback.ToString()))
+		if err := hlpr.prepareCallback(unblockCallback); err != nil {
+			return "", nil, err
+		}
+		buttons = append(buttons, replyMarkup.Data("Unblock student", unblockCallback.GetStringID()))
 	}
 
 	if student.FullCourse {
 		studentCallback := &model.Callback{
-			ID:          callback.ID,
+			Created:     time.Now(),
 			Type:        "student",
+			TypeID:      callback.TypeID,
 			Command:     "set_listener",
 			ListCommand: callback.ListCommand,
 		}
-		buttons = append(buttons, replyMarkup.Data("Change to listener", studentCallback.ToString()))
+		if err := hlpr.prepareCallback(studentCallback); err != nil {
+			return "", nil, err
+		}
+		buttons = append(buttons, replyMarkup.Data("Change to listener", studentCallback.GetStringID()))
 	} else {
 		listenerCallback := &model.Callback{
-			ID:          callback.ID,
+			Created:     time.Now(),
 			Type:        "student",
+			TypeID:      callback.TypeID,
 			Command:     "set_student",
 			ListCommand: callback.ListCommand,
 		}
-		buttons = append(buttons, replyMarkup.Data("Change to student", listenerCallback.ToString()))
+		if err := hlpr.prepareCallback(listenerCallback); err != nil {
+			return "", nil, err
+		}
+		buttons = append(buttons, replyMarkup.Data("Change to student", listenerCallback.GetStringID()))
 	}
 
 	var rows []telebot.Row
@@ -68,13 +85,22 @@ func (hlpr *Helper) GetStudent(callback *model.Callback) (string, *telebot.Reply
 	}
 
 	backToStudentsListCallback := &model.Callback{
-		ID:          student.ID,
+		Created:     time.Now(),
 		Type:        "student",
+		TypeID:      student.ID,
 		Command:     "students_list",
 		ListCommand: callback.ListCommand,
 	}
-	rows = append(rows, replyMarkup.Row(replyMarkup.Data("<< Back to Students List", backToStudentsListCallback.ToString())))
-	rows = append(rows, backToSchoolRow(replyMarkup, callback, student.School.ID))
+	if err := hlpr.prepareCallback(backToStudentsListCallback); err != nil {
+		return "", nil, err
+	}
+	rows = append(rows, replyMarkup.Row(replyMarkup.Data("<< Back to Students List", backToStudentsListCallback.GetStringID())))
+
+	backRow, err := hlpr.backToSchoolRow(replyMarkup, callback.ListCommand, student.School.ID)
+	if err != nil {
+		return "", nil, err
+	}
+	rows = append(rows, backRow)
 	replyMarkup.Inline(rows...)
 
 	reportMessage, err := hlpr.GetUserReport(student.Account, student.School)
@@ -88,9 +114,9 @@ func (hlpr *Helper) GetStudent(callback *model.Callback) (string, *telebot.Reply
 // GetStudentsList ...
 func (hlpr *Helper) GetStudentsList(callback *model.Callback) (string, *telebot.ReplyMarkup, error) {
 	hlpr.logger.WithFields(logrus.Fields{
-		"id": callback.ID,
+		"id": callback.TypeID,
 	}).Info("get student from database by id")
-	student, err := hlpr.store.Student().FindByID(callback.ID)
+	student, err := hlpr.store.Student().FindByID(callback.TypeID)
 	if err != nil {
 		return "", nil, err
 	}
@@ -113,8 +139,16 @@ func (hlpr *Helper) GetStudentsList(callback *model.Callback) (string, *telebot.
 		interfaceSlice[i] = v
 	}
 
-	rows := rowsWithButtons(interfaceSlice, callback)
-	rows = append(rows, backToSchoolRow(replyMarkup, callback, student.School.ID))
+	rows, err := hlpr.rowsWithButtons(interfaceSlice, callback)
+	if err != nil {
+		return "", nil, err
+	}
+
+	backRow, err := hlpr.backToSchoolRow(replyMarkup, callback.ListCommand, student.School.ID)
+	if err != nil {
+		return "", nil, err
+	}
+	rows = append(rows, backRow)
 	replyMarkup.Inline(rows...)
 
 	return fmt.Sprintf("School: %v\n\nChoose a student from the list below:", student.School.Title), replyMarkup, nil
@@ -123,9 +157,9 @@ func (hlpr *Helper) GetStudentsList(callback *model.Callback) (string, *telebot.
 // BlockStudent ...
 func (hlpr *Helper) BlockStudent(callback *model.Callback) (string, *telebot.ReplyMarkup, error) {
 	hlpr.logger.WithFields(logrus.Fields{
-		"id": callback.ID,
+		"id": callback.TypeID,
 	}).Info("get student from database by id")
-	student, err := hlpr.store.Student().FindByID(callback.ID)
+	student, err := hlpr.store.Student().FindByID(callback.TypeID)
 	if err != nil {
 		return "", nil, err
 	}
@@ -140,7 +174,11 @@ func (hlpr *Helper) BlockStudent(callback *model.Callback) (string, *telebot.Rep
 	hlpr.logger.WithFields(student.LogrusFields()).Info("student blocked")
 
 	replyMarkup := &telebot.ReplyMarkup{}
-	replyMarkup.Inline(backToStudentRow(replyMarkup, callback, student.ID))
+	backRow, err := hlpr.backToStudentRow(replyMarkup, callback.ListCommand, student.ID)
+	if err != nil {
+		return "", nil, err
+	}
+	replyMarkup.Inline(backRow)
 
 	return fmt.Sprintf("Success! Student <b>%v</b> blocked", student.Account.Username), replyMarkup, nil
 }
@@ -148,9 +186,9 @@ func (hlpr *Helper) BlockStudent(callback *model.Callback) (string, *telebot.Rep
 // UnblockStudent ...
 func (hlpr *Helper) UnblockStudent(callback *model.Callback) (string, *telebot.ReplyMarkup, error) {
 	hlpr.logger.WithFields(logrus.Fields{
-		"id": callback.ID,
+		"id": callback.TypeID,
 	}).Info("get student from database by id")
-	student, err := hlpr.store.Student().FindByID(callback.ID)
+	student, err := hlpr.store.Student().FindByID(callback.TypeID)
 	if err != nil {
 		return "", nil, err
 	}
@@ -165,7 +203,11 @@ func (hlpr *Helper) UnblockStudent(callback *model.Callback) (string, *telebot.R
 	hlpr.logger.WithFields(student.LogrusFields()).Info("student unblocked")
 
 	replyMarkup := &telebot.ReplyMarkup{}
-	replyMarkup.Inline(backToStudentRow(replyMarkup, callback, student.ID))
+	backRow, err := hlpr.backToStudentRow(replyMarkup, callback.ListCommand, student.ID)
+	if err != nil {
+		return "", nil, err
+	}
+	replyMarkup.Inline(backRow)
 
 	return fmt.Sprintf("Success! Student <b>%v</b> unblocked", student.Account.Username), replyMarkup, nil
 }
@@ -173,9 +215,9 @@ func (hlpr *Helper) UnblockStudent(callback *model.Callback) (string, *telebot.R
 // SetStudent ...
 func (hlpr *Helper) SetStudent(callback *model.Callback) (string, *telebot.ReplyMarkup, error) {
 	hlpr.logger.WithFields(logrus.Fields{
-		"id": callback.ID,
+		"id": callback.TypeID,
 	}).Info("get student from database by id")
-	student, err := hlpr.store.Student().FindByID(callback.ID)
+	student, err := hlpr.store.Student().FindByID(callback.TypeID)
 	if err != nil {
 		return "", nil, err
 	}
@@ -190,7 +232,11 @@ func (hlpr *Helper) SetStudent(callback *model.Callback) (string, *telebot.Reply
 	hlpr.logger.WithFields(student.LogrusFields()).Info("student moved")
 
 	replyMarkup := &telebot.ReplyMarkup{}
-	replyMarkup.Inline(backToStudentRow(replyMarkup, callback, student.ID))
+	backRow, err := hlpr.backToStudentRow(replyMarkup, callback.ListCommand, student.ID)
+	if err != nil {
+		return "", nil, err
+	}
+	replyMarkup.Inline(backRow)
 
 	return fmt.Sprintf("Success! Student <b>%v</b> updated. New type is %v", student.Account.Username, student.GetType()), replyMarkup, nil
 }
@@ -198,9 +244,9 @@ func (hlpr *Helper) SetStudent(callback *model.Callback) (string, *telebot.Reply
 // SetListener ...
 func (hlpr *Helper) SetListener(callback *model.Callback) (string, *telebot.ReplyMarkup, error) {
 	hlpr.logger.WithFields(logrus.Fields{
-		"id": callback.ID,
+		"id": callback.TypeID,
 	}).Info("get student from database by id")
-	student, err := hlpr.store.Student().FindByID(callback.ID)
+	student, err := hlpr.store.Student().FindByID(callback.TypeID)
 	if err != nil {
 		return "", nil, err
 	}
@@ -215,32 +261,44 @@ func (hlpr *Helper) SetListener(callback *model.Callback) (string, *telebot.Repl
 	hlpr.logger.WithFields(student.LogrusFields()).Info("student moved")
 
 	replyMarkup := &telebot.ReplyMarkup{}
-	replyMarkup.Inline(backToStudentRow(replyMarkup, callback, student.ID))
+	backRow, err := hlpr.backToStudentRow(replyMarkup, callback.ListCommand, student.ID)
+	if err != nil {
+		return "", nil, err
+	}
+	replyMarkup.Inline(backRow)
 
 	return fmt.Sprintf("Success! Student <b>%v</b> updated. New type is %v", student.Account.Username, student.GetType()), replyMarkup, nil
 }
 
-func backToStudentRow(replyMarkup *telebot.ReplyMarkup, callback *model.Callback, studentID int64) telebot.Row {
+func (hlpr *Helper) backToStudentRow(replyMarkup *telebot.ReplyMarkup, listCommand string, studentID int64) (telebot.Row, error) {
 	backToStudentCallback := &model.Callback{
-		ID:          studentID,
+		Created:     time.Now(),
 		Type:        "student",
+		TypeID:      studentID,
 		Command:     "get",
-		ListCommand: callback.ListCommand,
+		ListCommand: listCommand,
+	}
+	if err := hlpr.prepareCallback(backToStudentCallback); err != nil {
+		return nil, err
 	}
 
 	backToStudentsListCallback := &model.Callback{
-		ID:          studentID,
+		Created:     time.Now(),
 		Type:        "student",
+		TypeID:      studentID,
 		Command:     "students_list",
-		ListCommand: callback.ListCommand,
+		ListCommand: listCommand,
+	}
+	if err := hlpr.prepareCallback(backToStudentsListCallback); err != nil {
+		return nil, err
 	}
 
-	if callback.ListCommand == "get" {
+	if listCommand == "get" {
 		return replyMarkup.Row(
-			replyMarkup.Data("<< Back to Student", backToStudentCallback.ToString()),
-			replyMarkup.Data("<< Back to Students List", backToStudentsListCallback.ToString()),
-		)
+			replyMarkup.Data("<< Back to Student", backToStudentCallback.GetStringID()),
+			replyMarkup.Data("<< Back to Students List", backToStudentsListCallback.GetStringID()),
+		), nil
 	}
 
-	return replyMarkup.Row(replyMarkup.Data("<< Back to Students List", backToStudentsListCallback.ToString()))
+	return replyMarkup.Row(replyMarkup.Data("<< Back to Students List", backToStudentsListCallback.GetStringID())), nil
 }

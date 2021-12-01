@@ -13,6 +13,7 @@ type Store struct {
 	moduleRepository   *ModuleRepository
 	studentRepository  *StudentRepository
 	homeworkRepository *HomeworkRepository
+	callbackRepository *CallbackRepository
 }
 
 // New ...
@@ -102,4 +103,18 @@ func (store *Store) Homework() store.HomeworkRepository {
 	}
 
 	return store.homeworkRepository
+}
+
+// Callback ...
+func (store *Store) Callback() store.CallbackRepository {
+	if store.callbackRepository != nil {
+		return store.callbackRepository
+	}
+
+	store.callbackRepository = &CallbackRepository{
+		store:     store,
+		callbacks: []*model.Callback{},
+	}
+
+	return store.callbackRepository
 }

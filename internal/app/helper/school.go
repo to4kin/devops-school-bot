@@ -3,6 +3,7 @@ package helper
 import (
 	"fmt"
 	"sort"
+	"time"
 
 	"github.com/sirupsen/logrus"
 	"gitlab.devops.telekom.de/tvpp/prototypes/devops-school-bot/internal/app/model"
@@ -46,7 +47,10 @@ func (hlpr *Helper) GetSchoolsList(callback *model.Callback) (string, *telebot.R
 	for i, v := range schools {
 		interfaceSlice[i] = v
 	}
-	rows := rowsWithButtons(interfaceSlice, callback)
+	rows, err := hlpr.rowsWithButtons(interfaceSlice, callback)
+	if err != nil {
+		return "", nil, err
+	}
 
 	replyMarkup := &telebot.ReplyMarkup{}
 	replyMarkup.Inline(rows...)
@@ -60,9 +64,9 @@ func (hlpr *Helper) GetSchoolsList(callback *model.Callback) (string, *telebot.R
 // Buttons Report/Full Report and Homeworks depend on cound of Homeworks (>0)
 func (hlpr *Helper) GetSchool(callback *model.Callback) (string, *telebot.ReplyMarkup, error) {
 	hlpr.logger.WithFields(logrus.Fields{
-		"id": callback.ID,
+		"id": callback.TypeID,
 	}).Info("get school from database by id")
-	school, err := hlpr.store.School().FindByID(callback.ID)
+	school, err := hlpr.store.School().FindByID(callback.TypeID)
 	if err != nil {
 		return "", nil, err
 	}
@@ -104,44 +108,94 @@ func (hlpr *Helper) GetSchool(callback *model.Callback) (string, *telebot.ReplyM
 	var buttons []telebot.Btn
 	replyMarkup := &telebot.ReplyMarkup{}
 	if school.Active {
-		stopSchoolCallback := *callback
-		stopSchoolCallback.Command = "stop"
-		buttons = append(buttons, replyMarkup.Data("Stop school", stopSchoolCallback.ToString()))
+		stopSchoolCallback := &model.Callback{
+			Created:     time.Now(),
+			Type:        callback.Type,
+			TypeID:      callback.TypeID,
+			Command:     "stop",
+			ListCommand: callback.ListCommand,
+		}
+		if err := hlpr.prepareCallback(stopSchoolCallback); err != nil {
+			return "", nil, err
+		}
+
+		buttons = append(buttons, replyMarkup.Data("Stop school", stopSchoolCallback.GetStringID()))
 	} else {
-		startSchoolCallback := *callback
-		startSchoolCallback.Command = "start"
-		buttons = append(buttons, replyMarkup.Data("Start school", startSchoolCallback.ToString()))
+		startSchoolCallback := &model.Callback{
+			Created:     time.Now(),
+			Type:        callback.Type,
+			TypeID:      callback.TypeID,
+			Command:     "start",
+			ListCommand: callback.ListCommand,
+		}
+		if err := hlpr.prepareCallback(startSchoolCallback); err != nil {
+			return "", nil, err
+		}
+
+		buttons = append(buttons, replyMarkup.Data("Start school", startSchoolCallback.GetStringID()))
 	}
 	if len(students) > 0 {
 		studentsListCallback := &model.Callback{
-			ID:          students[0].ID,
+			Created:     time.Now(),
 			Type:        "student",
+			TypeID:      students[0].ID,
 			Command:     "students_list",
 			ListCommand: callback.ListCommand,
 		}
-		buttons = append(buttons, replyMarkup.Data("Students", studentsListCallback.ToString()))
+		if err := hlpr.prepareCallback(studentsListCallback); err != nil {
+			return "", nil, err
+		}
+		buttons = append(buttons, replyMarkup.Data("Students", studentsListCallback.GetStringID()))
 	}
 	if len(listeners) > 0 {
 		listenersListCallback := &model.Callback{
-			ID:          listeners[0].ID,
+			Created:     time.Now(),
 			Type:        "student",
+			TypeID:      listeners[0].ID,
 			Command:     "students_list",
 			ListCommand: callback.ListCommand,
 		}
-		buttons = append(buttons, replyMarkup.Data("Listeners", listenersListCallback.ToString()))
+		if err := hlpr.prepareCallback(listenersListCallback); err != nil {
+			return "", nil, err
+		}
+		buttons = append(buttons, replyMarkup.Data("Listeners", listenersListCallback.GetStringID()))
 	}
 	if len(homeworks) > 0 {
-		reportCallback := *callback
-		reportCallback.Command = "report"
-		buttons = append(buttons, replyMarkup.Data("Report", reportCallback.ToString()))
+		reportCallback := &model.Callback{
+			Created:     time.Now(),
+			Type:        callback.Type,
+			TypeID:      callback.TypeID,
+			Command:     "report",
+			ListCommand: callback.ListCommand,
+		}
+		if err := hlpr.prepareCallback(reportCallback); err != nil {
+			return "", nil, err
+		}
+		buttons = append(buttons, replyMarkup.Data("Report", reportCallback.GetStringID()))
 
-		fullReportCallback := *callback
-		fullReportCallback.Command = "full_report"
-		buttons = append(buttons, replyMarkup.Data("Full Report", fullReportCallback.ToString()))
+		fullReportCallback := &model.Callback{
+			Created:     time.Now(),
+			Type:        callback.Type,
+			TypeID:      callback.TypeID,
+			Command:     "full_report",
+			ListCommand: callback.ListCommand,
+		}
+		if err := hlpr.prepareCallback(fullReportCallback); err != nil {
+			return "", nil, err
+		}
+		buttons = append(buttons, replyMarkup.Data("Full Report", fullReportCallback.GetStringID()))
 
-		homeworksCallback := *callback
-		homeworksCallback.Command = "homeworks"
-		buttons = append(buttons, replyMarkup.Data("Homeworks", homeworksCallback.ToString()))
+		homeworksCallback := &model.Callback{
+			Created:     time.Now(),
+			Type:        callback.Type,
+			TypeID:      callback.TypeID,
+			Command:     "homeworks",
+			ListCommand: callback.ListCommand,
+		}
+		if err := hlpr.prepareCallback(homeworksCallback); err != nil {
+			return "", nil, err
+		}
+		buttons = append(buttons, replyMarkup.Data("Homeworks", homeworksCallback.GetStringID()))
 	}
 
 	var rows []telebot.Row
@@ -153,9 +207,17 @@ func (hlpr *Helper) GetSchool(callback *model.Callback) (string, *telebot.ReplyM
 		rows = append(rows, replyMarkup.Row(buttons[div*2]))
 	}
 
-	backToSchoolsListCallback := *callback
-	backToSchoolsListCallback.Command = "schools_list"
-	rows = append(rows, replyMarkup.Row(replyMarkup.Data("<< Back to Schools List", backToSchoolsListCallback.ToString())))
+	backToSchoolsListCallback := &model.Callback{
+		Created:     time.Now(),
+		Type:        callback.Type,
+		TypeID:      callback.TypeID,
+		Command:     "schools_list",
+		ListCommand: callback.ListCommand,
+	}
+	if err := hlpr.prepareCallback(backToSchoolsListCallback); err != nil {
+		return "", nil, err
+	}
+	rows = append(rows, replyMarkup.Row(replyMarkup.Data("<< Back to Schools List", backToSchoolsListCallback.GetStringID())))
 	replyMarkup.Inline(rows...)
 
 	lessons := make(map[string]int)
@@ -194,9 +256,9 @@ func (hlpr *Helper) GetSchool(callback *model.Callback) (string, *telebot.ReplyM
 // StartSchool updates School status in database
 func (hlpr *Helper) StartSchool(callback *model.Callback) (string, *telebot.ReplyMarkup, error) {
 	hlpr.logger.WithFields(logrus.Fields{
-		"id": callback.ID,
+		"id": callback.TypeID,
 	}).Info("get school from database by id")
-	school, err := hlpr.store.School().FindByID(callback.ID)
+	school, err := hlpr.store.School().FindByID(callback.TypeID)
 	if err != nil {
 		return "", nil, err
 	}
@@ -211,7 +273,8 @@ func (hlpr *Helper) StartSchool(callback *model.Callback) (string, *telebot.Repl
 	hlpr.logger.WithFields(school.LogrusFields()).Info("school started")
 
 	replyMarkup := &telebot.ReplyMarkup{}
-	replyMarkup.Inline(backToSchoolRow(replyMarkup, callback, school.ID))
+	backRow, err := hlpr.backToSchoolRow(replyMarkup, callback.ListCommand, school.ID)
+	replyMarkup.Inline(backRow)
 
 	return fmt.Sprintf("Success! School <b>%v</b> started", school.Title), replyMarkup, nil
 }
@@ -219,9 +282,9 @@ func (hlpr *Helper) StartSchool(callback *model.Callback) (string, *telebot.Repl
 // StopSchool updates School status in database
 func (hlpr *Helper) StopSchool(callback *model.Callback) (string, *telebot.ReplyMarkup, error) {
 	hlpr.logger.WithFields(logrus.Fields{
-		"id": callback.ID,
+		"id": callback.TypeID,
 	}).Info("get school from database by id")
-	school, err := hlpr.store.School().FindByID(callback.ID)
+	school, err := hlpr.store.School().FindByID(callback.TypeID)
 	if err != nil {
 		return "", nil, err
 	}
@@ -236,7 +299,8 @@ func (hlpr *Helper) StopSchool(callback *model.Callback) (string, *telebot.Reply
 	hlpr.logger.WithFields(school.LogrusFields()).Info("school stopped")
 
 	replyMarkup := &telebot.ReplyMarkup{}
-	replyMarkup.Inline(backToSchoolRow(replyMarkup, callback, school.ID))
+	backRow, err := hlpr.backToSchoolRow(replyMarkup, callback.ListCommand, school.ID)
+	replyMarkup.Inline(backRow)
 
 	return fmt.Sprintf("Success! School <b>%v</b> finished", school.Title), replyMarkup, nil
 }
@@ -244,9 +308,9 @@ func (hlpr *Helper) StopSchool(callback *model.Callback) (string, *telebot.Reply
 // ReportSchool returns report for School
 func (hlpr *Helper) ReportSchool(callback *model.Callback) (string, *telebot.ReplyMarkup, error) {
 	hlpr.logger.WithFields(logrus.Fields{
-		"id": callback.ID,
+		"id": callback.TypeID,
 	}).Info("get school from database by id")
-	school, err := hlpr.store.School().FindByID(callback.ID)
+	school, err := hlpr.store.School().FindByID(callback.TypeID)
 	if err != nil {
 		return "", nil, err
 	}
@@ -262,7 +326,8 @@ func (hlpr *Helper) ReportSchool(callback *model.Callback) (string, *telebot.Rep
 	}
 
 	replyMarkup := &telebot.ReplyMarkup{}
-	replyMarkup.Inline(backToSchoolRow(replyMarkup, callback, school.ID))
+	backRow, err := hlpr.backToSchoolRow(replyMarkup, callback.ListCommand, school.ID)
+	replyMarkup.Inline(backRow)
 
 	return fmt.Sprintf("School <b>%v</b>\n\n%v", school.Title, reportMessage), replyMarkup, nil
 }
@@ -270,9 +335,9 @@ func (hlpr *Helper) ReportSchool(callback *model.Callback) (string, *telebot.Rep
 // FullReportSchool return Dull Report for School
 func (hlpr *Helper) FullReportSchool(callback *model.Callback) (string, *telebot.ReplyMarkup, error) {
 	hlpr.logger.WithFields(logrus.Fields{
-		"id": callback.ID,
+		"id": callback.TypeID,
 	}).Info("get school from database by id")
-	school, err := hlpr.store.School().FindByID(callback.ID)
+	school, err := hlpr.store.School().FindByID(callback.TypeID)
 	if err != nil {
 		return "", nil, err
 	}
@@ -288,7 +353,8 @@ func (hlpr *Helper) FullReportSchool(callback *model.Callback) (string, *telebot
 	}
 
 	replyMarkup := &telebot.ReplyMarkup{}
-	replyMarkup.Inline(backToSchoolRow(replyMarkup, callback, school.ID))
+	backRow, err := hlpr.backToSchoolRow(replyMarkup, callback.ListCommand, school.ID)
+	replyMarkup.Inline(backRow)
 
 	return fmt.Sprintf("School <b>%v</b>\n\n%v", school.Title, reportMessage), replyMarkup, nil
 }
@@ -296,9 +362,9 @@ func (hlpr *Helper) FullReportSchool(callback *model.Callback) (string, *telebot
 // GetSchoolHomeworks returns Homeworks for School
 func (hlpr *Helper) GetSchoolHomeworks(callback *model.Callback) (string, *telebot.ReplyMarkup, error) {
 	hlpr.logger.WithFields(logrus.Fields{
-		"id": callback.ID,
+		"id": callback.TypeID,
 	}).Info("get school from database by id")
-	school, err := hlpr.store.School().FindByID(callback.ID)
+	school, err := hlpr.store.School().FindByID(callback.TypeID)
 	if err != nil {
 		return "", nil, err
 	}
@@ -339,33 +405,44 @@ func (hlpr *Helper) GetSchoolHomeworks(callback *model.Callback) (string, *teleb
 
 	var rows []telebot.Row
 	//rows := rowsWithButtons(interfaceSlice, homeworkCallback)
-	rows = append(rows, backToSchoolRow(replyMarkup, callback, school.ID))
+	backRow, err := hlpr.backToSchoolRow(replyMarkup, callback.ListCommand, school.ID)
+	rows = append(rows, backRow)
 	replyMarkup.Inline(rows...)
 
 	return fmt.Sprintf("School <b>%v</b>\n\n%v", school.Title, reportMessage), replyMarkup, nil
 }
 
-func backToSchoolRow(replyMarkup *telebot.ReplyMarkup, callback *model.Callback, schoolID int64) telebot.Row {
+func (hlpr *Helper) backToSchoolRow(replyMarkup *telebot.ReplyMarkup, listCommand string, schoolID int64) (telebot.Row, error) {
 	backToSchoolCallback := &model.Callback{
-		ID:          schoolID,
+		Created:     time.Now(),
 		Type:        "school",
+		TypeID:      schoolID,
 		Command:     "get",
-		ListCommand: callback.ListCommand,
+		ListCommand: listCommand,
+	}
+
+	if err := hlpr.prepareCallback(backToSchoolCallback); err != nil {
+		return nil, err
 	}
 
 	backToSchoolsListCallback := &model.Callback{
-		ID:          schoolID,
+		Created:     time.Now(),
 		Type:        "school",
+		TypeID:      schoolID,
 		Command:     "schools_list",
-		ListCommand: callback.ListCommand,
+		ListCommand: listCommand,
 	}
 
-	if callback.ListCommand == "get" {
+	if err := hlpr.prepareCallback(backToSchoolsListCallback); err != nil {
+		return nil, err
+	}
+
+	if listCommand == "get" {
 		return replyMarkup.Row(
-			replyMarkup.Data("<< Back to School", backToSchoolCallback.ToString()),
-			replyMarkup.Data("<< Back to Schools List", backToSchoolsListCallback.ToString()),
-		)
+			replyMarkup.Data("<< Back to School", backToSchoolCallback.GetStringID()),
+			replyMarkup.Data("<< Back to Schools List", backToSchoolsListCallback.GetStringID()),
+		), nil
 	}
 
-	return replyMarkup.Row(replyMarkup.Data("<< Back to Schools List", backToSchoolsListCallback.ToString()))
+	return replyMarkup.Row(replyMarkup.Data("<< Back to Schools List", backToSchoolsListCallback.GetStringID())), nil
 }

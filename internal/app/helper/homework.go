@@ -2,6 +2,7 @@ package helper
 
 import (
 	"fmt"
+	"time"
 
 	"github.com/sirupsen/logrus"
 	"gitlab.devops.telekom.de/tvpp/prototypes/devops-school-bot/internal/app/model"
@@ -12,9 +13,9 @@ import (
 // GetHomework ...
 func (hlpr *Helper) GetHomework(callback *model.Callback) (string, *telebot.ReplyMarkup, error) {
 	hlpr.logger.WithFields(logrus.Fields{
-		"id": callback.ID,
+		"id": callback.TypeID,
 	}).Info("get homework from database by id")
-	homework, err := hlpr.store.Homework().FindByID(callback.ID)
+	homework, err := hlpr.store.Homework().FindByID(callback.TypeID)
 	if err != nil {
 		return "", nil, err
 	}
@@ -24,29 +25,50 @@ func (hlpr *Helper) GetHomework(callback *model.Callback) (string, *telebot.Repl
 	replyMarkup := &telebot.ReplyMarkup{}
 
 	if homework.Active {
-		disableHomeworkCallback := *callback
-		disableHomeworkCallback.Command = "disable_homework"
-		rows = append(rows, replyMarkup.Row(replyMarkup.Data(fmt.Sprintf("Disable all %v", homework.Lesson.Title), disableHomeworkCallback.ToString())))
+		disableHomeworkCallback := &model.Callback{
+			Created:     time.Now(),
+			Type:        callback.Type,
+			TypeID:      callback.TypeID,
+			Command:     "disable_homework",
+			ListCommand: callback.ListCommand,
+		}
+		if err := hlpr.prepareCallback(disableHomeworkCallback); err != nil {
+			return "", nil, err
+		}
+		rows = append(rows, replyMarkup.Row(replyMarkup.Data(fmt.Sprintf("Disable all %v", homework.Lesson.Title), disableHomeworkCallback.GetStringID())))
 	} else {
-		enableHomeworkCallback := *callback
-		enableHomeworkCallback.Command = "enable_homework"
-		rows = append(rows, replyMarkup.Row(replyMarkup.Data(fmt.Sprintf("Enable all %v", homework.Lesson.Title), enableHomeworkCallback.ToString())))
+		enableHomeworkCallback := &model.Callback{
+			Created:     time.Now(),
+			Type:        callback.Type,
+			TypeID:      callback.TypeID,
+			Command:     "enable_homework",
+			ListCommand: callback.ListCommand,
+		}
+		if err := hlpr.prepareCallback(enableHomeworkCallback); err != nil {
+			return "", nil, err
+		}
+		rows = append(rows, replyMarkup.Row(replyMarkup.Data(fmt.Sprintf("Enable all %v", homework.Lesson.Title), enableHomeworkCallback.GetStringID())))
 	}
 
 	homeworksListCallback := &model.Callback{
-		ID:          homework.ID,
+		Created:     time.Now(),
 		Type:        "homework",
+		TypeID:      homework.ID,
 		Command:     "homeworks_list",
 		ListCommand: callback.ListCommand,
 	}
-	schoolsListCallback := &model.Callback{
-		ID:          homework.Student.School.ID,
-		Type:        "school",
-		Command:     "homeworks",
-		ListCommand: "homeworks",
+
+	if err := hlpr.prepareCallback(homeworksListCallback); err != nil {
+		return "", nil, err
 	}
-	rows = append(rows, replyMarkup.Row(replyMarkup.Data("<< Back to Homeworks List", homeworksListCallback.ToString())))
-	rows = append(rows, backToSchoolRow(replyMarkup, schoolsListCallback, homework.Student.School.ID))
+	rows = append(rows, replyMarkup.Row(replyMarkup.Data("<< Back to Homeworks List", homeworksListCallback.GetStringID())))
+
+	backRow, err := hlpr.backToSchoolRow(replyMarkup, "homeworks", homework.Student.School.ID)
+	if err != nil {
+		return "", nil, err
+	}
+
+	rows = append(rows, backRow)
 	replyMarkup.Inline(rows...)
 
 	hlpr.logger.WithFields(logrus.Fields{
@@ -86,9 +108,9 @@ func (hlpr *Helper) GetHomework(callback *model.Callback) (string, *telebot.Repl
 // GetHomeworksList ...
 func (hlpr *Helper) GetHomeworksList(callback *model.Callback) (string, *telebot.ReplyMarkup, error) {
 	hlpr.logger.WithFields(logrus.Fields{
-		"id": callback.ID,
+		"id": callback.TypeID,
 	}).Info("get homework from database by id")
-	homework, err := hlpr.store.Homework().FindByID(callback.ID)
+	homework, err := hlpr.store.Homework().FindByID(callback.TypeID)
 	if err != nil {
 		return "", nil, err
 	}
@@ -121,16 +143,17 @@ func (hlpr *Helper) GetHomeworksList(callback *model.Callback) (string, *telebot
 	}
 	interfaceSlice = removeDuplicate(interfaceSlice)
 
-	schoolsListCallback := &model.Callback{
-		ID:          homework.Student.School.ID,
-		Type:        "school",
-		Command:     "homeworks",
-		ListCommand: "homeworks",
+	rows, err := hlpr.rowsWithButtons(interfaceSlice, callback)
+	if err != nil {
+		return "", nil, err
 	}
 
-	rows := rowsWithButtons(interfaceSlice, callback)
-	//var rows []telebot.Row
-	rows = append(rows, backToSchoolRow(replyMarkup, schoolsListCallback, homework.Student.School.ID))
+	backRow, err := hlpr.backToSchoolRow(replyMarkup, "homeworks", homework.Student.School.ID)
+	if err != nil {
+		return "", nil, err
+	}
+
+	rows = append(rows, backRow)
 	replyMarkup.Inline(rows...)
 
 	return fmt.Sprintf("School <b>%v</b>\n\n%v", homework.Student.School.Title, reportMessage), replyMarkup, nil
@@ -139,9 +162,9 @@ func (hlpr *Helper) GetHomeworksList(callback *model.Callback) (string, *telebot
 // DisableHomework ...
 func (hlpr *Helper) DisableHomework(callback *model.Callback) (string, *telebot.ReplyMarkup, error) {
 	hlpr.logger.WithFields(logrus.Fields{
-		"id": callback.ID,
+		"id": callback.TypeID,
 	}).Info("get homework from database by id")
-	homework, err := hlpr.store.Homework().FindByID(callback.ID)
+	homework, err := hlpr.store.Homework().FindByID(callback.TypeID)
 	if err != nil {
 		return "", nil, err
 	}
@@ -169,7 +192,12 @@ func (hlpr *Helper) DisableHomework(callback *model.Callback) (string, *telebot.
 	}
 
 	replyMarkup := &telebot.ReplyMarkup{}
-	replyMarkup.Inline(backToHomeworkRow(replyMarkup, callback, homework.ID))
+	backRow, err := hlpr.backToHomeworkRow(replyMarkup, callback.ListCommand, homework.ID)
+	if err != nil {
+		return "", nil, err
+	}
+
+	replyMarkup.Inline(backRow)
 
 	return fmt.Sprintf("Success! Homeworks with lesson <b>%v</b> were <b>DISABLED</b>", homework.Lesson.Title), replyMarkup, nil
 }
@@ -177,9 +205,9 @@ func (hlpr *Helper) DisableHomework(callback *model.Callback) (string, *telebot.
 // EnableHomework ...
 func (hlpr *Helper) EnableHomework(callback *model.Callback) (string, *telebot.ReplyMarkup, error) {
 	hlpr.logger.WithFields(logrus.Fields{
-		"id": callback.ID,
+		"id": callback.TypeID,
 	}).Info("get homework from database by id")
-	homework, err := hlpr.store.Homework().FindByID(callback.ID)
+	homework, err := hlpr.store.Homework().FindByID(callback.TypeID)
 	if err != nil {
 		return "", nil, err
 	}
@@ -206,32 +234,47 @@ func (hlpr *Helper) EnableHomework(callback *model.Callback) (string, *telebot.R
 		hlpr.logger.WithFields(hw.LogrusFields()).Info("homework enabled")
 	}
 	replyMarkup := &telebot.ReplyMarkup{}
-	replyMarkup.Inline(backToHomeworkRow(replyMarkup, callback, homework.ID))
+	backRow, err := hlpr.backToHomeworkRow(replyMarkup, callback.ListCommand, homework.ID)
+	if err != nil {
+		return "", nil, err
+	}
+
+	replyMarkup.Inline(backRow)
 
 	return fmt.Sprintf("Success! Homeworks with lesson <b>%v</b> were <b>ENABLED</b>", homework.Lesson.Title), replyMarkup, nil
 }
 
-func backToHomeworkRow(replyMarkup *telebot.ReplyMarkup, callback *model.Callback, homeworkID int64) telebot.Row {
+func (hlpr *Helper) backToHomeworkRow(replyMarkup *telebot.ReplyMarkup, listCommand string, homeworkID int64) (telebot.Row, error) {
 	backToHomeworkCallback := &model.Callback{
-		ID:          homeworkID,
+		Created:     time.Now(),
 		Type:        "homework",
+		TypeID:      homeworkID,
 		Command:     "get",
-		ListCommand: callback.ListCommand,
+		ListCommand: listCommand,
 	}
 
-	backToHomeworkssListCallback := &model.Callback{
-		ID:          homeworkID,
+	if err := hlpr.prepareCallback(backToHomeworkCallback); err != nil {
+		return nil, err
+	}
+
+	backToHomeworksListCallback := &model.Callback{
+		Created:     time.Now(),
 		Type:        "homework",
+		TypeID:      homeworkID,
 		Command:     "homeworks_list",
-		ListCommand: callback.ListCommand,
+		ListCommand: listCommand,
 	}
 
-	if callback.ListCommand == "get" {
+	if err := hlpr.prepareCallback(backToHomeworksListCallback); err != nil {
+		return nil, err
+	}
+
+	if listCommand == "get" {
 		return replyMarkup.Row(
-			replyMarkup.Data("<< Back to Homework", backToHomeworkCallback.ToString()),
-			replyMarkup.Data("<< Back to Homeworks List", backToHomeworkssListCallback.ToString()),
-		)
+			replyMarkup.Data("<< Back to Homework", backToHomeworkCallback.GetStringID()),
+			replyMarkup.Data("<< Back to Homeworks List", backToHomeworksListCallback.GetStringID()),
+		), nil
 	}
 
-	return replyMarkup.Row(replyMarkup.Data("<< Back to Homeworks List", backToHomeworkssListCallback.ToString()))
+	return replyMarkup.Row(replyMarkup.Data("<< Back to Homeworks List", backToHomeworksListCallback.GetStringID())), nil
 }

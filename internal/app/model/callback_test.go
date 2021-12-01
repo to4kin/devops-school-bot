@@ -7,39 +7,52 @@ import (
 	"gitlab.devops.telekom.de/tvpp/prototypes/devops-school-bot/internal/app/model"
 )
 
-func TestCallback_Unmarshal(t *testing.T) {
-	callback := &model.Callback{}
-
+func TestCallback_Validate(t *testing.T) {
 	testCases := []struct {
 		name    string
-		a       func() string
+		c       func() *model.Callback
 		isValid bool
 	}{
 		{
-			name: "valid_string",
-			a: func() string {
-				return string("99999|account|accounts|get")
+			name: "valid",
+			c: func() *model.Callback {
+				return model.TestAccountCallback(t)
 			},
 			isValid: true,
 		},
 		{
-			name: "invalid_small_string",
-			a: func() string {
-				return string("99999|account|accounts")
+			name: "empty_type",
+			c: func() *model.Callback {
+				c := model.TestAccountCallback(t)
+				c.Type = ""
+				return c
 			},
 			isValid: false,
 		},
 		{
-			name: "invalid_big_string",
-			a: func() string {
-				return string("99999|account|accounts|get|somethingelse")
+			name: "zero_type_id",
+			c: func() *model.Callback {
+				c := model.TestAccountCallback(t)
+				c.TypeID = 0
+				return c
 			},
 			isValid: false,
 		},
 		{
-			name: "invalid_id",
-			a: func() string {
-				return string("invalid|account|accounts|get")
+			name: "empty_command",
+			c: func() *model.Callback {
+				c := model.TestAccountCallback(t)
+				c.Command = ""
+				return c
+			},
+			isValid: false,
+		},
+		{
+			name: "empty_list_command",
+			c: func() *model.Callback {
+				c := model.TestAccountCallback(t)
+				c.ListCommand = ""
+				return c
 			},
 			isValid: false,
 		},
@@ -48,9 +61,9 @@ func TestCallback_Unmarshal(t *testing.T) {
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
 			if tc.isValid {
-				assert.NoError(t, callback.Unmarshal(tc.a()))
+				assert.NoError(t, tc.c().Validate())
 			} else {
-				assert.Error(t, callback.Unmarshal(tc.a()))
+				assert.Error(t, tc.c().Validate())
 			}
 		})
 	}

@@ -64,3 +64,10 @@ type HomeworkRepository interface {
 	FindBySchoolIDLessonID(int64, int64) ([]*model.Homework, error)
 	FindByStudentIDLessonID(int64, int64) (*model.Homework, error)
 }
+
+// CallbackRepository ...
+type CallbackRepository interface {
+	Create(*model.Callback) error
+	FindByID(int64) (*model.Callback, error)
+	FindByCallback(*model.Callback) (*model.Callback, error)
+}

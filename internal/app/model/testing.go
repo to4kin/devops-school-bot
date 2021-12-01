@@ -146,7 +146,9 @@ func TestHomeworkTwo(t *testing.T) *Homework {
 func TestAccountCallback(t *testing.T) *Callback {
 	return &Callback{
 		ID:          int64(1),
+		Created:     time.Now(),
 		Type:        "account",
+		TypeID:      int64(1),
 		Command:     "get",
 		ListCommand: "accounts_list",
 	}
@@ -156,7 +158,9 @@ func TestAccountCallback(t *testing.T) *Callback {
 func TestStudentCallback(t *testing.T) *Callback {
 	return &Callback{
 		ID:          int64(1),
+		Created:     time.Now(),
 		Type:        "student",
+		TypeID:      int64(1),
 		Command:     "get",
 		ListCommand: "students_list",
 	}
@@ -166,7 +170,9 @@ func TestStudentCallback(t *testing.T) *Callback {
 func TestSchoolCallback(t *testing.T) *Callback {
 	return &Callback{
 		ID:          int64(1),
+		Created:     time.Now(),
 		Type:        "school",
+		TypeID:      int64(1),
 		Command:     "get",
 		ListCommand: "schools_list",
 	}
@@ -176,7 +182,9 @@ func TestSchoolCallback(t *testing.T) *Callback {
 func TestHomeworkCallback(t *testing.T) *Callback {
 	return &Callback{
 		ID:          int64(1),
+		Created:     time.Now(),
 		Type:        "homework",
+		TypeID:      int64(1),
 		Command:     "get",
 		ListCommand: "homeworks_list",
 	}

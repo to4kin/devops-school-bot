@@ -193,7 +193,7 @@ func (hlpr *Helper) GetReport(school *model.School) (string, error) {
 
 		reportMessage += message
 	} else {
-		reportMessage += ErrReportNotFound
+		reportMessage += ErrReportNotFound + "\n"
 	}
 
 	hlpr.logger.WithFields(logrus.Fields{
