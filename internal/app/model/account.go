@@ -55,9 +55,24 @@ func (a *Account) GetID() int64 {
 	return a.ID
 }
 
-// GetButtonTitle returns "@" + Account.Username
+// GetStatusText returns string depending on active
+//
+// NOTE:
+// 💀 if superuser is true
+// <empty> if superuser is false
+func (a *Account) GetStatusText() string {
+	if a.Superuser {
+		return "💀"
+	}
+
+	return ""
+}
+
+// GetButtonTitle returns composite string depending on active
+//
+// NOTE: GetStatusText() + <space> + GetFullName()
 func (a *Account) GetButtonTitle() string {
-	return "@" + a.Username
+	return fmt.Sprintf("%v%v", a.GetStatusText(), a.GetFullName())
 }
 
 // GetFullName returns a full name for account
@@ -65,12 +80,7 @@ func (a *Account) GetButtonTitle() string {
 // NOTE:
 // - returns FirstName + LastName by default
 // - returns FirstName only if LastName is empty
-// - returns LastName only if FirstName is empty
 func (a *Account) GetFullName() string {
-	if a.FirstName == "" {
-		return a.LastName
-	}
-
 	if a.LastName == "" {
 		return a.FirstName
 	}

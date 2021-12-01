@@ -63,7 +63,8 @@ func (r *AccountRepository) FindAll() ([]*model.Account, error) {
 	accounts := []*model.Account{}
 
 	rows, err := r.store.db.Query(`
-		SELECT id, created, telegram_id, first_name, last_name, username, superuser FROM account ORDER BY username ASC
+		SELECT id, created, telegram_id, first_name, last_name, username, superuser FROM account 
+		ORDER BY first_name, last_name, username ASC
 		`,
 	)
 	if err != nil {
@@ -158,7 +159,8 @@ func (r *AccountRepository) FindBySuperuser(superuser bool) ([]*model.Account, e
 	accounts := []*model.Account{}
 
 	rows, err := r.store.db.Query(`
-		SELECT id, created, telegram_id, first_name, last_name, username, superuser FROM account WHERE superuser = $1 ORDER BY username ASC
+		SELECT id, created, telegram_id, first_name, last_name, username, superuser FROM account WHERE superuser = $1 
+		ORDER BY first_name, last_name, username ASC
 		`,
 		superuser,
 	)

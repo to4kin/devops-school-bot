@@ -62,7 +62,7 @@ func (s *Student) GetStatusText() string {
 
 // GetButtonTitle returns composite string depending on active
 //
-// NOTE: GetStatusText + <sapce> + Account.Username
+// NOTE: GetStatusText() + <space> + Account.Username
 func (s *Student) GetButtonTitle() string {
 	return fmt.Sprintf("%v%v", s.GetStatusText(), s.Account.GetFullName())
 }
