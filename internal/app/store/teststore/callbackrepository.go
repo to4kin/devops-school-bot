@@ -12,22 +12,21 @@ type CallbackRepository struct {
 }
 
 // Create ...
-func (r *CallbackRepository) Create(c *model.Callback) error {
-	if err := c.Validate(); err != nil {
+func (r *CallbackRepository) Create(callback *model.Callback) error {
+	if err := callback.Validate(); err != nil {
 		return err
 	}
 
-	callback, err := r.store.callbackRepository.FindByCallback(c)
-	if err != nil && err != store.ErrRecordNotFound {
+	if err := r.store.callbackRepository.FindByCallback(callback); err != nil && err != store.ErrRecordNotFound {
 		return err
 	}
 
-	if callback != nil {
+	if callback.ID != 0 {
 		return store.ErrRecordIsExist
 	}
 
-	c.ID = int64(len(r.callbacks) + 1)
-	r.callbacks = append(r.callbacks, c)
+	callback.ID = int64(len(r.callbacks) + 1)
+	r.callbacks = append(r.callbacks, callback)
 	return nil
 }
 
@@ -43,13 +42,15 @@ func (r *CallbackRepository) FindByID(callbackID int64) (*model.Callback, error)
 }
 
 // FindByCallback ...
-func (r *CallbackRepository) FindByCallback(callback *model.Callback) (*model.Callback, error) {
+func (r *CallbackRepository) FindByCallback(callback *model.Callback) error {
 	for _, c := range r.callbacks {
 		if c.Type == callback.Type && c.TypeID == callback.TypeID &&
 			c.Command == callback.Command && c.ListCommand == callback.ListCommand {
-			return c, nil
+			callback.ID = c.ID
+			callback.Created = c.Created
+			return nil
 		}
 	}
 
-	return nil, store.ErrRecordNotFound
+	return store.ErrRecordNotFound
 }

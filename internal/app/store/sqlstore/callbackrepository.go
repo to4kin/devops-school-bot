@@ -55,10 +55,9 @@ func (r *CallbackRepository) FindByID(callbackID int64) (*model.Callback, error)
 }
 
 // FindByCallback ...
-func (r *CallbackRepository) FindByCallback(callback *model.Callback) (*model.Callback, error) {
-	c := &model.Callback{}
+func (r *CallbackRepository) FindByCallback(callback *model.Callback) error {
 	if err := r.store.db.QueryRow(`
-		SELECT id, created, type, type_id, command, list_command FROM callback
+		SELECT id, created FROM callback
 		WHERE type = $1 AND type_id = $2 AND command = $3 AND list_command = $4
 		`,
 		callback.Type,
@@ -66,19 +65,15 @@ func (r *CallbackRepository) FindByCallback(callback *model.Callback) (*model.Ca
 		callback.Command,
 		callback.ListCommand,
 	).Scan(
-		&c.ID,
-		&c.Created,
-		&c.Type,
-		&c.TypeID,
-		&c.Command,
-		&c.ListCommand,
+		&callback.ID,
+		&callback.Created,
 	); err != nil {
 		if err == sql.ErrNoRows {
-			return nil, store.ErrRecordNotFound
+			return store.ErrRecordNotFound
 		}
 
-		return nil, err
+		return err
 	}
 
-	return c, nil
+	return nil
 }

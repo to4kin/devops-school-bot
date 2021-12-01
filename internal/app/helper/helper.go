@@ -121,28 +121,23 @@ func (hlpr *Helper) rowsWithButtons(values []model.Interface, callback *model.Ca
 
 func (hlpr *Helper) prepareCallback(callback *model.Callback) error {
 	hlpr.logger.WithFields(callback.LogrusFields()).Debug("check if callback already exist")
-	c, err := hlpr.store.Callback().FindByCallback(callback)
+	err := hlpr.store.Callback().FindByCallback(callback)
 	if err != nil {
 		if err == store.ErrRecordNotFound {
+			hlpr.logger.Debug("callback not found")
 			hlpr.logger.WithFields(callback.LogrusFields()).Debug("insert callback into database")
 			err := hlpr.store.Callback().Create(callback)
 			if err != nil {
-				hlpr.logger.Error(err)
 				return err
 			}
-			hlpr.logger.WithFields(logrus.Fields{
-				"new_callback_id": callback.ID,
-			}).Debug("callback successfully updated")
+			hlpr.logger.WithFields(callback.LogrusFields()).Debug("callback successfully inserted")
 			return nil
 		}
 
-		hlpr.logger.Error(err)
 		return err
 	}
-	hlpr.logger.WithFields(c.LogrusFields()).Debug("callback found")
+	hlpr.logger.WithFields(callback.LogrusFields()).Debug("callback found")
 
-	callback.ID = c.ID
-	callback.Created = c.Created
 	return nil
 }
 

@@ -145,7 +145,6 @@ func TestHomeworkTwo(t *testing.T) *Homework {
 // TestAccountCallback ...
 func TestAccountCallback(t *testing.T) *Callback {
 	return &Callback{
-		ID:          int64(1),
 		Created:     time.Now(),
 		Type:        "account",
 		TypeID:      int64(1),
@@ -157,7 +156,6 @@ func TestAccountCallback(t *testing.T) *Callback {
 // TestStudentCallback ...
 func TestStudentCallback(t *testing.T) *Callback {
 	return &Callback{
-		ID:          int64(1),
 		Created:     time.Now(),
 		Type:        "student",
 		TypeID:      int64(1),
@@ -169,7 +167,6 @@ func TestStudentCallback(t *testing.T) *Callback {
 // TestSchoolCallback ...
 func TestSchoolCallback(t *testing.T) *Callback {
 	return &Callback{
-		ID:          int64(1),
 		Created:     time.Now(),
 		Type:        "school",
 		TypeID:      int64(1),
@@ -181,7 +178,6 @@ func TestSchoolCallback(t *testing.T) *Callback {
 // TestHomeworkCallback ...
 func TestHomeworkCallback(t *testing.T) *Callback {
 	return &Callback{
-		ID:          int64(1),
 		Created:     time.Now(),
 		Type:        "homework",
 		TypeID:      int64(1),

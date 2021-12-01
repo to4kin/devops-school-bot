@@ -69,5 +69,5 @@ type HomeworkRepository interface {
 type CallbackRepository interface {
 	Create(*model.Callback) error
 	FindByID(int64) (*model.Callback, error)
-	FindByCallback(*model.Callback) (*model.Callback, error)
+	FindByCallback(*model.Callback) error
 }

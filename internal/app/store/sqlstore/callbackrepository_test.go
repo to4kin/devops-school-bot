@@ -45,14 +45,12 @@ func TestCallbackRepository_FindByCallback(t *testing.T) {
 	defer teardown("callback")
 
 	s := sqlstore.New(db)
-	testCallback := model.TestAccountCallback(t)
+	callback := model.TestAccountCallback(t)
 
-	_, err := s.Callback().FindByCallback(testCallback)
-	assert.EqualError(t, err, store.ErrRecordNotFound.Error())
+	assert.EqualError(t, s.Callback().FindByCallback(callback), store.ErrRecordNotFound.Error())
 
-	assert.NoError(t, s.Callback().Create(testCallback))
+	assert.NoError(t, s.Callback().Create(callback))
 
-	callback, err := s.Callback().FindByCallback(testCallback)
-	assert.NoError(t, err)
-	assert.NotNil(t, callback)
+	assert.NoError(t, s.Callback().FindByCallback(callback))
+	assert.NotNil(t, callback.ID)
 }
