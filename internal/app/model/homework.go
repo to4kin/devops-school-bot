@@ -74,8 +74,8 @@ func (h *Homework) GetStatusIcon() string {
 // GetStatusText returns string depending on active
 //
 // NOTE:
-// 🟢 if active is true
-// 🔴 if active is false
+// 🟢 Enable if active is true
+// 🔴 Disable if active is false
 func (h *Homework) GetStatusText() string {
 	if h.Active {
 		return "🟢 Enable"
