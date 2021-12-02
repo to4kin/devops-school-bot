@@ -103,10 +103,18 @@ func (hlpr *Helper) GetStudent(callback *model.Callback) (string, *telebot.Reply
 	rows = append(rows, backRow)
 	replyMarkup.Inline(rows...)
 
-	reportMessage, err := hlpr.GetUserReport(student.Account, student.School)
+	reportMessage := fmt.Sprintf(
+		"<b>Student info:</b>\nFirst name: %v\nLast name: %v\n\n",
+		student.Account.FirstName,
+		student.Account.LastName,
+	)
+
+	message, err := hlpr.GetStudentReport(student)
 	if err != nil {
 		return "", nil, err
 	}
+
+	reportMessage += message
 
 	return reportMessage, replyMarkup, nil
 }

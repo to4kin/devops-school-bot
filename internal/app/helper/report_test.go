@@ -21,7 +21,7 @@ func TestReportHelper_GetUserReport(t *testing.T) {
 	assert.NoError(t, store.Lesson().Create(homework.Lesson))
 	assert.NoError(t, store.Homework().Create(homework))
 
-	reportMessage, err := hlpr.GetUserReport(homework.Student.Account, homework.Student.School)
+	reportMessage, err := hlpr.GetUserReport(homework.Student.Account)
 	assert.NoError(t, err)
 	assert.NotEmpty(t, reportMessage)
 }

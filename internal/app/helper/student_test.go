@@ -13,12 +13,14 @@ import (
 func TestStudentHelper_GetStudent(t *testing.T) {
 	store := teststore.New()
 	hlpr := helper.NewHelper(store, logrus.New())
-	student := model.TestStudent(t)
+	homework := model.TestHomeworkOne(t)
 	callback := model.TestStudentCallback(t)
 
-	assert.NoError(t, store.Account().Create(student.Account))
-	assert.NoError(t, store.School().Create(student.School))
-	assert.NoError(t, store.Student().Create(student))
+	assert.NoError(t, store.Account().Create(homework.Student.Account))
+	assert.NoError(t, store.School().Create(homework.Student.School))
+	assert.NoError(t, store.Student().Create(homework.Student))
+	assert.NoError(t, store.Lesson().Create(homework.Lesson))
+	assert.NoError(t, store.Homework().Create(homework))
 
 	replyMessage, replyMarkup, err := hlpr.GetStudent(callback)
 	assert.NoError(t, err)

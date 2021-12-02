@@ -31,11 +31,20 @@ func (handler *Handler) handleMyReport(c telebot.Context) error {
 
 	hlpr := helper.NewHelper(handler.store, handler.logger)
 
-	reportMessage, err := hlpr.GetUserReport(account, nil)
+	reportMessage := fmt.Sprintf(
+		"Hello, @%v!\n\n<b>Student info:</b>\nFirst name: %v\nLast name: %v\n\n",
+		account.Username,
+		account.FirstName,
+		account.LastName,
+	)
+
+	message, err := hlpr.GetUserReport(account)
 	if err != nil {
 		handler.logger.Error(err)
 		return c.EditOrReply(helper.ErrInternal, &telebot.SendOptions{ParseMode: "HTML"})
 	}
+
+	reportMessage += message
 
 	handler.logger.Info("report sent")
 	return c.EditOrReply(reportMessage, &telebot.SendOptions{ParseMode: "HTML"})
