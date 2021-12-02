@@ -24,31 +24,17 @@ func (hlpr *Helper) GetHomework(callback *model.Callback) (string, *telebot.Repl
 	var rows []telebot.Row
 	replyMarkup := &telebot.ReplyMarkup{}
 
-	if homework.Active {
-		disableHomeworkCallback := &model.Callback{
-			Created:     time.Now(),
-			Type:        callback.Type,
-			TypeID:      callback.TypeID,
-			Command:     "disable_homework",
-			ListCommand: callback.ListCommand,
-		}
-		if err := hlpr.prepareCallback(disableHomeworkCallback); err != nil {
-			return "", nil, err
-		}
-		rows = append(rows, replyMarkup.Row(replyMarkup.Data(fmt.Sprintf("Disable all %v", homework.Lesson.Title), disableHomeworkCallback.GetStringID())))
-	} else {
-		enableHomeworkCallback := &model.Callback{
-			Created:     time.Now(),
-			Type:        callback.Type,
-			TypeID:      callback.TypeID,
-			Command:     "enable_homework",
-			ListCommand: callback.ListCommand,
-		}
-		if err := hlpr.prepareCallback(enableHomeworkCallback); err != nil {
-			return "", nil, err
-		}
-		rows = append(rows, replyMarkup.Row(replyMarkup.Data(fmt.Sprintf("Enable all %v", homework.Lesson.Title), enableHomeworkCallback.GetStringID())))
+	statusCallback := &model.Callback{
+		Created:     time.Now(),
+		Type:        callback.Type,
+		TypeID:      callback.TypeID,
+		Command:     "update_status",
+		ListCommand: callback.ListCommand,
 	}
+	if err := hlpr.prepareCallback(statusCallback); err != nil {
+		return "", nil, err
+	}
+	rows = append(rows, replyMarkup.Row(replyMarkup.Data(fmt.Sprintf("%v all %v", (&model.Homework{Active: !homework.Active}).GetStatusText(), homework.Lesson.Title), statusCallback.GetStringID())))
 
 	homeworksListCallback := &model.Callback{
 		Created:     time.Now(),
@@ -159,8 +145,8 @@ func (hlpr *Helper) GetHomeworksList(callback *model.Callback) (string, *telebot
 	return fmt.Sprintf("School <b>%v</b>\n\n%v", homework.Student.School.Title, reportMessage), replyMarkup, nil
 }
 
-// DisableHomework ...
-func (hlpr *Helper) DisableHomework(callback *model.Callback) (string, *telebot.ReplyMarkup, error) {
+// UpdateHomeworkStatus ...
+func (hlpr *Helper) UpdateHomeworkStatus(callback *model.Callback) (string, *telebot.ReplyMarkup, error) {
 	hlpr.logger.WithFields(logrus.Fields{
 		"id": callback.TypeID,
 	}).Info("get homework from database by id")
@@ -184,11 +170,11 @@ func (hlpr *Helper) DisableHomework(callback *model.Callback) (string, *telebot.
 	for _, hw := range homeworks {
 		hw.Active = false
 
-		hlpr.logger.Info("disable homework")
+		hlpr.logger.Info("change homework status")
 		if err := hlpr.store.Homework().Update(hw); err != nil {
 			return "", nil, err
 		}
-		hlpr.logger.WithFields(hw.LogrusFields()).Info("homework disabled")
+		hlpr.logger.WithFields(hw.LogrusFields()).Info("status changed")
 	}
 
 	replyMarkup := &telebot.ReplyMarkup{}
@@ -199,49 +185,7 @@ func (hlpr *Helper) DisableHomework(callback *model.Callback) (string, *telebot.
 
 	replyMarkup.Inline(backRow)
 
-	return fmt.Sprintf("Success! Homeworks with lesson <b>%v</b> were <b>DISABLED</b>", homework.Lesson.Title), replyMarkup, nil
-}
-
-// EnableHomework ...
-func (hlpr *Helper) EnableHomework(callback *model.Callback) (string, *telebot.ReplyMarkup, error) {
-	hlpr.logger.WithFields(logrus.Fields{
-		"id": callback.TypeID,
-	}).Info("get homework from database by id")
-	homework, err := hlpr.store.Homework().FindByID(callback.TypeID)
-	if err != nil {
-		return "", nil, err
-	}
-	hlpr.logger.WithFields(homework.LogrusFields()).Info("homework found")
-
-	hlpr.logger.WithFields(logrus.Fields{
-		"lesson_id": homework.Lesson.ID,
-	}).Info("get all homeworks from database by lesson_id")
-	homeworks, err := hlpr.store.Homework().FindBySchoolIDLessonID(homework.Student.School.ID, homework.Lesson.ID)
-	if err != nil {
-		return "", nil, err
-	}
-	hlpr.logger.WithFields(logrus.Fields{
-		"count": len(homeworks),
-	}).Info("homeworks found")
-
-	for _, hw := range homeworks {
-		hw.Active = true
-
-		hlpr.logger.Info("enable homework")
-		if err := hlpr.store.Homework().Update(hw); err != nil {
-			return "", nil, err
-		}
-		hlpr.logger.WithFields(hw.LogrusFields()).Info("homework enabled")
-	}
-	replyMarkup := &telebot.ReplyMarkup{}
-	backRow, err := hlpr.backToHomeworkRow(replyMarkup, callback.ListCommand, homework.ID)
-	if err != nil {
-		return "", nil, err
-	}
-
-	replyMarkup.Inline(backRow)
-
-	return fmt.Sprintf("Success! Homeworks with lesson <b>%v</b> were <b>ENABLED</b>", homework.Lesson.Title), replyMarkup, nil
+	return fmt.Sprintf("Success! For homeworks with lesson <b>%v</b> status was changed to <b>%v</b>", homework.Lesson.Title, homework.GetStatusText()), replyMarkup, nil
 }
 
 func (hlpr *Helper) backToHomeworkRow(replyMarkup *telebot.ReplyMarkup, listCommand string, homeworkID int64) (telebot.Row, error) {

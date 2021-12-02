@@ -113,11 +113,8 @@ func (handler *Handler) handleCallback(c telebot.Context) error {
 		case "get":
 			replyMessage, replyMarkup, err = hlpr.GetHomework(callback)
 
-		case "disable_homework":
-			replyMessage, replyMarkup, err = hlpr.DisableHomework(callback)
-
-		case "enable_homework":
-			replyMessage, replyMarkup, err = hlpr.EnableHomework(callback)
+		case "update_status":
+			replyMessage, replyMarkup, err = hlpr.UpdateHomeworkStatus(callback)
 
 		}
 	}

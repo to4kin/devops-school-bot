@@ -58,12 +58,12 @@ func (h *Homework) GetID() int64 {
 	return h.ID
 }
 
-// GetStatusText returns string depending on active
+// GetStatusIcon returns string depending on active
 //
 // NOTE:
 // 🟢 if active is true
 // 🔴 if active is false
-func (h *Homework) GetStatusText() string {
+func (h *Homework) GetStatusIcon() string {
 	if h.Active {
 		return "🟢"
 	}
@@ -71,11 +71,24 @@ func (h *Homework) GetStatusText() string {
 	return "🔴"
 }
 
+// GetStatusText returns string depending on active
+//
+// NOTE:
+// 🟢 if active is true
+// 🔴 if active is false
+func (h *Homework) GetStatusText() string {
+	if h.Active {
+		return "🟢 Enable"
+	}
+
+	return "🔴 Disable"
+}
+
 // GetButtonTitle returns composite string depending on active
 //
-// NOTE: GetStatusText + <sapce> + Lesson.Title
+// NOTE: GetStatusIcon() + <sapce> + Lesson.Title
 func (h *Homework) GetButtonTitle() string {
-	return fmt.Sprintf("%v %v", h.GetStatusText(), h.Lesson.Title)
+	return fmt.Sprintf("%v %v", h.GetStatusIcon(), h.Lesson.Title)
 }
 
 // GetURL reuturns link to the corresponding telegram message
