@@ -44,7 +44,7 @@ func TestStudentHelper_GetStudentsList(t *testing.T) {
 	assert.NotNil(t, replyMarkup)
 }
 
-func TestStudentHelper_BlockStudent(t *testing.T) {
+func TestStudentHelper_UpdateStudentStatus(t *testing.T) {
 	store := teststore.New()
 	hlpr := helper.NewHelper(store, logrus.New())
 	student := model.TestStudent(t)
@@ -55,50 +55,14 @@ func TestStudentHelper_BlockStudent(t *testing.T) {
 	assert.Equal(t, true, student.Active)
 	assert.NoError(t, store.Student().Create(student))
 
-	replyMessage, replyMarkup, err := hlpr.BlockStudent(callback)
+	replyMessage, replyMarkup, err := hlpr.UpdateStudentStatus(callback)
 	assert.NoError(t, err)
 	assert.NotEmpty(t, replyMessage)
 	assert.NotNil(t, replyMarkup)
 	assert.Equal(t, false, student.Active)
 }
 
-func TestStudentHelper_UnblockStudent(t *testing.T) {
-	store := teststore.New()
-	hlpr := helper.NewHelper(store, logrus.New())
-	student := model.TestInactiveStudent(t)
-	callback := model.TestStudentCallback(t)
-
-	assert.NoError(t, store.Account().Create(student.Account))
-	assert.NoError(t, store.School().Create(student.School))
-	assert.Equal(t, false, student.Active)
-	assert.NoError(t, store.Student().Create(student))
-
-	replyMessage, replyMarkup, err := hlpr.UnblockStudent(callback)
-	assert.NoError(t, err)
-	assert.NotEmpty(t, replyMessage)
-	assert.NotNil(t, replyMarkup)
-	assert.Equal(t, true, student.Active)
-}
-
-func TestStudentHelper_SetStudent(t *testing.T) {
-	store := teststore.New()
-	hlpr := helper.NewHelper(store, logrus.New())
-	student := model.TestListener(t)
-	callback := model.TestStudentCallback(t)
-
-	assert.NoError(t, store.Account().Create(student.Account))
-	assert.NoError(t, store.School().Create(student.School))
-	assert.Equal(t, false, student.FullCourse)
-	assert.NoError(t, store.Student().Create(student))
-
-	replyMessage, replyMarkup, err := hlpr.SetStudent(callback)
-	assert.NoError(t, err)
-	assert.NotEmpty(t, replyMessage)
-	assert.NotNil(t, replyMarkup)
-	assert.Equal(t, true, student.FullCourse)
-}
-
-func TestStudentHelper_SetListener(t *testing.T) {
+func TestStudentHelper_UpdateStudentType(t *testing.T) {
 	store := teststore.New()
 	hlpr := helper.NewHelper(store, logrus.New())
 	student := model.TestStudent(t)
@@ -109,7 +73,7 @@ func TestStudentHelper_SetListener(t *testing.T) {
 	assert.Equal(t, true, student.FullCourse)
 	assert.NoError(t, store.Student().Create(student))
 
-	replyMessage, replyMarkup, err := hlpr.SetListener(callback)
+	replyMessage, replyMarkup, err := hlpr.UpdateStudentType(callback)
 	assert.NoError(t, err)
 	assert.NotEmpty(t, replyMessage)
 	assert.NotNil(t, replyMarkup)

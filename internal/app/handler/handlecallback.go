@@ -16,7 +16,7 @@ func (handler *Handler) handleCallback(c telebot.Context) error {
 	callbackID, err := strconv.ParseInt(c.Callback().Data[1:], 10, 64)
 	if err != nil {
 		handler.logger.Error(err)
-		return c.EditOrReply(helper.ErrInternal, &telebot.SendOptions{ParseMode: "HTML"})
+		return c.EditOrReply(helper.ErrOldCallbackData, &telebot.SendOptions{ParseMode: "HTML"})
 	}
 
 	handler.logger.WithFields(logrus.Fields{
@@ -101,17 +101,11 @@ func (handler *Handler) handleCallback(c telebot.Context) error {
 		case "get":
 			replyMessage, replyMarkup, err = hlpr.GetStudent(callback)
 
-		case "block":
-			replyMessage, replyMarkup, err = hlpr.BlockStudent(callback)
+		case "update_status":
+			replyMessage, replyMarkup, err = hlpr.UpdateStudentStatus(callback)
 
-		case "unblock":
-			replyMessage, replyMarkup, err = hlpr.UnblockStudent(callback)
-
-		case "set_student":
-			replyMessage, replyMarkup, err = hlpr.SetStudent(callback)
-
-		case "set_listener":
-			replyMessage, replyMarkup, err = hlpr.SetListener(callback)
+		case "update_type":
+			replyMessage, replyMarkup, err = hlpr.UpdateStudentType(callback)
 
 		}
 	case "homework":

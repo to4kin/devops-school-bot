@@ -47,12 +47,12 @@ func (s *Student) GetID() int64 {
 	return s.ID
 }
 
-// GetStatusText returns string depending on active
+// GetStatusIcon returns string depending on active
 //
 // NOTE:
 // 🟢 if active is true
 // 🔴 if active is false
-func (s *Student) GetStatusText() string {
+func (s *Student) GetStatusIcon() string {
 	if s.Active {
 		return "🟢"
 	}
@@ -60,11 +60,24 @@ func (s *Student) GetStatusText() string {
 	return "🔴"
 }
 
+// GetStatusText returns string depending on active
+//
+// NOTE:
+// 🟢Active if active is true
+// 🔴Block if active is false
+func (s *Student) GetStatusText() string {
+	if s.Active {
+		return "🟢Active"
+	}
+
+	return "🔴Block"
+}
+
 // GetButtonTitle returns composite string depending on active
 //
-// NOTE: GetStatusText() + <space> + Account.Username
+// NOTE: GetStatusIcon() + <space> + Account.Username
 func (s *Student) GetButtonTitle() string {
-	return fmt.Sprintf("%v%v", s.GetStatusText(), s.Account.GetFullName())
+	return fmt.Sprintf("%v%v", s.GetStatusIcon(), s.Account.GetFullName())
 }
 
 // GetType returns student type
