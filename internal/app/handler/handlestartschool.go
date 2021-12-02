@@ -16,6 +16,10 @@ var (
 )
 
 func (handler *Handler) handleStartSchool(c telebot.Context) error {
+	if c.Message().Private() {
+		return c.EditOrReply(fmt.Sprintf(helper.ErrWrongChatType, "SCHOOL"), &telebot.SendOptions{ParseMode: "HTML"})
+	}
+
 	handler.logger.WithFields(logrus.Fields{
 		"telegram_id": c.Sender().ID,
 	}).Info("get account from database by telegram_id")
@@ -29,24 +33,6 @@ func (handler *Handler) handleStartSchool(c telebot.Context) error {
 	if !account.Superuser {
 		handler.logger.WithFields(account.LogrusFields()).Info("account has insufficient permissions")
 		return c.EditOrReply(helper.ErrInsufficientPermissions, &telebot.SendOptions{ParseMode: "HTML"})
-	}
-
-	if c.Message().Private() {
-		callback := &model.Callback{
-			ID:          0,
-			Type:        "school",
-			Command:     "start",
-			ListCommand: "start",
-		}
-
-		hlpr := helper.NewHelper(handler.store, handler.logger)
-		replyMessage, replyMarkup, err := hlpr.GetSchoolsList(callback)
-		if err != nil {
-			handler.logger.Error(err)
-			return c.EditOrReply(helper.ErrInternal, &telebot.SendOptions{ParseMode: "HTML"})
-		}
-
-		return c.EditOrReply(replyMessage, replyMarkup)
 	}
 
 	handler.logger.WithFields(logrus.Fields{

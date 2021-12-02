@@ -36,8 +36,6 @@ var (
 
 <b>Superuser Commands</b>
 /schools - Manage schools
-/startschool - Start school
-/stopschool - Finish school
 /report - School progress
 /fullreport - School progress with homework list
 

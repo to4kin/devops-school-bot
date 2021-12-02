@@ -5,7 +5,6 @@ import (
 
 	"github.com/sirupsen/logrus"
 	"gitlab.devops.telekom.de/tvpp/prototypes/devops-school-bot/internal/app/helper"
-	"gitlab.devops.telekom.de/tvpp/prototypes/devops-school-bot/internal/app/model"
 	"gopkg.in/tucnak/telebot.v3"
 )
 
@@ -14,6 +13,10 @@ var (
 )
 
 func (handler *Handler) handleStopSchool(c telebot.Context) error {
+	if c.Message().Private() {
+		return c.EditOrReply(fmt.Sprintf(helper.ErrWrongChatType, "SCHOOL"), &telebot.SendOptions{ParseMode: "HTML"})
+	}
+
 	handler.logger.WithFields(logrus.Fields{
 		"telegram_id": c.Sender().ID,
 	}).Info("get account from database by telegram_id")
@@ -27,24 +30,6 @@ func (handler *Handler) handleStopSchool(c telebot.Context) error {
 	if !account.Superuser {
 		handler.logger.WithFields(account.LogrusFields()).Info("account has insufficient permissions")
 		return c.EditOrReply(helper.ErrInsufficientPermissions, &telebot.SendOptions{ParseMode: "HTML"})
-	}
-
-	if c.Message().Private() {
-		callback := &model.Callback{
-			ID:          0,
-			Type:        "school",
-			Command:     "stop",
-			ListCommand: "stop",
-		}
-
-		hlpr := helper.NewHelper(handler.store, handler.logger)
-		replyMessage, replyMarkup, err := hlpr.GetSchoolsList(callback)
-		if err != nil {
-			handler.logger.Error(err)
-			return c.EditOrReply(helper.ErrInternal, &telebot.SendOptions{ParseMode: "HTML"})
-		}
-
-		return c.EditOrReply(replyMessage, replyMarkup)
 	}
 
 	handler.logger.WithFields(logrus.Fields{

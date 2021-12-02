@@ -46,12 +46,12 @@ func (s *School) GetID() int64 {
 	return s.ID
 }
 
-// GetStatusText returns string depending on active
+// GetStatusIcon returns string depending on active
 //
 // NOTE:
 // 🟢 if active is true
 // 🔴 if active is false
-func (s *School) GetStatusText() string {
+func (s *School) GetStatusIcon() string {
 	if s.Active {
 		return "🟢"
 	}
@@ -59,11 +59,24 @@ func (s *School) GetStatusText() string {
 	return "🔴"
 }
 
+// GetStatusText returns string depending on active
+//
+// NOTE:
+// 🟢 In Progress if active is true
+// 🔴 Stop if active is false
+func (s *School) GetStatusText() string {
+	if s.Active {
+		return "🟢 In Progress"
+	}
+
+	return "🔴 Stop"
+}
+
 // GetButtonTitle returns composite string depending on active
 //
-// NOTE: GetStatusText + <space> + Title
+// NOTE: GetStatusIcon() + <space> + Title
 func (s *School) GetButtonTitle() string {
-	return fmt.Sprintf("%v %v", s.GetStatusText(), s.Title)
+	return fmt.Sprintf("%v %v", s.GetStatusIcon(), s.Title)
 }
 
 // GetURL returns link to the corresponding telegram chat

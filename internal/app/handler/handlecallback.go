@@ -59,11 +59,8 @@ func (handler *Handler) handleCallback(c telebot.Context) error {
 		case "get":
 			replyMessage, replyMarkup, err = hlpr.GetSchool(callback)
 
-		case "start":
-			replyMessage, replyMarkup, err = hlpr.StartSchool(callback)
-
-		case "stop":
-			replyMessage, replyMarkup, err = hlpr.StopSchool(callback)
+		case "update_status":
+			replyMessage, replyMarkup, err = hlpr.UpdateSchoolStatus(callback)
 
 		case "report":
 			replyMessage, replyMarkup, err = hlpr.ReportSchool(callback)

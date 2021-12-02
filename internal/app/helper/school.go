@@ -11,26 +11,11 @@ import (
 	"gopkg.in/tucnak/telebot.v3"
 )
 
-// GetSchoolsList returns schools from database depends on Callback
+// GetSchoolsList returns all schools from database
 // The message is populated with buttons
-// if Callback.ListCommand is start - returns all inactive schools
-// if Callback.ListCommand is stop - returns all active schools
-// In other cases retruns all schools
 func (hlpr *Helper) GetSchoolsList(callback *model.Callback) (string, *telebot.ReplyMarkup, error) {
-	var err error
-	var schools []*model.School
-	switch callback.ListCommand {
-	case "start":
-		hlpr.logger.Info("get all inactive schools from database")
-		schools, err = hlpr.store.School().FindByActive(false)
-	case "stop":
-		hlpr.logger.Info("get all active schools from database")
-		schools, err = hlpr.store.School().FindByActive(true)
-	default:
-		hlpr.logger.Info("get all schools from database")
-		schools, err = hlpr.store.School().FindAll()
-	}
-
+	hlpr.logger.Info("get all schools from database")
+	schools, err := hlpr.store.School().FindAll()
 	if err != nil && err != store.ErrRecordNotFound {
 		return "", nil, err
 	}
@@ -107,33 +92,19 @@ func (hlpr *Helper) GetSchool(callback *model.Callback) (string, *telebot.ReplyM
 
 	var buttons []telebot.Btn
 	replyMarkup := &telebot.ReplyMarkup{}
-	if school.Active {
-		stopSchoolCallback := &model.Callback{
-			Created:     time.Now(),
-			Type:        callback.Type,
-			TypeID:      callback.TypeID,
-			Command:     "stop",
-			ListCommand: callback.ListCommand,
-		}
-		if err := hlpr.prepareCallback(stopSchoolCallback); err != nil {
-			return "", nil, err
-		}
-
-		buttons = append(buttons, replyMarkup.Data("Stop school", stopSchoolCallback.GetStringID()))
-	} else {
-		startSchoolCallback := &model.Callback{
-			Created:     time.Now(),
-			Type:        callback.Type,
-			TypeID:      callback.TypeID,
-			Command:     "start",
-			ListCommand: callback.ListCommand,
-		}
-		if err := hlpr.prepareCallback(startSchoolCallback); err != nil {
-			return "", nil, err
-		}
-
-		buttons = append(buttons, replyMarkup.Data("Start school", startSchoolCallback.GetStringID()))
+	stopSchoolCallback := &model.Callback{
+		Created:     time.Now(),
+		Type:        callback.Type,
+		TypeID:      callback.TypeID,
+		Command:     "update_status",
+		ListCommand: callback.ListCommand,
 	}
+	if err := hlpr.prepareCallback(stopSchoolCallback); err != nil {
+		return "", nil, err
+	}
+
+	buttons = append(buttons, replyMarkup.Data(fmt.Sprintf("Set to %v", (&model.School{Active: !school.Active}).GetStatusText()), stopSchoolCallback.GetStringID()))
+
 	if len(students) > 0 {
 		studentsListCallback := &model.Callback{
 			Created:     time.Now(),
@@ -253,8 +224,8 @@ func (hlpr *Helper) GetSchool(callback *model.Callback) (string, *telebot.ReplyM
 	), replyMarkup, nil
 }
 
-// StartSchool updates School status in database
-func (hlpr *Helper) StartSchool(callback *model.Callback) (string, *telebot.ReplyMarkup, error) {
+// UpdateSchoolStatus updates School status in database
+func (hlpr *Helper) UpdateSchoolStatus(callback *model.Callback) (string, *telebot.ReplyMarkup, error) {
 	hlpr.logger.WithFields(logrus.Fields{
 		"id": callback.TypeID,
 	}).Info("get school from database by id")
@@ -264,45 +235,19 @@ func (hlpr *Helper) StartSchool(callback *model.Callback) (string, *telebot.Repl
 	}
 	hlpr.logger.WithFields(school.LogrusFields()).Info("school found")
 
-	school.Active = true
+	school.Active = !school.Active
 
-	hlpr.logger.Info("start school")
+	hlpr.logger.Info("change school status")
 	if err := hlpr.store.School().Update(school); err != nil {
 		return "", nil, err
 	}
-	hlpr.logger.WithFields(school.LogrusFields()).Info("school started")
+	hlpr.logger.WithFields(school.LogrusFields()).Info("status changed")
 
 	replyMarkup := &telebot.ReplyMarkup{}
 	backRow, err := hlpr.backToSchoolRow(replyMarkup, callback.ListCommand, school.ID)
 	replyMarkup.Inline(backRow)
 
-	return fmt.Sprintf("Success! School <b>%v</b> started", school.Title), replyMarkup, nil
-}
-
-// StopSchool updates School status in database
-func (hlpr *Helper) StopSchool(callback *model.Callback) (string, *telebot.ReplyMarkup, error) {
-	hlpr.logger.WithFields(logrus.Fields{
-		"id": callback.TypeID,
-	}).Info("get school from database by id")
-	school, err := hlpr.store.School().FindByID(callback.TypeID)
-	if err != nil {
-		return "", nil, err
-	}
-	hlpr.logger.WithFields(school.LogrusFields()).Info("school found")
-
-	school.Active = false
-
-	hlpr.logger.Info("stop school")
-	if err := hlpr.store.School().Update(school); err != nil {
-		return "", nil, err
-	}
-	hlpr.logger.WithFields(school.LogrusFields()).Info("school stopped")
-
-	replyMarkup := &telebot.ReplyMarkup{}
-	backRow, err := hlpr.backToSchoolRow(replyMarkup, callback.ListCommand, school.ID)
-	replyMarkup.Inline(backRow)
-
-	return fmt.Sprintf("Success! School <b>%v</b> finished", school.Title), replyMarkup, nil
+	return fmt.Sprintf("Success! School <b>%v</b> status changed to %v", school.Title, school.GetStatusText()), replyMarkup, nil
 }
 
 // ReportSchool returns report for School
