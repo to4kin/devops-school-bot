@@ -32,7 +32,7 @@ func (handler *Handler) handleMyReport(c telebot.Context) error {
 	hlpr := helper.NewHelper(handler.store, handler.logger)
 
 	reportMessage := fmt.Sprintf(
-		"Hello, @%v!\n\n<b>Student info:</b>\nFirst name: %v\nLast name: %v\n\n",
+		"Hello, @%v!\n\n<b>Account info:</b>\nFirst name: %v\nLast name: %v\n\n",
 		account.Username,
 		account.FirstName,
 		account.LastName,

@@ -76,8 +76,7 @@ func (hlpr *Helper) GetStudent(callback *model.Callback) (string, *telebot.Reply
 	replyMarkup.Inline(rows...)
 
 	reportMessage := fmt.Sprintf(
-		"<b>%v info:</b>\nFirst name: %v\nLast name: %v\n\n",
-		student.GetType(),
+		"<b>Account info:</b>\nFirst name: %v\nLast name: %v\n\n",
 		student.Account.FirstName,
 		student.Account.LastName,
 	)
