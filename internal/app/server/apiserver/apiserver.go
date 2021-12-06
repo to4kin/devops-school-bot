@@ -4,7 +4,7 @@ import (
 	"net/http"
 	"time"
 
-	_ "net/http/pprof" // for profiling
+	_ "net/http/pprof" // for profiling data in the format expected by the pprof visualization tool
 
 	"github.com/go-co-op/gocron"
 	"github.com/gorilla/mux"
@@ -53,6 +53,10 @@ func (apiserver *APIServer) Start() error {
 
 	router := mux.NewRouter()
 	router.HandleFunc("/", handler.HandleWebHook()).Methods("POST")
+
+	if apiserver.config.DebugMode {
+		router.PathPrefix("/debug/").Handler(http.DefaultServeMux)
+	}
 
 	return http.ListenAndServe(apiserver.config.Apiserver.BindAddr, router)
 }

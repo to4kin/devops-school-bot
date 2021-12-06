@@ -1,4 +1,5 @@
 log_level = "debug"
+debug_mode = true
 
 [apiserver]
 bind_addr = ":3000"

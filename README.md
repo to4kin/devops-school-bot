@@ -120,6 +120,7 @@ example-config.toml
 
 ```toml
 log_level = "debug"
+debug_mode = false
 
 [apiserver]
 bind_addr = ":3000"
@@ -146,6 +147,7 @@ example-config.yaml:
 
 ```yaml
 log_level: debug
+debug_mode: false
 
 apiserver:
   bind_addr: :3000
@@ -171,6 +173,7 @@ telegram_bot:
 Or, you can use ENV variables to update config:
 ```bash
 LOG_LEVEL="debug"
+DEBUG_MODE="false"
 
 APISERVER_BIND_ADDR=":3000"
 APISERVER_CRON_ENABLED="true"
@@ -265,6 +268,10 @@ users - Manage users
 setsuperuser - Set Superuser
 unsetsuperuser - Unset Superuser
 ```
+
+## Debug mode
+
+When debug_mode is enabled the bot will provide additional http endpoint /debug/pprof for profiling data in the format expected by the pprof visualization tool
 
 ## Student types
 

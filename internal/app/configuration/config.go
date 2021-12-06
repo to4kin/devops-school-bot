@@ -3,6 +3,7 @@ package configuration
 // Config ...
 type Config struct {
 	LogLevel    string      `mapstructure:"log_level"`
+	DebugMode   bool        `mapstructure:"debug_mode"`
 	Apiserver   apiserver   `mapstructure:"apiserver"`
 	AWSLambda   awslambda   `mapstructure:"awslambda"`
 	Database    database    `mapstructure:"database"`
