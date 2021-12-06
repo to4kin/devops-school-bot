@@ -18,7 +18,7 @@ type Account struct {
 
 	// Created returns time.Time
 	//
-	// NOTE: should be set before INSRT to the store
+	// NOTE: should be set before INSERT to the store
 	// *field is required
 	Created time.Time `json:"created"`
 
@@ -50,7 +50,7 @@ type Account struct {
 	Superuser bool `json:"superuser,string" `
 }
 
-// GetID Account.ID
+// GetID returns Account.ID
 func (a *Account) GetID() int64 {
 	return a.ID
 }
