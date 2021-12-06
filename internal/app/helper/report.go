@@ -1,6 +1,7 @@
 package helper
 
 import (
+	"errors"
 	"fmt"
 	"sort"
 
@@ -8,12 +9,6 @@ import (
 	"gitlab.devops.telekom.de/tvpp/prototypes/devops-school-bot/internal/app/model"
 	"gitlab.devops.telekom.de/tvpp/prototypes/devops-school-bot/internal/app/store"
 )
-
-type report struct {
-	Student     *model.Student
-	Accepted    []*model.Homework
-	NotProvided []*model.Lesson
-}
 
 // GetUserReport returns report for User
 // Account should be a vald Account struct
@@ -191,8 +186,55 @@ func (hlpr *Helper) GetLessonsReport(school *model.School) (string, error) {
 	return reportMessage, nil
 }
 
+// GetCSVReport returns csv string
+func (hlpr *Helper) GetCSVReport(school *model.School) (string, error) {
+	hlpr.logger.WithFields(logrus.Fields{
+		"school_id": school.ID,
+	}).Info("get lessons from database by school_id")
+	lessons, err := hlpr.store.Lesson().FindBySchoolID(school.ID)
+	if err != nil {
+		return "", err
+	}
+	hlpr.logger.WithFields(logrus.Fields{
+		"count": len(lessons),
+	}).Info("lessons found")
+
+	hlpr.logger.WithFields(logrus.Fields{
+		"school_id":   school.ID,
+		"full_course": "true",
+	}).Info("get students from database by school_id")
+	students, err := hlpr.store.Student().FindBySchoolID(school.ID)
+	if err != nil && err != store.ErrRecordNotFound {
+		return "", err
+	}
+	hlpr.logger.WithFields(logrus.Fields{
+		"count": len(students),
+	}).Info("students found")
+
+	reports := []*model.Report{}
+	for _, student := range students {
+		report, err := hlpr.prepareReport(student, lessons)
+		if err != nil {
+			return "", err
+		}
+
+		reports = append(reports, report)
+	}
+
+	if len(reports) == 0 {
+		return "", errors.New("")
+	}
+
+	csvReport := reports[0].GetCSVHeader()
+	for _, report := range reports {
+		csvReport += report.GetCSVLine()
+	}
+
+	return csvReport, nil
+}
+
 func (hlpr *Helper) prepareGeneralReportMsg(students []*model.Student, lessons []*model.Lesson) (string, error) {
-	reports := []*report{}
+	reports := []*model.Report{}
 	for _, student := range students {
 		if !student.Active {
 			continue
@@ -245,8 +287,8 @@ func (hlpr *Helper) prepareDetailedReportMsg(student *model.Student, lessons []*
 	return reportMessage, nil
 }
 
-func (hlpr *Helper) prepareReport(student *model.Student, lessons []*model.Lesson) (*report, error) {
-	studentReport := &report{
+func (hlpr *Helper) prepareReport(student *model.Student, lessons []*model.Lesson) (*model.Report, error) {
+	studentReport := &model.Report{
 		Student:     student,
 		Accepted:    []*model.Homework{},
 		NotProvided: []*model.Lesson{},

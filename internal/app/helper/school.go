@@ -167,6 +167,18 @@ func (hlpr *Helper) GetSchool(callback *model.Callback) (string, *telebot.ReplyM
 			return "", nil, err
 		}
 		buttons = append(buttons, replyMarkup.Data("Homeworks", homeworksCallback.GetStringID()))
+
+		csvReportCallback := &model.Callback{
+			Created:     time.Now(),
+			Type:        callback.Type,
+			TypeID:      callback.TypeID,
+			Command:     "csv_report",
+			ListCommand: callback.ListCommand,
+		}
+		if err := hlpr.prepareCallback(csvReportCallback); err != nil {
+			return "", nil, err
+		}
+		buttons = append(buttons, replyMarkup.Data("CSV Report", csvReportCallback.GetStringID()))
 	}
 
 	var rows []telebot.Row
@@ -245,13 +257,16 @@ func (hlpr *Helper) UpdateSchoolStatus(callback *model.Callback) (string, *teleb
 
 	replyMarkup := &telebot.ReplyMarkup{}
 	backRow, err := hlpr.backToSchoolRow(replyMarkup, callback.ListCommand, school.ID)
+	if err != nil {
+		return "", nil, err
+	}
 	replyMarkup.Inline(backRow)
 
 	return fmt.Sprintf("Success! School <b>%v</b> status changed to %v", school.Title, school.GetStatusText()), replyMarkup, nil
 }
 
-// ReportSchool returns report for School
-func (hlpr *Helper) ReportSchool(callback *model.Callback) (string, *telebot.ReplyMarkup, error) {
+// GetSchoolReport returns report for School
+func (hlpr *Helper) GetSchoolReport(callback *model.Callback) (string, *telebot.ReplyMarkup, error) {
 	hlpr.logger.WithFields(logrus.Fields{
 		"id": callback.TypeID,
 	}).Info("get school from database by id")
@@ -272,13 +287,16 @@ func (hlpr *Helper) ReportSchool(callback *model.Callback) (string, *telebot.Rep
 
 	replyMarkup := &telebot.ReplyMarkup{}
 	backRow, err := hlpr.backToSchoolRow(replyMarkup, callback.ListCommand, school.ID)
+	if err != nil {
+		return "", nil, err
+	}
 	replyMarkup.Inline(backRow)
 
 	return fmt.Sprintf("School <b>%v</b>\n\n%v", school.Title, reportMessage), replyMarkup, nil
 }
 
-// FullReportSchool return Dull Report for School
-func (hlpr *Helper) FullReportSchool(callback *model.Callback) (string, *telebot.ReplyMarkup, error) {
+// GetSchoolFullReport return Dull Report for School
+func (hlpr *Helper) GetSchoolFullReport(callback *model.Callback) (string, *telebot.ReplyMarkup, error) {
 	hlpr.logger.WithFields(logrus.Fields{
 		"id": callback.TypeID,
 	}).Info("get school from database by id")
@@ -299,9 +317,42 @@ func (hlpr *Helper) FullReportSchool(callback *model.Callback) (string, *telebot
 
 	replyMarkup := &telebot.ReplyMarkup{}
 	backRow, err := hlpr.backToSchoolRow(replyMarkup, callback.ListCommand, school.ID)
+	if err != nil {
+		return "", nil, err
+	}
 	replyMarkup.Inline(backRow)
 
 	return fmt.Sprintf("School <b>%v</b>\n\n%v", school.Title, reportMessage), replyMarkup, nil
+}
+
+// GetSchoolCSVReport return CSV Report for School
+func (hlpr *Helper) GetSchoolCSVReport(callback *model.Callback) (string, *telebot.ReplyMarkup, error) {
+	hlpr.logger.WithFields(logrus.Fields{
+		"id": callback.TypeID,
+	}).Info("get school from database by id")
+	school, err := hlpr.store.School().FindByID(callback.TypeID)
+	if err != nil {
+		return "", nil, err
+	}
+	hlpr.logger.WithFields(school.LogrusFields()).Info("school found")
+
+	reportMessage, err := hlpr.GetCSVReport(school)
+	if err != nil && err != store.ErrRecordNotFound {
+		return "", nil, err
+	}
+
+	if err == store.ErrRecordNotFound {
+		reportMessage = ErrReportNotFound
+	}
+
+	replyMarkup := &telebot.ReplyMarkup{}
+	backRow, err := hlpr.backToSchoolRow(replyMarkup, callback.ListCommand, school.ID)
+	if err != nil {
+		return "", nil, err
+	}
+	replyMarkup.Inline(backRow)
+
+	return fmt.Sprintf("School %v\n\n%v", school.Title, reportMessage), replyMarkup, nil
 }
 
 // GetSchoolHomeworks returns Homeworks for School
@@ -351,6 +402,9 @@ func (hlpr *Helper) GetSchoolHomeworks(callback *model.Callback) (string, *teleb
 	var rows []telebot.Row
 	//rows := rowsWithButtons(interfaceSlice, homeworkCallback)
 	backRow, err := hlpr.backToSchoolRow(replyMarkup, callback.ListCommand, school.ID)
+	if err != nil {
+		return "", nil, err
+	}
 	rows = append(rows, backRow)
 	replyMarkup.Inline(rows...)
 

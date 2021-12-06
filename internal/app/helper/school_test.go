@@ -51,27 +51,27 @@ func TestSchoolHelper_StartSchool(t *testing.T) {
 	assert.Equal(t, true, school.Active)
 }
 
-func TestSchoolHelper_ReportSchool(t *testing.T) {
+func TestSchoolHelper_GetSchoolReport(t *testing.T) {
 	store := teststore.New()
 	hlpr := helper.NewHelper(store, logrus.New())
 	school := model.TestSchool(t)
 	callback := model.TestSchoolCallback(t)
 
 	assert.NoError(t, store.School().Create(school))
-	replyMessage, replyMarkup, err := hlpr.ReportSchool(callback)
+	replyMessage, replyMarkup, err := hlpr.GetSchoolReport(callback)
 	assert.NoError(t, err)
 	assert.NotEmpty(t, replyMessage)
 	assert.NotNil(t, replyMarkup)
 }
 
-func TestSchoolHelper_FullReportSchool(t *testing.T) {
+func TestSchoolHelper_GetSchoolFullReport(t *testing.T) {
 	store := teststore.New()
 	hlpr := helper.NewHelper(store, logrus.New())
 	school := model.TestSchool(t)
 	callback := model.TestSchoolCallback(t)
 
 	assert.NoError(t, store.School().Create(school))
-	replyMessage, replyMarkup, err := hlpr.FullReportSchool(callback)
+	replyMessage, replyMarkup, err := hlpr.GetSchoolFullReport(callback)
 	assert.NoError(t, err)
 	assert.NotEmpty(t, replyMessage)
 	assert.NotNil(t, replyMarkup)

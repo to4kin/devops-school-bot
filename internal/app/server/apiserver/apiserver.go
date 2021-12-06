@@ -4,6 +4,8 @@ import (
 	"net/http"
 	"time"
 
+	_ "net/http/pprof" // for profiling
+
 	"github.com/go-co-op/gocron"
 	"github.com/gorilla/mux"
 	"gitlab.devops.telekom.de/tvpp/prototypes/devops-school-bot/internal/app/configuration"

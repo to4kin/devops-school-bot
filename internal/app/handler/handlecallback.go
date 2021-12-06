@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"bytes"
 	"strconv"
 
 	"github.com/sirupsen/logrus"
@@ -63,10 +64,26 @@ func (handler *Handler) handleCallback(c telebot.Context) error {
 			replyMessage, replyMarkup, err = hlpr.UpdateSchoolStatus(callback)
 
 		case "report":
-			replyMessage, replyMarkup, err = hlpr.ReportSchool(callback)
+			replyMessage, replyMarkup, err = hlpr.GetSchoolReport(callback)
 
 		case "full_report":
-			replyMessage, replyMarkup, err = hlpr.FullReportSchool(callback)
+			replyMessage, replyMarkup, err = hlpr.GetSchoolFullReport(callback)
+
+		case "csv_report":
+			replyMessage, replyMarkup, err = hlpr.GetSchoolCSVReport(callback)
+			document := telebot.Document{
+				File:     telebot.FromReader(bytes.NewReader([]byte(replyMessage))),
+				FileName: "report.csv",
+			}
+			if err != nil {
+				handler.logger.Error(err)
+				return c.EditOrReply(helper.ErrInternal, &telebot.SendOptions{ParseMode: "HTML"})
+			}
+
+			_, err = document.Send(c.Bot(), c.Recipient(), &telebot.SendOptions{ParseMode: "HTML"})
+			if err == nil {
+				replyMessage = "The document was sent successfully!"
+			}
 
 		case "homeworks":
 			replyMessage, replyMarkup, err = hlpr.GetSchoolHomeworks(callback)
