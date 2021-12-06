@@ -254,10 +254,12 @@ func (hlpr *Helper) prepareGeneralReportMsg(students []*model.Student, lessons [
 
 	reportMessage := ""
 	for _, report := range reports {
-		reportMessage += fmt.Sprintf("%d/%d - %v\n",
+		reportMessage += fmt.Sprintf("%d/%d - %s\n",
 			len(report.Accepted), len(report.NotProvided), report.Student.Account.GetMention())
 
 	}
+
+	reportMessage += fmt.Sprintf("\nWay to go, %s, you're crushing it!\n", reports[0].Student.Account.GetMention())
 
 	return reportMessage, nil
 }
