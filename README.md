@@ -119,7 +119,7 @@ Availiable file formats: `JSON, TOML, YAML, HCL, envfile and Java properties`
 example-config.toml
 
 ```toml
-log_level = "debug"
+log_level = "info"
 debug_mode = false
 
 [apiserver]
@@ -146,7 +146,7 @@ verbose = false
 example-config.yaml:
 
 ```yaml
-log_level: debug
+log_level: info
 debug_mode: false
 
 apiserver:

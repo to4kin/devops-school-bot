@@ -31,7 +31,7 @@ type Config struct {
 
 	// Version returns a version
 	//
-	// NOTE: populted only on build stage
+	// NOTE: populated only on build stage
 	Version string
 }
 
