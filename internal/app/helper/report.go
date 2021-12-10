@@ -213,7 +213,7 @@ func (hlpr *Helper) GetFullReport(school *model.School) (string, error) {
 }
 
 // GetLessonsReport returns the list of homeworks for school
-// The list is populated only with active homeworks provided by students
+// The list is populated only with active homeworks provided by students:
 // 	School DevOps School Test
 //
 // 	Homework list
@@ -227,6 +227,10 @@ func (hlpr *Helper) GetLessonsReport(school *model.School) (string, error) {
 	}).Info("get lessons from database by school_id")
 	lessons, err := hlpr.store.Lesson().FindBySchoolID(school.ID)
 	if err != nil {
+		if err == store.ErrRecordNotFound {
+			hlpr.logger.Info(err)
+		}
+
 		return "", err
 	}
 	hlpr.logger.WithFields(logrus.Fields{
