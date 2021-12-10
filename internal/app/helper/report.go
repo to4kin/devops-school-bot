@@ -50,7 +50,9 @@ func (hlpr *Helper) GetUserReport(account *model.Account) (string, error) {
 	return reportMessage, nil
 }
 
-// GetStudentReport returns student progress in School:
+// GetStudentReport returns student progress in School
+//
+// Example:
 // 	Account info:
 // 	First name: Ivan
 // 	Last name: Ivanov
@@ -90,7 +92,9 @@ func (hlpr *Helper) GetStudentReport(student *model.Student) (string, error) {
 	return reportMessage, nil
 }
 
-// GetReport returns academic perfomance for all active stundents in school:
+// GetReport returns academic perfomance for all active stundents in school
+//
+// Example:
 // 	School DevOps School Test
 //
 // 	Academic perfomance:
@@ -174,6 +178,8 @@ func (hlpr *Helper) GetReport(school *model.School) (string, error) {
 
 // GetFullReport returns academic performance for all active students in school.
 // Additionally adds the list of homeworks at the beginning
+//
+// Example:
 // 	School DevOps School Test
 //
 // 	Homework list
@@ -213,7 +219,9 @@ func (hlpr *Helper) GetFullReport(school *model.School) (string, error) {
 }
 
 // GetLessonsReport returns the list of homeworks for school
-// The list is populated only with active homeworks provided by students:
+// The list is populated only with active homeworks provided by students
+//
+// Example:
 // 	School DevOps School Test
 //
 // 	Homework list
