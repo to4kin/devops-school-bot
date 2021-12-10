@@ -117,6 +117,9 @@ func (hlpr *Helper) GetReport(school *model.School) (string, error) {
 	}).Info("get lessons from database by school_id")
 	lessons, err := hlpr.store.Lesson().FindBySchoolID(school.ID)
 	if err != nil {
+		if err == store.ErrRecordNotFound {
+			hlpr.logger.Info(err)
+		}
 		return "", err
 	}
 	hlpr.logger.WithFields(logrus.Fields{
