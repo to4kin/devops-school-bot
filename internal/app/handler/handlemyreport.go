@@ -11,7 +11,7 @@ import (
 
 func (handler *Handler) handleMyReport(c telebot.Context) error {
 	if !c.Message().Private() {
-		return c.EditOrReply(fmt.Sprintf(helper.ErrWrongChatType, "PRIVATE"), &telebot.SendOptions{ParseMode: "HTML"})
+		return handler.editOrReply(c, fmt.Sprintf(helper.ErrWrongChatType, "PRIVATE"), nil)
 	}
 
 	handler.logger.WithFields(logrus.Fields{
@@ -22,10 +22,10 @@ func (handler *Handler) handleMyReport(c telebot.Context) error {
 		handler.logger.Error(err)
 
 		if err == store.ErrRecordNotFound {
-			return c.EditOrReply(helper.ErrUserNotJoined, &telebot.SendOptions{ParseMode: "HTML"})
+			return handler.editOrReply(c, helper.ErrUserNotJoined, nil)
 		}
 
-		return c.EditOrReply(helper.ErrInternal, &telebot.SendOptions{ParseMode: "HTML"})
+		return handler.editOrReply(c, helper.ErrInternal, nil)
 	}
 	handler.logger.WithFields(account.LogrusFields()).Info("account found")
 
@@ -41,11 +41,9 @@ func (handler *Handler) handleMyReport(c telebot.Context) error {
 	message, err := hlpr.GetUserReport(account)
 	if err != nil {
 		handler.logger.Error(err)
-		return c.EditOrReply(helper.ErrInternal, &telebot.SendOptions{ParseMode: "HTML"})
+		return handler.editOrReply(c, helper.ErrInternal, nil)
 	}
 
 	reportMessage += message
-
-	handler.logger.Info("report sent")
-	return c.EditOrReply(reportMessage, &telebot.SendOptions{ParseMode: "HTML"})
+	return handler.editOrReply(c, reportMessage, nil)
 }

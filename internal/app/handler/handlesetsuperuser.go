@@ -6,12 +6,13 @@ import (
 	"github.com/sirupsen/logrus"
 	"gitlab.devops.telekom.de/tvpp/prototypes/devops-school-bot/internal/app/helper"
 	"gitlab.devops.telekom.de/tvpp/prototypes/devops-school-bot/internal/app/model"
+	"gitlab.devops.telekom.de/tvpp/prototypes/devops-school-bot/internal/app/store"
 	"gopkg.in/tucnak/telebot.v3"
 )
 
 func (handler *Handler) handleSetSuperuser(c telebot.Context) error {
 	if !c.Message().Private() {
-		return c.EditOrReply(fmt.Sprintf(helper.ErrWrongChatType, "PRIVATE"), &telebot.SendOptions{ParseMode: "HTML"})
+		return handler.editOrReply(c, fmt.Sprintf(helper.ErrWrongChatType, "PRIVATE"), nil)
 	}
 
 	handler.logger.WithFields(logrus.Fields{
@@ -20,13 +21,18 @@ func (handler *Handler) handleSetSuperuser(c telebot.Context) error {
 	account, err := handler.store.Account().FindByTelegramID(int64(c.Sender().ID))
 	if err != nil {
 		handler.logger.Error(err)
-		return c.EditOrReply(helper.ErrInternal, &telebot.SendOptions{ParseMode: "HTML"})
+
+		if err == store.ErrRecordNotFound {
+			return handler.editOrReply(c, helper.ErrInsufficientPermissions, nil)
+		}
+
+		return handler.editOrReply(c, helper.ErrInternal, nil)
 	}
 	handler.logger.WithFields(account.LogrusFields()).Info("account found")
 
 	if !account.Superuser {
 		handler.logger.WithFields(account.LogrusFields()).Info("account has insufficient permissions")
-		return c.EditOrReply(helper.ErrInsufficientPermissions, &telebot.SendOptions{ParseMode: "HTML"})
+		return handler.editOrReply(c, helper.ErrInsufficientPermissions, nil)
 	}
 
 	callback := &model.Callback{
@@ -40,8 +46,8 @@ func (handler *Handler) handleSetSuperuser(c telebot.Context) error {
 	replyMessage, replyMarkup, err := hlpr.GetUsersList(callback)
 	if err != nil {
 		handler.logger.Error(err)
-		return c.EditOrReply(helper.ErrInternal, &telebot.SendOptions{ParseMode: "HTML"})
+		return handler.editOrReply(c, helper.ErrInternal, nil)
 	}
 
-	return c.EditOrReply(replyMessage, &telebot.SendOptions{ParseMode: "HTML"}, replyMarkup)
+	return handler.editOrReply(c, replyMessage, replyMarkup)
 }

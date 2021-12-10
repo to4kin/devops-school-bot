@@ -10,7 +10,7 @@ import (
 
 func (handler *Handler) handleHomework(c telebot.Context) error {
 	if !c.Message().Private() {
-		return c.EditOrReply(fmt.Sprintf(helper.ErrWrongChatType, "PRIVATE"), &telebot.SendOptions{ParseMode: "HTML"})
+		return handler.editOrReply(c, fmt.Sprintf(helper.ErrWrongChatType, "PRIVATE"), nil)
 	}
 
 	hlpr := helper.NewHelper(handler.store, handler.logger)
@@ -24,8 +24,8 @@ func (handler *Handler) handleHomework(c telebot.Context) error {
 	replyMessage, replyMarkup, err := hlpr.GetSchoolsList(callback)
 	if err != nil {
 		handler.logger.Error(err)
-		return c.EditOrReply(helper.ErrInternal, &telebot.SendOptions{ParseMode: "HTML"})
+		return handler.editOrReply(c, helper.ErrInternal, nil)
 	}
 
-	return c.EditOrReply(replyMessage, replyMarkup)
+	return handler.editOrReply(c, replyMessage, replyMarkup)
 }

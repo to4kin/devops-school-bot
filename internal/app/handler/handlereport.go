@@ -17,13 +17,18 @@ func (handler *Handler) handleReport(c telebot.Context) error {
 	account, err := handler.store.Account().FindByTelegramID(int64(c.Sender().ID))
 	if err != nil {
 		handler.logger.Error(err)
-		return c.EditOrReply(helper.ErrInternal, &telebot.SendOptions{ParseMode: "HTML"})
+
+		if err == store.ErrRecordNotFound {
+			return handler.editOrReply(c, helper.ErrInsufficientPermissions, nil)
+		}
+
+		return handler.editOrReply(c, helper.ErrInternal, nil)
 	}
 	handler.logger.WithFields(account.LogrusFields()).Info("account found")
 
 	if !account.Superuser {
 		handler.logger.WithFields(account.LogrusFields()).Info("account has insufficient permissions")
-		return c.EditOrReply(helper.ErrInsufficientPermissions, &telebot.SendOptions{ParseMode: "HTML"})
+		return handler.editOrReply(c, helper.ErrInsufficientPermissions, nil)
 	}
 
 	hlpr := helper.NewHelper(handler.store, handler.logger)
@@ -39,10 +44,10 @@ func (handler *Handler) handleReport(c telebot.Context) error {
 		replyMessage, replyMarkup, err := hlpr.GetSchoolsList(callback)
 		if err != nil {
 			handler.logger.Error(err)
-			return c.EditOrReply(helper.ErrInternal, &telebot.SendOptions{ParseMode: "HTML"})
+			return handler.editOrReply(c, helper.ErrInternal, nil)
 		}
 
-		return c.EditOrReply(replyMessage, replyMarkup)
+		return handler.editOrReply(c, replyMessage, replyMarkup)
 	}
 
 	handler.logger.WithFields(logrus.Fields{
@@ -53,23 +58,22 @@ func (handler *Handler) handleReport(c telebot.Context) error {
 		handler.logger.Error(err)
 
 		if err == store.ErrRecordNotFound {
-			return c.EditOrReply(helper.ErrSchoolNotStarted, &telebot.SendOptions{ParseMode: "HTML"})
+			return handler.editOrReply(c, helper.ErrSchoolNotStarted, nil)
 		}
 
-		return c.EditOrReply(helper.ErrInternal, &telebot.SendOptions{ParseMode: "HTML"})
+		return handler.editOrReply(c, helper.ErrInternal, nil)
 	}
 	handler.logger.WithFields(school.LogrusFields()).Info("school found")
 
 	reportMessage, err := hlpr.GetReport(school)
 	if err != nil && err != store.ErrRecordNotFound {
 		handler.logger.Error(err)
-		return c.EditOrReply(helper.ErrInternal, &telebot.SendOptions{ParseMode: "HTML"})
+		return handler.editOrReply(c, helper.ErrInternal, nil)
 	}
 
 	if err == store.ErrRecordNotFound {
 		reportMessage = helper.ErrReportNotFound
 	}
 
-	handler.logger.Info("report sent")
-	return c.EditOrReply(fmt.Sprintf("School <b>%v</b>\n\n%v", school.Title, reportMessage), &telebot.SendOptions{ParseMode: "HTML"})
+	return handler.editOrReply(c, fmt.Sprintf("School <b>%v</b>\n\n%v", school.Title, reportMessage), nil)
 }

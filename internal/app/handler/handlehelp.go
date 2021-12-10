@@ -74,5 +74,5 @@ func (handler *Handler) handleHelp(c telebot.Context) error {
 		}
 	}
 
-	return c.EditOrReply(message, &telebot.SendOptions{ParseMode: "HTML"})
+	return handler.editOrReply(c, message, nil)
 }

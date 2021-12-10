@@ -17,32 +17,17 @@ func (handler *Handler) handleCallback(c telebot.Context) error {
 	callbackID, err := strconv.ParseInt(c.Callback().Data[1:], 10, 64)
 	if err != nil {
 		handler.logger.Error(err)
-		return c.EditOrReply(helper.ErrOldCallbackData, &telebot.SendOptions{ParseMode: "HTML"})
+		return handler.editOrReply(c, helper.ErrOldCallbackData, nil)
 	}
 
 	handler.logger.WithFields(logrus.Fields{
 		"callback_id": callbackID,
 	}).Info("callback parsed")
 
-	// handler.logger.WithFields(logrus.Fields{
-	// 	"telegram_id": c.Sender().ID,
-	// }).Info("get account from database by telegram_id")
-	// account, err := handler.store.Account().FindByTelegramID(int64(c.Sender().ID))
-	// if err != nil {
-	// 	handler.logger.Error(err)
-	// 	return c.EditOrReply(helper.ErrInternal, &telebot.SendOptions{ParseMode: "HTML"})
-	// }
-	// handler.logger.WithFields(account.LogrusFields()).Info("account found")
-
-	//if !account.Superuser {
-	//	handler.logger.WithFields(account.LogrusFields()).Info("account has insufficient permissions")
-	//	return c.EditOrReply(helper.ErrInsufficientPermissions, &telebot.SendOptions{ParseMode: "HTML"})
-	//}
-
 	callback, err := handler.store.Callback().FindByID(callbackID)
 	if err != nil {
 		handler.logger.Error(err)
-		return c.EditOrReply(helper.ErrInternal, &telebot.SendOptions{ParseMode: "HTML"})
+		return handler.editOrReply(c, helper.ErrInternal, nil)
 	}
 	handler.logger.WithFields(callback.LogrusFields()).Info("callback found")
 
@@ -77,7 +62,7 @@ func (handler *Handler) handleCallback(c telebot.Context) error {
 			}
 			if err != nil {
 				handler.logger.Error(err)
-				return c.EditOrReply(helper.ErrInternal, &telebot.SendOptions{ParseMode: "HTML"})
+				return handler.editOrReply(c, helper.ErrInternal, nil)
 			}
 
 			_, err = document.Send(c.Bot(), c.Recipient(), &telebot.SendOptions{ParseMode: "HTML"})
@@ -138,12 +123,12 @@ func (handler *Handler) handleCallback(c telebot.Context) error {
 
 	if err != nil {
 		handler.logger.Error(err)
-		return c.EditOrReply(helper.ErrInternal, &telebot.SendOptions{ParseMode: "HTML"})
+		return handler.editOrReply(c, helper.ErrInternal, nil)
 	}
 
 	if replyMessage == "" {
-		return c.EditOrReply(helper.ErrInternal, &telebot.SendOptions{ParseMode: "HTML"})
+		return handler.editOrReply(c, helper.ErrInternal, nil)
 	}
 
-	return c.EditOrReply(replyMessage, &telebot.SendOptions{ParseMode: "HTML"}, replyMarkup)
+	return handler.editOrReply(c, replyMessage, replyMarkup)
 }

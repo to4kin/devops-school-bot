@@ -17,21 +17,25 @@ func (handler *Handler) HandleWebHook() http.HandlerFunc {
 			return
 		}
 
-		handler.logger.WithFields(logrus.Fields{
-			"update_id": u.ID,
-		}).Info("new message received")
-		handler.bot.ProcessUpdate(u)
+		if u.Callback != nil {
+			handler.logger.WithFields(logrus.Fields{
+				"update_id":         u.ID,
+				"private":           u.Callback.Message.Private(),
+				"callback_raw_data": u.Callback.Data,
+			}).Info("new callback received")
+			handler.bot.ProcessUpdate(u)
+		}
+
+		if u.Message != nil &&
+			(u.Message.UserJoined == nil && u.Message.UsersJoined == nil && u.Message.UserLeft == nil) {
+			handler.logger.WithFields(logrus.Fields{
+				"update_id": u.ID,
+				"private":   u.Message.Private(),
+				"message":   u.Message.Text,
+			}).Info("new message received")
+			handler.bot.ProcessUpdate(u)
+		}
+
 		handler.respond(rw, r, http.StatusOK, nil)
-	}
-}
-
-func (handler *Handler) error(rw http.ResponseWriter, r *http.Request, code int, err error) {
-	handler.respond(rw, r, code, map[string]string{"error": err.Error()})
-}
-
-func (handler *Handler) respond(rw http.ResponseWriter, r *http.Request, code int, data interface{}) {
-	rw.WriteHeader(code)
-	if data != nil {
-		json.NewEncoder(rw).Encode(data)
 	}
 }

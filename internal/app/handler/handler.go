@@ -1,6 +1,9 @@
 package handler
 
 import (
+	"encoding/json"
+	"net/http"
+
 	_ "github.com/golang-migrate/migrate/v4/source/file" // for migrations by file
 	"github.com/sirupsen/logrus"
 	"gitlab.devops.telekom.de/tvpp/prototypes/devops-school-bot/internal/app/configuration"
@@ -55,4 +58,25 @@ func NewHandler(config *configuration.Config, store store.Store) (*Handler, erro
 	handler.configureBotHandlers()
 
 	return handler, nil
+}
+
+// Respond error to http request
+func (handler *Handler) error(rw http.ResponseWriter, r *http.Request, code int, err error) {
+	handler.respond(rw, r, code, map[string]string{"error": err.Error()})
+}
+
+// Respond ok to http request
+func (handler *Handler) respond(rw http.ResponseWriter, r *http.Request, code int, data interface{}) {
+	rw.WriteHeader(code)
+	if data != nil {
+		json.NewEncoder(rw).Encode(data)
+	}
+}
+
+// Respond to telegram chat
+func (handler *Handler) editOrReply(c telebot.Context, replyMessage string, replyMarkup *telebot.ReplyMarkup) error {
+	handler.logger.WithFields(logrus.Fields{
+		"message": replyMessage,
+	}).Info("send message to user")
+	return c.EditOrReply(replyMessage, &telebot.SendOptions{ParseMode: "HTML"}, replyMarkup)
 }

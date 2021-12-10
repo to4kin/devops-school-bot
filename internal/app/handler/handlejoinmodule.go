@@ -13,7 +13,7 @@ import (
 
 func (handler *Handler) handleJoinModule(c telebot.Context) error {
 	if c.Message().Private() {
-		return c.EditOrReply(fmt.Sprintf(helper.ErrWrongChatType, "SCHOOL"), &telebot.SendOptions{ParseMode: "HTML"})
+		return handler.editOrReply(c, fmt.Sprintf(helper.ErrWrongChatType, "SCHOOL"), nil)
 	}
 
 	handler.logger.WithFields(logrus.Fields{
@@ -34,13 +34,13 @@ func (handler *Handler) handleJoinModule(c telebot.Context) error {
 
 			if err := handler.store.Account().Create(account); err != nil {
 				handler.logger.Error(err)
-				return c.EditOrReply(helper.ErrInternal, &telebot.SendOptions{ParseMode: "HTML"})
+				return handler.editOrReply(c, helper.ErrInternal, nil)
 			}
 
 			handler.logger.WithFields(account.LogrusFields()).Info("account created")
 		} else {
 			handler.logger.Error(err)
-			return c.EditOrReply(helper.ErrInternal, &telebot.SendOptions{ParseMode: "HTML"})
+			return handler.editOrReply(c, helper.ErrInternal, nil)
 		}
 	} else {
 		handler.logger.WithFields(account.LogrusFields()).Info("account found")
@@ -53,16 +53,16 @@ func (handler *Handler) handleJoinModule(c telebot.Context) error {
 	if err != nil {
 		handler.logger.Error(err)
 		if err == store.ErrRecordNotFound {
-			return c.EditOrReply(helper.ErrSchoolNotStarted, &telebot.SendOptions{ParseMode: "HTML"})
+			return handler.editOrReply(c, helper.ErrSchoolNotStarted, nil)
 		}
 
-		return c.EditOrReply(helper.ErrInternal, &telebot.SendOptions{ParseMode: "HTML"})
+		return handler.editOrReply(c, helper.ErrInternal, nil)
 	}
 	handler.logger.WithFields(school.LogrusFields()).Info("school found")
 
 	if !school.Active {
 		handler.logger.WithFields(school.LogrusFields()).Info("school finished")
-		return c.EditOrReply(helper.ErrSchoolNotStarted, &telebot.SendOptions{ParseMode: "HTML"})
+		return handler.editOrReply(c, helper.ErrSchoolNotStarted, nil)
 	}
 
 	handler.logger.WithFields(logrus.Fields{
@@ -83,7 +83,7 @@ func (handler *Handler) handleJoinModule(c telebot.Context) error {
 
 			if err := handler.store.Student().Create(student); err != nil {
 				handler.logger.Error(err)
-				return c.EditOrReply(helper.ErrInternal, &telebot.SendOptions{ParseMode: "HTML"})
+				return handler.editOrReply(c, helper.ErrInternal, nil)
 			}
 
 			handler.logger.WithFields(student.LogrusFields()).Info("student created")
@@ -93,12 +93,12 @@ func (handler *Handler) handleJoinModule(c telebot.Context) error {
 			} else {
 				reportMessage += "\n\n" + helper.SysListenerGuide
 			}
-			return c.EditOrReply(reportMessage, &telebot.SendOptions{ParseMode: "HTML"})
+			return handler.editOrReply(c, reportMessage, nil)
 		}
 
 		handler.logger.Error(err)
-		return c.EditOrReply(helper.ErrInternal, &telebot.SendOptions{ParseMode: "HTML"})
+		return handler.editOrReply(c, helper.ErrInternal, nil)
 	}
 	handler.logger.WithFields(student.LogrusFields()).Info("student exist")
-	return c.EditOrReply(fmt.Sprintf(helper.MsgUserAlreadyJoined, school.Title, student.GetType()), &telebot.SendOptions{ParseMode: "HTML"})
+	return handler.editOrReply(c, fmt.Sprintf(helper.MsgUserAlreadyJoined, school.Title, student.GetType()), nil)
 }

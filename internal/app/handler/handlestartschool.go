@@ -17,7 +17,7 @@ var (
 
 func (handler *Handler) handleStartSchool(c telebot.Context) error {
 	if c.Message().Private() {
-		return c.EditOrReply(fmt.Sprintf(helper.ErrWrongChatType, "SCHOOL"), &telebot.SendOptions{ParseMode: "HTML"})
+		return handler.editOrReply(c, fmt.Sprintf(helper.ErrWrongChatType, "SCHOOL"), nil)
 	}
 
 	handler.logger.WithFields(logrus.Fields{
@@ -26,13 +26,18 @@ func (handler *Handler) handleStartSchool(c telebot.Context) error {
 	account, err := handler.store.Account().FindByTelegramID(int64(c.Sender().ID))
 	if err != nil {
 		handler.logger.Error(err)
-		return c.EditOrReply(helper.ErrInternal, &telebot.SendOptions{ParseMode: "HTML"})
+
+		if err == store.ErrRecordNotFound {
+			return handler.editOrReply(c, helper.ErrInsufficientPermissions, nil)
+		}
+
+		return handler.editOrReply(c, helper.ErrInternal, nil)
 	}
 	handler.logger.WithFields(account.LogrusFields()).Info("account found")
 
 	if !account.Superuser {
 		handler.logger.WithFields(account.LogrusFields()).Info("account has insufficient permissions")
-		return c.EditOrReply(helper.ErrInsufficientPermissions, &telebot.SendOptions{ParseMode: "HTML"})
+		return handler.editOrReply(c, helper.ErrInsufficientPermissions, nil)
 	}
 
 	handler.logger.WithFields(logrus.Fields{
@@ -51,15 +56,15 @@ func (handler *Handler) handleStartSchool(c telebot.Context) error {
 
 			if err := handler.store.School().Create(school); err != nil {
 				handler.logger.Error(err)
-				return c.EditOrReply(helper.ErrInternal, &telebot.SendOptions{ParseMode: "HTML"})
+				return handler.editOrReply(c, helper.ErrInternal, nil)
 			}
 
 			handler.logger.WithFields(school.LogrusFields()).Info("school created")
-			return c.EditOrReply(fmt.Sprintf(msgSchoolStarted, school.Title), &telebot.SendOptions{ParseMode: "HTML"})
+			return handler.editOrReply(c, fmt.Sprintf(msgSchoolStarted, school.Title), nil)
 		}
 
 		handler.logger.Error(err)
-		return c.EditOrReply(helper.ErrInternal, &telebot.SendOptions{ParseMode: "HTML"})
+		return handler.editOrReply(c, helper.ErrInternal, nil)
 	}
 
 	if !school.Active {
@@ -67,10 +72,10 @@ func (handler *Handler) handleStartSchool(c telebot.Context) error {
 		school.Active = true
 		if err := handler.store.School().Update(school); err != nil {
 			handler.logger.Error(err)
-			return c.EditOrReply(helper.ErrInternal, &telebot.SendOptions{ParseMode: "HTML"})
+			return handler.editOrReply(c, helper.ErrInternal, nil)
 		}
 	}
 
 	handler.logger.WithFields(school.LogrusFields()).Info("school started")
-	return c.EditOrReply(fmt.Sprintf(msgSchoolStarted, school.Title), &telebot.SendOptions{ParseMode: "HTML"})
+	return handler.editOrReply(c, fmt.Sprintf(msgSchoolStarted, school.Title), nil)
 }

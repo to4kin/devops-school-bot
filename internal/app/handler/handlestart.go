@@ -19,7 +19,7 @@ var (
 
 func (handler *Handler) handleStart(c telebot.Context) error {
 	if !c.Message().Private() {
-		return c.EditOrReply(fmt.Sprintf(helper.ErrWrongChatType, "PRIVATE"), &telebot.SendOptions{ParseMode: "HTML"})
+		return handler.editOrReply(c, fmt.Sprintf(helper.ErrWrongChatType, "PRIVATE"), nil)
 	}
 
 	handler.logger.WithFields(logrus.Fields{
@@ -40,23 +40,23 @@ func (handler *Handler) handleStart(c telebot.Context) error {
 
 			if err := handler.store.Account().Create(account); err != nil {
 				handler.logger.Error(err)
-				return c.EditOrReply(helper.ErrInternal, &telebot.SendOptions{ParseMode: "HTML"})
+				return handler.editOrReply(c, helper.ErrInternal, nil)
 			}
 
 			handler.logger.WithFields(account.LogrusFields()).Info("account created")
-			return c.EditOrReply(
+			return handler.editOrReply(c,
 				fmt.Sprintf(msgUserCreated, account.FirstName, account.FirstName, account.LastName, account.Username, account.Superuser),
-				&telebot.SendOptions{ParseMode: "HTML"},
+				nil,
 			)
 		}
 
 		handler.logger.Error(err)
-		return c.EditOrReply(helper.ErrInternal, &telebot.SendOptions{ParseMode: "HTML"})
+		return handler.editOrReply(c, helper.ErrInternal, nil)
 	}
 
 	handler.logger.WithFields(account.LogrusFields()).Info("account found")
-	return c.EditOrReply(
+	return handler.editOrReply(c,
 		fmt.Sprintf(msgUserExist, account.FirstName, account.FirstName, account.LastName, account.Username, account.Superuser),
-		&telebot.SendOptions{ParseMode: "HTML"},
+		nil,
 	)
 }

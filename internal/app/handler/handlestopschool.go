@@ -5,6 +5,7 @@ import (
 
 	"github.com/sirupsen/logrus"
 	"gitlab.devops.telekom.de/tvpp/prototypes/devops-school-bot/internal/app/helper"
+	"gitlab.devops.telekom.de/tvpp/prototypes/devops-school-bot/internal/app/store"
 	"gopkg.in/tucnak/telebot.v3"
 )
 
@@ -14,7 +15,7 @@ var (
 
 func (handler *Handler) handleStopSchool(c telebot.Context) error {
 	if c.Message().Private() {
-		return c.EditOrReply(fmt.Sprintf(helper.ErrWrongChatType, "SCHOOL"), &telebot.SendOptions{ParseMode: "HTML"})
+		return handler.editOrReply(c, fmt.Sprintf(helper.ErrWrongChatType, "SCHOOL"), nil)
 	}
 
 	handler.logger.WithFields(logrus.Fields{
@@ -23,13 +24,18 @@ func (handler *Handler) handleStopSchool(c telebot.Context) error {
 	account, err := handler.store.Account().FindByTelegramID(int64(c.Sender().ID))
 	if err != nil {
 		handler.logger.Error(err)
-		return c.EditOrReply(helper.ErrInternal, &telebot.SendOptions{ParseMode: "HTML"})
+
+		if err == store.ErrRecordNotFound {
+			return handler.editOrReply(c, helper.ErrInsufficientPermissions, nil)
+		}
+
+		return handler.editOrReply(c, helper.ErrInternal, nil)
 	}
 	handler.logger.WithFields(account.LogrusFields()).Info("account found")
 
 	if !account.Superuser {
 		handler.logger.WithFields(account.LogrusFields()).Info("account has insufficient permissions")
-		return c.EditOrReply(helper.ErrInsufficientPermissions, &telebot.SendOptions{ParseMode: "HTML"})
+		return handler.editOrReply(c, helper.ErrInsufficientPermissions, nil)
 	}
 
 	handler.logger.WithFields(logrus.Fields{
@@ -38,20 +44,20 @@ func (handler *Handler) handleStopSchool(c telebot.Context) error {
 	school, err := handler.store.School().FindByChatID(c.Message().Chat.ID)
 	if err != nil {
 		handler.logger.Error(err)
-		return c.EditOrReply(helper.ErrSchoolNotStarted, &telebot.SendOptions{ParseMode: "HTML"})
+		return handler.editOrReply(c, helper.ErrSchoolNotStarted, nil)
 	}
 	handler.logger.WithFields(school.LogrusFields()).Info("school found")
 
 	if !school.Active {
 		handler.logger.WithFields(school.LogrusFields()).Info("school already finished")
-		return c.EditOrReply(fmt.Sprintf(msgSchoolFinished, school.Title), &telebot.SendOptions{ParseMode: "HTML"})
+		return handler.editOrReply(c, fmt.Sprintf(msgSchoolFinished, school.Title), nil)
 	}
 
 	school.Active = false
 	if err := handler.store.School().Update(school); err != nil {
 		handler.logger.Error(err)
-		return c.EditOrReply(helper.ErrInternal, &telebot.SendOptions{ParseMode: "HTML"})
+		return handler.editOrReply(c, helper.ErrInternal, nil)
 	}
 	handler.logger.WithFields(school.LogrusFields()).Info("school finished")
-	return c.EditOrReply(fmt.Sprintf(msgSchoolFinished, school.Title), &telebot.SendOptions{ParseMode: "HTML"})
+	return handler.editOrReply(c, fmt.Sprintf(msgSchoolFinished, school.Title), nil)
 }
