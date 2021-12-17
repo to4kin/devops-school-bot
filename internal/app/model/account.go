@@ -100,7 +100,7 @@ func (a *Account) GetMention() string {
 //
 // NOTE:
 // - Created is required
-// - TelegramID is requiredq
+// - TelegramID is required
 // - FirstName is required
 func (a *Account) Validate() error {
 	return validation.ValidateStruct(

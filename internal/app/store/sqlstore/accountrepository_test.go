@@ -16,6 +16,7 @@ func TestAccountRepository_Create(t *testing.T) {
 	s := sqlstore.New(db)
 	a := model.TestAccount(t)
 
+	assert.Error(t, s.Account().Create(&model.Account{}))
 	assert.NoError(t, s.Account().Create(a))
 	assert.NotNil(t, a)
 }
@@ -27,18 +28,23 @@ func TestAccountRepository_Update(t *testing.T) {
 	s := sqlstore.New(db)
 	a := model.TestAccount(t)
 
+	assert.Error(t, s.Account().Update(&model.Account{}))
 	assert.EqualError(t, s.Account().Update(a), store.ErrRecordNotFound.Error())
 
 	assert.NoError(t, s.Account().Create(a))
 	assert.NotNil(t, a)
 
-	a.FirstName = "NewFirstName"
-	a.LastName = "NewLastName"
-	a.Username = "NewUsername"
-	a.Superuser = true
+	a.FirstName += "New"
+	a.LastName += "New"
+	a.Username += "New"
+	a.Superuser = !a.Superuser
 
 	assert.NoError(t, s.Account().Update(a))
-	assert.NotNil(t, a)
+
+	account, err := s.Account().FindByID(a.ID)
+	assert.NoError(t, err)
+	assert.NotNil(t, account)
+	assert.Equal(t, a.Superuser, account.Superuser)
 }
 
 func TestAccountRepository_FindAll(t *testing.T) {

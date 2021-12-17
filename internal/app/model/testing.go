@@ -7,7 +7,14 @@ import (
 	"gopkg.in/tucnak/telebot.v3"
 )
 
-// TestAccount ...
+// TestAccount for testing
+// NOTE:
+//	Created:    time.Now(),
+//	TelegramID: int64(99999),
+//	FirstName:  "FirstName",
+//	LastName:   "LastName",
+//	Username:   "Username",
+//	Superuser:  false,
 func TestAccount(t *testing.T) *Account {
 	return &Account{
 		Created:    time.Now(),
@@ -19,11 +26,18 @@ func TestAccount(t *testing.T) *Account {
 	}
 }
 
-// TestAdminAccount ...
+// TestAdminAccount for testing
+// NOTE:
+//	Created:    time.Now(),
+//	TelegramID: int64(99999),
+//	FirstName:  "FirstName",
+//	LastName:   "LastName",
+//	Username:   "Username",
+//	Superuser:  true,
 func TestAdminAccount(t *testing.T) *Account {
 	return &Account{
 		Created:    time.Now(),
-		TelegramID: int64(99999),
+		TelegramID: int64(66666),
 		FirstName:  "FirstName",
 		LastName:   "LastName",
 		Username:   "Username",
@@ -31,7 +45,12 @@ func TestAdminAccount(t *testing.T) *Account {
 	}
 }
 
-// TestSchool ...
+// TestSchool for testing
+// NOTE:
+//	Created: time.Now(),
+//	Title:   "Title",
+//	ChatID:  int64(99999),
+//	Active:  true,
 func TestSchool(t *testing.T) *School {
 	return &School{
 		Created: time.Now(),
@@ -41,7 +60,12 @@ func TestSchool(t *testing.T) *School {
 	}
 }
 
-// TestInactiveSchool ...
+// TestInactiveSchool for testing
+// NOTE:
+//	Created: time.Now(),
+//	Title:   "Title",
+//	ChatID:  int64(99999),
+//	Active:  false,
 func TestInactiveSchool(t *testing.T) *School {
 	return &School{
 		Created: time.Now(),
@@ -51,7 +75,10 @@ func TestInactiveSchool(t *testing.T) *School {
 	}
 }
 
-// TestLessonOne ...
+// TestLessonOne for testing
+// NOTE:
+//	Title:  "golang1",
+//	Module: TestModule(t),
 func TestLessonOne(t *testing.T) *Lesson {
 	return &Lesson{
 		Title:  "golang1",
@@ -59,7 +86,10 @@ func TestLessonOne(t *testing.T) *Lesson {
 	}
 }
 
-// TestLessonTwo ...
+// TestLessonTwo for testing
+// NOTE:
+//	Title:  "golang2",
+//	Module: TestModule(t),
 func TestLessonTwo(t *testing.T) *Lesson {
 	return &Lesson{
 		Title:  "golang2",
@@ -67,14 +97,22 @@ func TestLessonTwo(t *testing.T) *Lesson {
 	}
 }
 
-// TestModule ...
+// TestModule for testing
+// NOTE:
+//	Title: "golang",
 func TestModule(t *testing.T) *Module {
 	return &Module{
 		Title: "golang",
 	}
 }
 
-// TestStudent ...
+// TestStudent for testing
+// NOTE:
+//	Created:    time.Now(),
+//	Account:    TestAccount(t),
+//	School:     TestSchool(t),
+//	Active:     true,
+//	FullCourse: true,
 func TestStudent(t *testing.T) *Student {
 	return &Student{
 		Created:    time.Now(),
@@ -85,7 +123,13 @@ func TestStudent(t *testing.T) *Student {
 	}
 }
 
-// TestInactiveStudent ...
+// TestInactiveStudent for testing
+// NOTE:
+//	Created:    time.Now(),
+//	Account:    TestAccount(t),
+//	School:     TestSchool(t),
+//	Active:     false,
+//	FullCourse: true,
 func TestInactiveStudent(t *testing.T) *Student {
 	return &Student{
 		Created:    time.Now(),
@@ -96,7 +140,13 @@ func TestInactiveStudent(t *testing.T) *Student {
 	}
 }
 
-// TestListener ...
+// TestListener for testing
+// NOTE:
+//	Created:    time.Now(),
+//	Account:    TestAccount(t),
+//	School:     TestSchool(t),
+//	Active:     true,
+//	FullCourse: false,
 func TestListener(t *testing.T) *Student {
 	return &Student{
 		Created:    time.Now(),
@@ -107,7 +157,13 @@ func TestListener(t *testing.T) *Student {
 	}
 }
 
-// TestInactiveListener ...
+// TestInactiveListener for testing
+// NOTE:
+//	Created:    time.Now(),
+//	Account:    TestAccount(t),
+//	School:     TestSchool(t),
+//	Active:     false,
+//	FullCourse: false,
 func TestInactiveListener(t *testing.T) *Student {
 	return &Student{
 		Created:    time.Now(),
@@ -118,7 +174,14 @@ func TestInactiveListener(t *testing.T) *Student {
 	}
 }
 
-// TestHomeworkOne ...
+// TestHomeworkOne for testing
+// NOTE:
+//	Created:   time.Now(),
+//	Student:   TestStudent(t),
+//	Lesson:    TestLessonOne(t),
+//	MessageID: int64(99999),
+//	Verify:    true,
+//	Active:    true,
 func TestHomeworkOne(t *testing.T) *Homework {
 	return &Homework{
 		Created:   time.Now(),
@@ -130,7 +193,14 @@ func TestHomeworkOne(t *testing.T) *Homework {
 	}
 }
 
-// TestHomeworkTwo ...
+// TestHomeworkTwo for testing
+// NOTE:
+//	Created:   time.Now(),
+//	Student:   TestStudent(t),
+//	Lesson:    TestLessonTwo(t),
+//	MessageID: int64(99999),
+//	Verify:    true,
+//	Active:    true,
 func TestHomeworkTwo(t *testing.T) *Homework {
 	return &Homework{
 		Created:   time.Now(),
@@ -142,7 +212,13 @@ func TestHomeworkTwo(t *testing.T) *Homework {
 	}
 }
 
-// TestAccountCallback ...
+// TestAccountCallback for testing
+// NOTE:
+//	Created:     time.Now(),
+//	Type:        "account",
+//	TypeID:      int64(1),
+//	Command:     "get",
+//	ListCommand: "accounts_list",
 func TestAccountCallback(t *testing.T) *Callback {
 	return &Callback{
 		Created:     time.Now(),
@@ -153,7 +229,13 @@ func TestAccountCallback(t *testing.T) *Callback {
 	}
 }
 
-// TestStudentCallback ...
+// TestStudentCallback for testing
+// NOTE:
+//	Created:     time.Now(),
+//	Type:        "student",
+//	TypeID:      int64(1),
+//	Command:     "get",
+//	ListCommand: "students_list",
 func TestStudentCallback(t *testing.T) *Callback {
 	return &Callback{
 		Created:     time.Now(),
@@ -164,7 +246,13 @@ func TestStudentCallback(t *testing.T) *Callback {
 	}
 }
 
-// TestSchoolCallback ...
+// TestSchoolCallback for testing
+// NOTE:
+//	Created:     time.Now(),
+//	Type:        "school",
+//	TypeID:      int64(1),
+//	Command:     "get",
+//	ListCommand: "schools_list",
 func TestSchoolCallback(t *testing.T) *Callback {
 	return &Callback{
 		Created:     time.Now(),
@@ -175,7 +263,13 @@ func TestSchoolCallback(t *testing.T) *Callback {
 	}
 }
 
-// TestHomeworkCallback ...
+// TestHomeworkCallback for testing
+// NOTE:
+//	Created:     time.Now(),
+//	Type:        "homework",
+//	TypeID:      int64(1),
+//	Command:     "get",
+//	ListCommand: "homeworks_list",
 func TestHomeworkCallback(t *testing.T) *Callback {
 	return &Callback{
 		Created:     time.Now(),
@@ -186,7 +280,12 @@ func TestHomeworkCallback(t *testing.T) *Callback {
 	}
 }
 
-// TestTelebotUser ...
+// TestTelebotUser for testing
+// NOTE:
+//	ID:        int64(99999),
+//	FirstName: "FirstName",
+//	LastName:  "LastName",
+//	Username:  "Username",
 func TestTelebotUser(t *testing.T) *telebot.User {
 	return &telebot.User{
 		ID:        int64(99999),
