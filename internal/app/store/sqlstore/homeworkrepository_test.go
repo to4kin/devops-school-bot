@@ -49,28 +49,27 @@ func TestHomeworkRepository_Update(t *testing.T) {
 	assert.Equal(t, false, h.Active)
 }
 
-func TestHomeworkRepository_DeleteByMessageID(t *testing.T) {
+func TestHomeworkRepository_DeleteByMessageIDStudentID(t *testing.T) {
 	db, teardown := sqlstore.TestDb(t, databaseURL, migrations)
 	defer teardown("homework", "lesson", "module", "student", "school", "account")
 
 	s := sqlstore.New(db)
-	h1 := model.TestHomeworkOne(t)
-	h2 := model.TestHomeworkTwo(t)
+	h := model.TestHomeworkOne(t)
 
-	assert.EqualError(t, s.Homework().DeleteByMessageID(h1.MessageID), store.ErrRecordNotFound.Error())
+	assert.EqualError(t, s.Homework().DeleteByMessageIDStudentID(h.MessageID, h.Student.ID), store.ErrRecordNotFound.Error())
 
-	assert.NoError(t, s.Account().Create(h1.Student.Account))
-	assert.NoError(t, s.School().Create(h1.Student.School))
-	assert.NoError(t, s.Student().Create(h1.Student))
-	assert.NoError(t, s.Module().Create(h1.Lesson.Module))
-	assert.NoError(t, s.Lesson().Create(h1.Lesson))
-	assert.NoError(t, s.Homework().Create(h1))
+	assert.NoError(t, s.Account().Create(h.Student.Account))
+	assert.NoError(t, s.School().Create(h.Student.School))
+	assert.NoError(t, s.Student().Create(h.Student))
+	assert.NoError(t, s.Module().Create(h.Lesson.Module))
+	assert.NoError(t, s.Lesson().Create(h.Lesson))
+	assert.NoError(t, s.Homework().Create(h))
 
-	h1.Lesson = h2.Lesson
-	assert.NoError(t, s.Lesson().Create(h1.Lesson))
-	assert.NoError(t, s.Homework().Create(h1))
+	assert.NoError(t, s.Homework().DeleteByMessageIDStudentID(h.MessageID, h.Student.ID))
 
-	assert.NoError(t, s.Homework().DeleteByMessageID(h1.MessageID))
+	homework, err := s.Homework().FindByID(h.ID)
+	assert.Error(t, store.ErrRecordNotFound, err)
+	assert.Nil(t, homework)
 }
 
 func TestHomeworkRepository_FindByID(t *testing.T) {

@@ -18,6 +18,7 @@ var (
 
 func (handler *Handler) handleOnText(c telebot.Context) error {
 	if c.Message().Private() {
+		handler.logger.Info("message is private, exiting...")
 		return nil
 	}
 
@@ -25,7 +26,11 @@ func (handler *Handler) handleOnText(c telebot.Context) error {
 	var entities []telebot.MessageEntity
 
 	// NOTE: multimedia messages have CaptionEntities and Caption, not Entities and Text
-	if c.Message().Text != "" {
+	// Also, if the message was edited - Entities and Text are under c.Update().EditedMessage
+	if c.Update().EditedMessage != nil {
+		text = strings.ToLower(c.Update().EditedMessage.Text)
+		entities = c.Update().EditedMessage.Entities
+	} else if c.Message().Text != "" {
 		text = strings.ToLower(c.Message().Text)
 		entities = c.Message().Entities
 	} else {
@@ -84,8 +89,8 @@ func (handler *Handler) handleOnText(c telebot.Context) error {
 		if c.Update().EditedMessage != nil {
 			handler.logger.WithFields(logrus.Fields{
 				"message_id": c.Update().EditedMessage.ID,
-			}).Info("message was edited, need to delete old homeworks first")
-			if err := handler.store.Homework().DeleteByMessageID(int64(c.Update().EditedMessage.ID)); err != nil {
+			}).Info("message was edited, need to delete old homework first")
+			if err := handler.store.Homework().DeleteByMessageIDStudentID(int64(c.Update().EditedMessage.ID), student.ID); err != nil {
 				if err == store.ErrRecordNotFound {
 					handler.logger.Info(err)
 				} else {
@@ -95,7 +100,7 @@ func (handler *Handler) handleOnText(c telebot.Context) error {
 			} else {
 				handler.logger.WithFields(logrus.Fields{
 					"message_id": c.Update().EditedMessage.ID,
-				}).Info("all messages were deleted")
+				}).Info("old message was deleted")
 			}
 		}
 

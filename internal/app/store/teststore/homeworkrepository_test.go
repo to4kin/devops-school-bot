@@ -41,6 +41,26 @@ func TestHomeworkRepository_Update(t *testing.T) {
 	assert.Equal(t, false, h.Active)
 }
 
+func TestHomeworkRepository_DeleteByMessageIDStudentID(t *testing.T) {
+	s := teststore.New()
+	h := model.TestHomeworkOne(t)
+
+	assert.EqualError(t, s.Homework().DeleteByMessageIDStudentID(h.MessageID, h.Student.ID), store.ErrRecordNotFound.Error())
+
+	assert.NoError(t, s.Account().Create(h.Student.Account))
+	assert.NoError(t, s.School().Create(h.Student.School))
+	assert.NoError(t, s.Student().Create(h.Student))
+	assert.NoError(t, s.Module().Create(h.Lesson.Module))
+	assert.NoError(t, s.Lesson().Create(h.Lesson))
+	assert.NoError(t, s.Homework().Create(h))
+
+	assert.NoError(t, s.Homework().DeleteByMessageIDStudentID(h.MessageID, h.Student.ID))
+
+	homework, err := s.Homework().FindByID(h.ID)
+	assert.Error(t, store.ErrRecordNotFound, err)
+	assert.Nil(t, homework)
+}
+
 func TestHomeworkRepository_FindByID(t *testing.T) {
 	s := teststore.New()
 	h := model.TestHomeworkOne(t)

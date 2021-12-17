@@ -57,7 +57,7 @@ type StudentRepository interface {
 type HomeworkRepository interface {
 	Create(*model.Homework) error
 	Update(*model.Homework) error
-	DeleteByMessageID(int64) error
+	DeleteByMessageIDStudentID(int64, int64) error
 	FindByID(int64) (*model.Homework, error)
 	FindByStudentID(int64) ([]*model.Homework, error)
 	FindBySchoolID(int64) ([]*model.Homework, error)

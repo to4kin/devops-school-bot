@@ -43,17 +43,25 @@ func (r *HomeworkRepository) Update(h *model.Homework) error {
 	return store.ErrRecordNotFound
 }
 
-// DeleteByMessageID ...
-func (r *HomeworkRepository) DeleteByMessageID(messageID int64) error {
+// DeleteByMessageIDStudentID ...
+func (r *HomeworkRepository) DeleteByMessageIDStudentID(messageID int64, studentID int64) error {
+	found := false
 	result := []*model.Homework{}
 
 	for _, homework := range r.homeworks {
-		if homework.MessageID != messageID {
+		if homework.MessageID != messageID && homework.Student.ID != studentID {
 			result = append(result, homework)
+		} else {
+			found = true
 		}
 	}
 
 	r.homeworks = result
+
+	if !found {
+		return store.ErrRecordNotFound
+	}
+
 	return nil
 }
 

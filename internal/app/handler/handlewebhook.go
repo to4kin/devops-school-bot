@@ -26,13 +26,21 @@ func (handler *Handler) HandleWebHook() http.HandlerFunc {
 			handler.bot.ProcessUpdate(u)
 		}
 
-		if u.Message != nil &&
-			(u.Message.UserJoined == nil && u.Message.UsersJoined == nil && u.Message.UserLeft == nil) {
+		if u.Message != nil {
 			handler.logger.WithFields(logrus.Fields{
 				"update_id": u.ID,
 				"private":   u.Message.Private(),
 				"message":   u.Message.Text,
 			}).Info("new message received")
+			handler.bot.ProcessUpdate(u)
+		}
+
+		if u.EditedMessage != nil {
+			handler.logger.WithFields(logrus.Fields{
+				"update_id": u.ID,
+				"private":   u.EditedMessage.Private(),
+				"message":   u.EditedMessage.Text,
+			}).Info("edited message received")
 			handler.bot.ProcessUpdate(u)
 		}
 

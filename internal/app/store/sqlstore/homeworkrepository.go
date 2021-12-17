@@ -51,11 +51,12 @@ func (r *HomeworkRepository) Update(h *model.Homework) error {
 	return nil
 }
 
-// DeleteByMessageID ...
-func (r *HomeworkRepository) DeleteByMessageID(messageID int64) error {
+// DeleteByMessageIDStudentID ...
+func (r *HomeworkRepository) DeleteByMessageIDStudentID(messageID int64, studentID int64) error {
 	res, err := r.store.db.Exec(
-		"DELETE FROM homework WHERE message_id = $1",
+		"DELETE FROM homework WHERE message_id = $1 AND student_id = $2",
 		messageID,
+		studentID,
 	)
 
 	if err != nil {
