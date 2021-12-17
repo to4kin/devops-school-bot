@@ -18,7 +18,9 @@ var (
 /joinstudent - Join school as student
 /joinmodule - Join school as listener
 /help - Help message
+`
 
+	msgSuperUserGroupHelp string = `
 <b>Superuser Commands</b>
 /startschool - Start school
 /stopschool - Finish school
@@ -33,12 +35,14 @@ var (
 /myreport - Your progress
 /homeworks - Homeworks list
 /help - Help message
+`
 
+	msgSuperUserPrivateHelp string = `
 <b>Superuser Commands</b>
 /schools - Manage schools
 /report - School progress
 /fullreport - School progress with homework list
-
+	
 /users - Manage users
 /setsuperuser - Set Superuser
 /unsetsuperuser - Unset Superuser
@@ -69,7 +73,10 @@ func (handler *Handler) handleHelp(c telebot.Context) error {
 
 		if account.Superuser {
 			if c.Message().Private() {
+				message += msgSuperUserPrivateHelp
 				message += fmt.Sprintf(msgBotInfo, handler.version, handler.buildDate, runtime.Version())
+			} else {
+				message += msgSuperUserGroupHelp
 			}
 		}
 	}

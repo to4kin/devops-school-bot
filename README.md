@@ -230,23 +230,23 @@ volumes:
 There're two types of telegram chat where the bot is accepting commands: `private chat` and `group chat`
 
 ##### User Commands
-**/start** - Add user to database  
-**/joinstudent** - Join school as student  
-**/joinmodule** - Join school as listener  
-**/myreport** - Your progress  
-**/homeworks** - Homeworks list  
-**/help** - Help message  
+**/start** - Add user to database [Private chat Only]  
+**/joinstudent** - Join school as student [Group chat Only]  
+**/joinmodule** - Join school as listener [Group chat Only]  
+**/myreport** - Your progress [Private chat Only]  
+**/homeworks** - Homeworks list [Private chat Only]  
+**/help** - Help message [All chats]  
 
 ##### Superuser Commands
-**/schools** - Manage schools  
-**/startschool** - Start school  
-**/stopschool** - Finish school  
-**/report** - School progress  
-**/fullreport** - School progress with homework list  
+**/schools** - Manage schools [Private chat Only]  
+**/startschool** - Start school [Group chats Only]   
+**/stopschool** - Finish school [Group chats Only]  
+**/report** - School progress [All chats]  
+**/fullreport** - School progress with homework list [All chats]  
 
-**/users** - Manage users  
-**/setsuperuser** - Set Superuser  
-**/unsetsuperuser** - Unset Superuser  
+**/users** - Manage users [Private chat Only]  
+**/setsuperuser** - Set Superuser [Private chat Only]  
+**/unsetsuperuser** - Unset Superuser [Private chat Only]  
 
 To add homework, use the work hashtag along with the `#homework`, for example: `#homework #cicd`
 
@@ -259,14 +259,6 @@ joinmodule - Join school as listener
 myreport - Your progress
 homeworks - Homeworks list
 help - Help message
-schools - Manage schools
-startschool - Start school
-stopschool - Finish school
-report - School progress
-fullreport - School progress with homework list
-users - Manage users
-setsuperuser - Set Superuser
-unsetsuperuser - Unset Superuser
 ```
 
 ## Debug mode
