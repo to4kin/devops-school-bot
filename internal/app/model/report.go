@@ -1,6 +1,10 @@
 package model
 
-import "fmt"
+import (
+	"fmt"
+
+	"github.com/sirupsen/logrus"
+)
 
 // Report object represents a report
 type Report struct {
@@ -41,4 +45,16 @@ func (r *Report) GetCSVLine() string {
 	}
 
 	return line
+}
+
+// LogrusFields returns logrus.Fields for logrus logger
+//
+// NOTE:
+// available fields are "id", "student", "lesson", "message_id", "verify", "active"
+func (r *Report) LogrusFields() logrus.Fields {
+	return logrus.Fields{
+		"student":      r.Student.LogrusFields(),
+		"accepted":     len(r.Accepted),
+		"not_provided": len(r.NotProvided),
+	}
 }

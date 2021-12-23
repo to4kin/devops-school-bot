@@ -10,6 +10,10 @@ import (
 	"gitlab.devops.telekom.de/tvpp/prototypes/devops-school-bot/internal/app/store"
 )
 
+var (
+	reportMessageTitle string = "<b><u>Accepted/Not Provided - Name</u></b>\n"
+)
+
 // GetUserReport returns report for User
 // Account should be a vald Account struct
 // School can be nil, in this case report will be generated for all schools where User is a student
@@ -139,7 +143,7 @@ func (hlpr *Helper) GetReport(school *model.School) (string, error) {
 	}).Info("students found")
 
 	reportMessage := "Academic perfomance:\n\nStudents Report:\n"
-	reportMessage += "<b><u>Accepted/Not Provided - Name</u></b>\n"
+	reportMessage += reportMessageTitle
 
 	if len(students) > 0 {
 		message, err := hlpr.prepareGeneralReportMsg(students, lessons)
@@ -165,15 +169,16 @@ func (hlpr *Helper) GetReport(school *model.School) (string, error) {
 	}).Info("listeners found")
 
 	if len(listeners) > 0 {
-		reportMessage += "\nListeners Report:\n"
-		reportMessage += "<b><u>Accepted/Not Provided - Name</u></b>\n"
-
 		message, err := hlpr.prepareGeneralReportMsg(listeners, lessons)
 		if err != nil {
 			return "", err
 		}
 
-		reportMessage += message
+		if message != "" {
+			reportMessage += "\nListeners Report:\n"
+			reportMessage += reportMessageTitle
+			reportMessage += message
+		}
 	}
 
 	return reportMessage, nil
@@ -324,18 +329,32 @@ func (hlpr *Helper) prepareGeneralReportMsg(students []*model.Student, lessons [
 		reports = append(reports, report)
 	}
 
+	for _, report := range reports {
+		hlpr.logger.WithFields(report.LogrusFields()).Debug("report before sort")
+	}
+
 	sort.Slice(reports, func(i, j int) bool {
 		return len(reports[i].Accepted) > len(reports[j].Accepted)
 	})
 
+	for _, report := range reports {
+		hlpr.logger.WithFields(report.LogrusFields()).Debug("report after sort")
+	}
+
 	reportMessage := ""
 	for _, report := range reports {
+		if !report.Student.FullCourse && len(report.Accepted) == 0 && len(report.NotProvided) == 0 {
+			continue
+		}
+
 		reportMessage += fmt.Sprintf("%d/%d - %s\n",
 			len(report.Accepted), len(report.NotProvided), report.Student.Account.GetMention())
 
 	}
 
-	reportMessage += fmt.Sprintf("\nWay to go, %s, you're crushing it!\n", reports[0].Student.Account.GetMention())
+	if reportMessage != "" {
+		reportMessage += fmt.Sprintf("\nWay to go, %s, you're crushing it!\n", reports[0].Student.Account.GetMention())
+	}
 
 	return reportMessage, nil
 }
