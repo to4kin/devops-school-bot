@@ -17,6 +17,13 @@ func (handler *Handler) HandleWebHook() http.HandlerFunc {
 			return
 		}
 
+		message := func(message *telebot.Message) string {
+			if message.Text != "" {
+				return message.Text
+			}
+			return message.Caption
+		}
+
 		if u.Callback != nil {
 			handler.logger.WithFields(logrus.Fields{
 				"update_id":         u.ID,
@@ -30,7 +37,7 @@ func (handler *Handler) HandleWebHook() http.HandlerFunc {
 			handler.logger.WithFields(logrus.Fields{
 				"update_id": u.ID,
 				"private":   u.Message.Private(),
-				"message":   u.Message.Text,
+				"message":   message(u.Message),
 			}).Info("new message received")
 			handler.bot.ProcessUpdate(u)
 		}
@@ -39,8 +46,8 @@ func (handler *Handler) HandleWebHook() http.HandlerFunc {
 			handler.logger.WithFields(logrus.Fields{
 				"update_id": u.ID,
 				"private":   u.EditedMessage.Private(),
-				"message":   u.EditedMessage.Text,
-			}).Info("edited message received")
+				"message":   message(u.EditedMessage),
+			}).Info("new edited message received")
 			handler.bot.ProcessUpdate(u)
 		}
 

@@ -25,17 +25,19 @@ func (handler *Handler) handleOnText(c telebot.Context) error {
 	text := ""
 	var entities []telebot.MessageEntity
 
+	message := func(message *telebot.Message) (string, []telebot.MessageEntity) {
+		if message.Text != "" {
+			return message.Text, message.Entities
+		}
+		return message.Caption, message.CaptionEntities
+	}
+
 	// NOTE: multimedia messages have CaptionEntities and Caption, not Entities and Text
 	// Also, if the message was edited - Entities and Text are under c.Update().EditedMessage
 	if c.Update().EditedMessage != nil {
-		text = strings.ToLower(c.Update().EditedMessage.Text)
-		entities = c.Update().EditedMessage.Entities
-	} else if c.Message().Text != "" {
-		text = strings.ToLower(c.Message().Text)
-		entities = c.Message().Entities
+		text, entities = message(c.Update().EditedMessage)
 	} else {
-		text = strings.ToLower(c.Message().Caption)
-		entities = c.Message().CaptionEntities
+		text, entities = message(c.Update().Message)
 	}
 
 	// NOTE: Telegram uses UTF16 encoding for calculating Length and Offset
@@ -89,6 +91,7 @@ func (handler *Handler) handleOnText(c telebot.Context) error {
 		if c.Update().EditedMessage != nil {
 			handler.logger.WithFields(logrus.Fields{
 				"message_id": c.Update().EditedMessage.ID,
+				"student_id": student.ID,
 			}).Info("message was edited, need to delete old homework first")
 			if err := handler.store.Homework().DeleteByMessageIDStudentID(int64(c.Update().EditedMessage.ID), student.ID); err != nil {
 				if err == store.ErrRecordNotFound {
@@ -100,6 +103,7 @@ func (handler *Handler) handleOnText(c telebot.Context) error {
 			} else {
 				handler.logger.WithFields(logrus.Fields{
 					"message_id": c.Update().EditedMessage.ID,
+					"student_id": student.ID,
 				}).Info("old message was deleted")
 			}
 		}
