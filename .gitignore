@@ -12,3 +12,8 @@ test/
 ## Binary
 bin/
 devopsschoolbot
+
+## Terraform
+.terraform
+terraform.tfstate
+terraform.tfstate.backup

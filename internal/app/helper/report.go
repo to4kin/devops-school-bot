@@ -57,17 +57,18 @@ func (hlpr *Helper) GetUserReport(account *model.Account) (string, error) {
 // GetStudentReport returns student progress in School
 //
 // Example:
-// 	Account info:
-// 	First name: Ivan
-// 	Last name: Ivanov
 //
-// 	School: DevOps School Test:
-// 	Type: Student
-// 	Status: 🟢Active
+//	Account info:
+//	First name: Ivan
+//	Last name: Ivanov
 //
-// 	Progress:
-// 	🟢 - #cicd1 [Go To Message (https://t.me/c/1534814897/279)]
-// 	🟢 - #cicd2 [Go To Message (https://t.me/c/1534814897/293)]
+//	School: DevOps School Test
+//	Type: Student
+//	Status: 🟢Active
+//
+//	Progress:
+//	🟢 - #cicd1 [Go To Message (https://t.me/c/1534814897/279)]
+//	🟢 - #cicd2 [Go To Message (https://t.me/c/1534814897/293)]
 func (hlpr *Helper) GetStudentReport(student *model.Student) (string, error) {
 	hlpr.logger.WithFields(logrus.Fields{
 		"school_id": student.School.ID,
@@ -99,22 +100,23 @@ func (hlpr *Helper) GetStudentReport(student *model.Student) (string, error) {
 // GetReport returns academic perfomance for all active stundents in school
 //
 // Example:
-// 	School DevOps School Test
 //
-// 	Academic perfomance:
+//	School DevOps School Test
 //
-// 	Students Report:
-// 	Accepted/Not Provided - Name
-// 	1/1 - Ivan Petrov
-// 	1/1 - Sergey Ivanov
+//	Academic perfomance:
 //
-// 	Way to go, Ivan Petrov, you're crushing it!
+//	Students Report:
+//	Accepted/Not Provided - Name
+//	1/1 - Ivan Petrov
+//	1/1 - Sergey Ivanov
 //
-// 	Listeners Report:
-// 	Accepted/Not Provided - Name
-// 	2/0 - Ivan Ivanov
+//	Way to go, Ivan Petrov, you're crushing it!
 //
-// 	Way to go, Ivan Ivanov, you're crushing it!
+//	Listeners Report:
+//	Accepted/Not Provided - Name
+//	2/0 - Ivan Ivanov
+//
+//	Way to go, Ivan Ivanov, you're crushing it!
 func (hlpr *Helper) GetReport(school *model.School) (string, error) {
 	hlpr.logger.WithFields(logrus.Fields{
 		"school_id": school.ID,
@@ -188,28 +190,29 @@ func (hlpr *Helper) GetReport(school *model.School) (string, error) {
 // Additionally adds the list of homeworks at the beginning
 //
 // Example:
-// 	School DevOps School Test
 //
-// 	Homework list
+//	School DevOps School Test
 //
-// 	Module: cicd
-// 	#cicd1
-// 	#cicd2
+//	Homework list
 //
-// 	Academic perfomance:
+//	Module: cicd
+//	#cicd1
+//	#cicd2
 //
-// 	Students Report:
-// 	Accepted/Not Provided - Name
-// 	1/1 - Ivan Petrov
-// 	1/1 - Sergey Ivanov
+//	Academic perfomance:
 //
-// 	Way to go, Ivan Petrov, you're crushing it!
+//	Students Report:
+//	Accepted/Not Provided - Name
+//	1/1 - Ivan Petrov
+//	1/1 - Sergey Ivanov
 //
-// 	Listeners Report:
-// 	Accepted/Not Provided - Name
-// 	2/0 - Ivan Ivanov
+//	Way to go, Ivan Petrov, you're crushing it!
 //
-// 	Way to go, Ivan Ivanov, you're crushing it!
+//	Listeners Report:
+//	Accepted/Not Provided - Name
+//	2/0 - Ivan Ivanov
+//
+//	Way to go, Ivan Ivanov, you're crushing it!
 func (hlpr *Helper) GetFullReport(school *model.School) (string, error) {
 	fullReport, err := hlpr.GetLessonsReport(school)
 	if err != nil {
@@ -230,13 +233,14 @@ func (hlpr *Helper) GetFullReport(school *model.School) (string, error) {
 // The list is populated only with active homeworks provided by students
 //
 // Example:
-// 	School DevOps School Test
 //
-// 	Homework list
+//	School DevOps School Test
 //
-// 	Module: cicd
-// 	#cicd1
-// 	#cicd2
+//	Homework list
+//
+//	Module: cicd
+//	#cicd1
+//	#cicd2
 func (hlpr *Helper) GetLessonsReport(school *model.School) (string, error) {
 	hlpr.logger.WithFields(logrus.Fields{
 		"school_id": school.ID,

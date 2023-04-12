@@ -38,7 +38,7 @@ type Student struct {
 	// NOTE:
 	// - "true" means - "Student"
 	// - "false" means - "Listener"
-	// false by default if not specifieda
+	// false by default if not specified
 	FullCourse bool `json:"full_course,string"`
 }
 
