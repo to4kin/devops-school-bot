@@ -9,7 +9,6 @@ provider "aws" {
 }
 
 data "aws_caller_identity" "current" {}
-data "aws_region" "current" {}
 data "aws_availability_zones" "available" {}
 data "aws_ecr_authorization_token" "token" {}
 
@@ -19,6 +18,28 @@ locals {
 
   vpc_cidr = "10.0.0.0/16"
   azs      = slice(data.aws_availability_zones.available.names, 0, 3)
+}
+
+################################################################################
+# S3 bucket to store terraform.tfstate
+################################################################################
+
+module "terraform_state_backend" {
+  source  = "cloudposse/tfstate-backend/aws"
+  version = "~> 0.38.1"
+
+  environment = "school"
+  name        = local.name
+  namespace   = "tf"
+
+  terraform_backend_config_file_path = "."
+  terraform_backend_config_file_name = "backend.tf"
+  force_destroy                      = false
+
+  tags = merge(
+    var.additional_tags,
+    var.security_class_tags
+  )
 }
 
 ################################################################################
@@ -67,7 +88,7 @@ module "lambda_function" {
   allowed_triggers = {
     APIGatewayAny = {
       service    = "apigateway"
-      source_arn = "arn:aws:execute-api:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:${module.api_gateway.api_gateway_id}/*/*/${local.name}"
+      source_arn = "arn:aws:execute-api:${local.region}:${data.aws_caller_identity.current.account_id}:${module.api_gateway.api_gateway_id}/*/*/${local.name}"
     }
   }
 
